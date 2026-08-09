@@ -161,6 +161,7 @@ header{display:grid;grid-template-columns:minmax(340px,1.35fr) 1fr;gap:36px;padd
 h1{font-family:var(--body);font-size:clamp(29px,3.2vw,46px);line-height:1.02;letter-spacing:-.045em;text-transform:none;font-weight:750}
 h1 span{color:var(--ink);font-weight:750}
 .lede{margin:0;max-width:62ch;align-self:end;color:var(--ink-2);font-size:12px;line-height:1.55}
+.lede .rate-warning{display:block;margin-top:9px;color:var(--bad);font-weight:650}
 .stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);margin:2px 0 0;border:1px solid var(--rule);border-radius:10px;background:#fafbf9;overflow:hidden}
 .stat{padding:12px 14px;border-right:1px solid var(--rule)}
 .stat b{font-family:var(--body);font-size:22px;letter-spacing:-.04em}
@@ -257,7 +258,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
   <h1>Минимальные ставки<span>цехов кинопроизводства РФ</span></h1>
-  <p class="lede">Две таблицы сведены в одну базу: справочник МПК и реестр сообщества «Точно продюсер». Ставки шести цехов обновлены по цеховым письмам 2026 года — они помечены зелёным. Всё, что помечено жёлтым или синим, стоит сверить с письмом перед защитой сметы.</p>
+  <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.<span class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</span></p>
   <div class="stats" id="stats"></div>
 </header>
 
