@@ -215,6 +215,23 @@ tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blu
 .detail-add{width:100%;min-height:38px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .est .hint{padding:18px;color:var(--ink-3);font-size:11px}
 .line{padding:11px 16px}.line .t{font-size:11px}.line .s{font-size:8px}.line .q span{font-size:8px}.line .v{font-size:12px}
+.line.calc-line{display:block;padding:14px 16px}
+.line-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+.line-head .v{margin-top:5px;font-size:15px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.calc-field{display:grid;gap:4px;min-width:0}
+.calc-field.wide{grid-column:1/-1}
+.calc-field label{color:var(--ink-3);font-size:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.calc-field input,.calc-field select{box-sizing:border-box;width:100%;min-height:34px;padding:7px 8px;border:1px solid var(--rule-hard);border-radius:6px;background:#fff;color:var(--ink);font:11px var(--body)}
+.calc-field input[readonly]{background:#f5f6f3;color:var(--ink-2)}
+.calc-note{grid-column:1/-1;padding:9px 10px;border-left:2px solid var(--blue);background:var(--blue-soft);color:var(--ink-2);font-size:9px;line-height:1.45}
+.calc-result{display:grid;grid-template-columns:1fr auto;gap:5px 12px;margin-top:11px;padding-top:10px;border-top:1px solid var(--rule);font-size:10px;color:var(--ink-3)}
+.calc-result b{color:var(--ink);font:700 11px var(--mono);text-align:right}
+.tax-explain{margin:0;padding:12px 16px;border-top:1px solid var(--rule);background:#fafbf9;color:var(--ink-2);font-size:9px;line-height:1.5}
+.tax-explain b{color:var(--ink)}
+.totals{border-top:2px solid var(--ink)}
+.totals .total{border-top:1px solid var(--rule)}
+.totals .total:first-child{border-top:0}
 .total{padding:15px 16px;border-top:1px solid var(--rule)}.total b{font-family:var(--body);font-size:22px}.total i{font-family:var(--body);font-size:8px}
 .est .acts{position:sticky;bottom:0;background:#fff}.est .acts button{font-family:var(--body);font-size:9px}
 .sources{margin:0;padding:32px calc(var(--inspector) + 18px) 0 18px;border-top:1px solid var(--rule)}
@@ -291,9 +308,10 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
     </div>
     <div class="inspector-pane" id="detailPane"><div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div></div>
     <div class="inspector-pane" id="budgetPane" hidden>
-      <p class="hint" id="esthint">Добавляйте позиции кнопкой «+», указывайте количество смен или месяцев и копируйте итог в смету.</p>
+      <p class="hint" id="esthint">Добавляйте позиции кнопкой «+». Ставка и единица подтянутся из справочника; даты, количество и процент можно изменить.</p>
       <div id="estlines"></div>
-      <div class="total"><i>Итого минимум</i><b id="esttotal">0 ₽</b></div>
+      <p class="tax-explain"><b>Логика расчёта.</b> Для месячной ставки период показывается как дни ÷ 30, а сумма считается точнее — по календарным долям первого и последнего месяца. «Финтюзер» / сумма с налогом — это gross-up: сумма без налога ÷ (1 − процент), как в исходной таблице.</p>
+      <div class="totals"><div class="total"><i>Без налога</i><b id="estsubtotal">0 ₽</b></div><div class="total"><i>С налогом</i><b id="esttotal">0 ₽</b></div></div>
       <div class="acts"><button id="copy">Скопировать</button><button id="clear">Очистить</button></div>
     </div>
   </aside>
@@ -324,8 +342,8 @@ const TIP = {
   newdoc:"Цех выпустил письмо, вступившее в силу в 2026 году. Цифра здесь — из реестра февраля 2025, откройте письмо и сверьте.",
   expired:"Срок действия письма закончился. Ставка приведена как ориентир."
 };
-const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
-const state = {q:'', unit:'', content:'', depts:new Set(), only26:false, sort:'dept', open:new Set()};
+const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+const state = {q:'', unit:'', content:'', dept:'', only26:false, sort:'dept', open:new Set()};
 const est = new Map();
 
 const depts = [...new Set(DATA.map(r=>r.dept))].sort((a,b)=>a.localeCompare(b,'ru'));
@@ -346,13 +364,13 @@ const uSel = document.getElementById('unit'), cSel = document.getElementById('co
 units.filter(u=>DATA.some(r=>r.unit===u)).forEach(u=>uSel.insertAdjacentHTML('beforeend',`<option value="${u}">${u}</option>`));
 conts.forEach(c=>cSel.insertAdjacentHTML('beforeend',`<option value="${c}">${c}</option>`));
 const chips = document.getElementById('chips');
-chips.innerHTML = depts.map(d=>`<button class="chip" data-d="${d}" aria-pressed="false">${d}<span class="n">${DATA.filter(r=>r.dept===d).length}</span></button>`).join('')
-  + `<button class="chip reset" id="resetd" aria-pressed="false">сбросить цеха</button>`;
+chips.innerHTML = `<button class="chip" data-d="" aria-pressed="true">Все цеха<span class="n">${DATA.length}</span></button>`+
+  depts.map(d=>`<button class="chip" data-d="${d}" aria-pressed="false">${d}<span class="n">${DATA.filter(r=>r.dept===d).length}</span></button>`).join('');
 
 function match(r){
   if(state.unit && r.unit!==state.unit) return false;
   if(state.content && r.content!==state.content) return false;
-  if(state.depts.size && !state.depts.has(r.dept)) return false;
+  if(state.dept && r.dept!==state.dept) return false;
   if(state.only26 && r.status!=='fresh2026') return false;
   if(state.q){
     const h=(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase();
@@ -414,18 +432,59 @@ function renderDetail(r){
   </div>`;
 }
 // смета
+function newEstimate(r){
+  return {r,start:'',end:'',rate:r.amount||0,qty:1,tax:.08};
+}
+function parseDate(value){
+  if(!value)return null;
+  const [y,m,d]=value.split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d));
+}
+function daysInMonth(date){return new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()+1,0)).getUTCDate()}
+function monthDiff(start,end){
+  let months=(end.getUTCFullYear()-start.getUTCFullYear())*12+end.getUTCMonth()-start.getUTCMonth();
+  if(end.getUTCDate()<start.getUTCDate())months--;
+  return Math.max(0,months);
+}
+function monthlyProrata(start,end,rate){
+  if(!start||!end||end<start)return 0;
+  const whole=monthDiff(start,end),startDay=start.getUTCDate(),endDay=end.getUTCDate();
+  const first=(daysInMonth(start)-startDay+1)/daysInMonth(start)*rate;
+  const last=endDay/daysInMonth(end)*rate;
+  return startDay>endDay ? rate*whole+first+last : rate*(whole-1)+first+last;
+}
+function calcEstimate(e){
+  const start=parseDate(e.start),end=parseDate(e.end);
+  const elapsed=start&&end&&end>=start?(end-start)/86400000:0;
+  const monthly=e.r.unit==='месяц';
+  const period=monthly?elapsed/30:(e.qty||0);
+  const base=monthly?monthlyProrata(start,end,e.rate):(e.rate||0);
+  const net=Math.max(0,base*(e.qty||0));
+  const gross=e.tax<1?net/(1-e.tax):net;
+  return {period,net,gross};
+}
 function renderEst(){
   const box=document.getElementById('estlines'), hint=document.getElementById('esthint');
   hint.hidden = est.size>0;
-  let total=0;
+  let subtotal=0,total=0;
   box.innerHTML=[...est.values()].map(e=>{
-    const sum=(e.r.amount||0)*e.qty; total+=sum;
-    const u=e.r.unit==='месяц'?'мес.':e.r.unit==='смена'?'смен':e.r.unit;
-    return `<div class="line"><div><div class="t">${e.r.prof}</div><div class="s">${e.r.dept}</div>
-      <div class="q"><input type="number" min="1" step="1" value="${e.qty}" data-q="${e.r.id}" aria-label="Количество">
-      <span>× ${u} × ${e.r.amount?fmt(e.r.amount):'—'}</span></div></div>
-      <div><button class="x" data-del="${e.r.id}" title="Убрать" aria-label="Убрать из сметы">×</button><div class="v">${fmt(sum)}</div></div></div>`;
+    const calc=calcEstimate(e); subtotal+=calc.net; total+=calc.gross;
+    const monthly=e.r.unit==='месяц';
+    return `<div class="line calc-line"><div class="line-head"><div><div class="t">${e.r.prof}</div><div class="s">${e.r.dept}</div></div>
+      <div><button class="x" data-del="${e.r.id}" title="Убрать" aria-label="Убрать из сметы">×</button><div class="v">${fmt(calc.gross)}</div></div></div>
+      <div class="calc-grid">
+        <div class="calc-field"><label>Дата прикрепления</label><input type="date" value="${e.start}" data-field="start" data-id="${e.r.id}"></div>
+        <div class="calc-field"><label>Дата открепления</label><input type="date" value="${e.end}" data-field="end" data-id="${e.r.id}"></div>
+        <div class="calc-field"><label>Ставка за ${e.r.unit}</label><input type="number" min="0" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}"></div>
+        <div class="calc-field"><label>Количество, чел./шт.</label><input type="number" min="0" step="1" value="${e.qty}" data-field="qty" data-id="${e.r.id}"></div>
+        <div class="calc-field"><label>Период</label><input readonly value="${calc.period.toLocaleString('ru-RU',{minimumFractionDigits:monthly?2:0,maximumFractionDigits:2})}"></div>
+        <div class="calc-field"><label>Единица</label><input readonly value="${e.r.unit}"></div>
+        <div class="calc-field wide"><label>Процент</label><select data-field="tax" data-id="${e.r.id}">${[0,.04,.06,.07,.08,.09,.10].map(v=>`<option value="${v}"${v===e.tax?' selected':''}>${Math.round(v*100)}%</option>`).join('')}</select></div>
+        ${monthly?`<div class="calc-note">Период: (${e.end||'дата открепления'} − ${e.start||'дата прикрепления'}) ÷ 30. Итог при этом рассчитывается по фактическому числу дней в каждом календарном месяце.</div>`:''}
+      </div>
+      <div class="calc-result"><span>Сумма без налога</span><b>${fmt(calc.net)}</b><span>Сумма с налогом · ÷ ${(1-e.tax).toLocaleString('ru-RU',{maximumFractionDigits:2})}</span><b>${fmt(calc.gross)}</b></div></div>`;
   }).join('');
+  document.getElementById('estsubtotal').textContent=fmt(subtotal);
   document.getElementById('esttotal').textContent=fmt(total);
   document.getElementById('estn').textContent=est.size+' '+(est.size%10===1&&est.size%100!==11?'позиция':'позиций');
 }
@@ -437,24 +496,26 @@ document.getElementById('sort').addEventListener('change',e=>{state.sort=e.targe
 document.getElementById('only26').addEventListener('change',e=>{state.only26=e.target.checked;render()});
 chips.addEventListener('click',e=>{
   const b=e.target.closest('.chip'); if(!b) return;
-  if(b.id==='resetd'){state.depts.clear();[...chips.querySelectorAll('.chip')].forEach(c=>c.setAttribute('aria-pressed','false'));render();return}
-  const d=b.dataset.d; state.depts.has(d)?state.depts.delete(d):state.depts.add(d);
-  b.setAttribute('aria-pressed',state.depts.has(d));render();
+  state.dept=b.dataset.d;
+  [...chips.querySelectorAll('.chip')].forEach(c=>c.setAttribute('aria-pressed',String(c===b)));
+  render();
 });
 document.getElementById('tb').addEventListener('click',e=>{
   const add=e.target.closest('[data-add]');
   if(add){const r=DATA.find(x=>x.id==add.dataset.add);
-    if(!est.has(r.id)) est.set(r.id,{r,qty:r.unit==='месяц'?1:5});
+    if(!est.has(r.id)) est.set(r.id,newEstimate(r));
     renderEst();setInspectorTab('budget');return}
   const tr=e.target.closest('tr.r'); if(!tr) return;
   const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');
 });
 document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
 document.querySelector('.inspector-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-inspector-tab]');if(b)setInspectorTab(b.dataset.inspectorTab)});
-document.getElementById('detailPane').addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(!add)return;const r=DATA.find(x=>x.id==add.dataset.add);if(!est.has(r.id))est.set(r.id,{r,qty:r.unit==='месяц'?1:5});renderEst();setInspectorTab('budget')});
-document.getElementById('estlines').addEventListener('input',e=>{
-  const q=e.target.closest('[data-q]'); if(!q) return;
-  const e2=est.get(+q.dataset.q); e2.qty=Math.max(1,+q.value||1); renderEst();
+document.getElementById('detailPane').addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(!add)return;const r=DATA.find(x=>x.id==add.dataset.add);if(!est.has(r.id))est.set(r.id,newEstimate(r));renderEst();setInspectorTab('budget')});
+document.getElementById('estlines').addEventListener('change',e=>{
+  const f=e.target.closest('[data-field]'); if(!f) return;
+  const row=est.get(+f.dataset.id); if(!row)return;
+  row[f.dataset.field]=['rate','qty','tax'].includes(f.dataset.field)?Math.max(0,+f.value||0):f.value;
+  renderEst();
 });
 document.getElementById('estlines').addEventListener('click',e=>{
   const d=e.target.closest('[data-del]'); if(!d) return; est.delete(+d.dataset.del); renderEst();
@@ -463,10 +524,10 @@ document.getElementById('clear').addEventListener('click',()=>{est.clear();rende
 document.getElementById('copy').addEventListener('click',async ()=>{
   const btn=document.getElementById('copy');
   if(!est.size){btn.textContent='смета пуста';setTimeout(()=>btn.textContent='Скопировать',1400);return}
-  let t='Цех\tПрофессия\tУсловие\tЕд.\tСтавка\tКол-во\tСумма\n',total=0;
-  est.forEach(e=>{const s=(e.r.amount||0)*e.qty;total+=s;
-    t+=`${e.r.dept}\t${e.r.prof}\t${e.r.cond}\t${e.r.unit}\t${e.r.amount||''}\t${e.qty}\t${s}\n`});
-  t+=`\t\t\t\t\tИТОГО\t${total}\n`;
+  let t='Цех\tПрофессия\tУсловие\tДата прикрепления\tДата открепления\tЕд.\tСтавка\tКоличество\tПериод\tПроцент\tБез налога\tС налогом\n',net=0,gross=0;
+  est.forEach(e=>{const c=calcEstimate(e);net+=c.net;gross+=c.gross;
+    t+=`${e.r.dept}\t${e.r.prof}\t${e.r.cond}\t${e.start}\t${e.end}\t${e.r.unit}\t${e.rate}\t${e.qty}\t${c.period}\t${e.tax}\t${c.net}\t${c.gross}\n`});
+  t+=`\t\t\t\t\t\t\t\t\tИТОГО\t${net}\t${gross}\n`;
   try{await navigator.clipboard.writeText(t);btn.textContent='скопировано ✓'}catch(_){btn.textContent='не вышло';}
   setTimeout(()=>btn.textContent='Скопировать',1600);
 });
