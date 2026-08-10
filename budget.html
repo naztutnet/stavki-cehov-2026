@@ -180,7 +180,7 @@ h1 span{color:var(--ink);font-weight:750}
 .chip.reset{margin-top:8px;border:1px dashed var(--rule-hard);justify-content:center}
 .registry{min-width:0}
 .controls{top:0;padding:12px 18px 11px;margin:0;background:rgba(244,245,242,.96);border-bottom:1px solid var(--rule);backdrop-filter:blur(12px)}
-.row1{display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,minmax(128px,auto)) auto;gap:7px}
+.row1{display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,minmax(128px,auto)) auto auto;gap:7px}
 input[type=search],select,.chk{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font-size:11px}
 input[type=search]{padding-left:36px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23707770' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center}
 .chk{justify-content:center;padding:8px 10px}
@@ -216,7 +216,7 @@ tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blu
 .detail-section b{display:block;margin-bottom:5px;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
 .detail-section p{margin:0;color:var(--ink-2);font-size:11px;line-height:1.5}
 .detail-card a{color:var(--blue)}
-.detail-add{width:100%;min-height:38px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
+.detail-add{width:100%;min-height:38px;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.detail-add.is-remove{border-color:var(--bad);background:#fff;color:var(--bad)}.detail-add.is-remove:hover{background:var(--bad-bg)}
 .est .hint{padding:18px;color:var(--ink-3);font-size:11px}
 .line{padding:11px 16px}.line .t{font-size:11px}.line .s{font-size:8px}.line .q span{font-size:8px}.line .v{font-size:12px}
 .line.calc-line{display:block;padding:14px 16px}
@@ -242,8 +242,8 @@ tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blu
 .sitem{border-top-color:var(--rule)}
 footer{margin:28px calc(var(--inspector) + 18px) 0 18px}
 header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-bottom:14px;position:relative}header .eyebrow{grid-column:1/-1}header h1{font-size:34px}header .lede{max-width:58ch}.stats{grid-template-columns:repeat(5,minmax(110px,1fr));grid-column:1/-1}.est{box-shadow:-10px 0 32px rgba(20,25,20,.06)}.inspector-tabs{grid-template-columns:110px 1fr}.total{background:#f8faf6}.total b{font-size:28px}.line{padding-top:13px;padding-bottom:13px}
-.header-estimate{position:absolute;right:28px;top:18px;min-height:36px;padding:0 13px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;color:var(--ink);font:700 10px var(--body);cursor:pointer}.header-estimate:hover{border-color:var(--ink);background:#f5f6f3}
-header .eyebrow{padding-right:170px}
+.header-estimate{min-height:38px;padding:0 14px;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:#fff;font:700 10px var(--body);cursor:pointer;white-space:nowrap}.header-estimate:hover{background:#103a5d;border-color:#103a5d}
+header .eyebrow{padding-right:0}
 :focus-visible{outline:3px solid rgba(36,87,245,.28);outline-offset:2px}
 @media(max-width:1180px){
   :root{--nav:220px;--inspector:320px}.row1{grid-template-columns:minmax(220px,1fr) repeat(2,minmax(120px,auto))}.row1 select#sort{display:none}
@@ -287,7 +287,7 @@ header .eyebrow{padding-right:170px}
 .budget-summary h3{margin:0 0 16px;font-size:13px}.summary-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--rule);font-size:9px;color:var(--ink-3)}.summary-line b{color:var(--ink);font:700 13px var(--mono)}.summary-line.grand{margin-top:2px;padding-top:15px;border-top:2px solid var(--ink)}.summary-line.grand b{font-size:18px}.summary-actions{display:grid;gap:7px;margin-top:auto}.summary-actions button{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:650 10px var(--body);cursor:pointer}.summary-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{border:0;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note,.feedback-status{margin:0;color:var(--ink-3);font-size:9px}.feedback-status.ok{color:var(--ok)}.feedback-status.error{color:var(--bad)}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.feedback-submit:disabled{opacity:.65;cursor:wait}
 @media(max-width:1050px){.builder-body{grid-template-columns:230px minmax(650px,1fr)}.budget-summary{position:absolute;right:14px;top:74px;width:250px;max-height:calc(100vh - 90px);box-shadow:0 12px 34px rgba(20,25,20,.14)}}
-@media(max-width:700px){header .eyebrow{padding-right:0}.header-estimate{position:static;width:100%;margin-top:12px}.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
+@media(max-width:700px){header .eyebrow{padding-right:0}.header-estimate{width:100%}.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -295,7 +295,6 @@ header .eyebrow{padding-right:170px}
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
-  <button class="header-estimate" id="openBuilder">Открыть смету · 0</button>
   <div class="title-block"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><h1><span>Минимальные ставки</span><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
   <div class="stats" id="stats"></div>
@@ -319,6 +318,7 @@ header .eyebrow{padding-right:170px}
       <option value="date">Дата письма ↓</option>
     </select>
     <label class="chk"><input type="checkbox" id="only26">Только сверенные 2026</label>
+    <button class="header-estimate" id="openBuilder">Открыть смету · 0</button>
   </div>
 </div>
 
@@ -531,7 +531,7 @@ function renderDetail(r){
     <div class="detail-section"><b>Условия и доплаты</b><p>${r.extra||'Дополнительные условия не указаны.'}</p></div>
     <div class="detail-section"><b>Источник</b><p>${r.src}<br>Действует с ${r.eff}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть письмо цеха →</a>`:''}</p></div>
     ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
-    <button class="detail-add" data-add="${r.id}" ${est.has(r.id)?'disabled':''}>${est.has(r.id)?'Добавлено в смету ✓':'Добавить в смету'}</button>
+    <button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>
   </div>`;
 }
 // смета
@@ -614,7 +614,12 @@ document.getElementById('tb').addEventListener('click',e=>{
   const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');
 });
 document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
-document.getElementById('detailPane').addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(!add)return;const r=DATA.find(x=>x.id==add.dataset.add);if(!est.has(r.id))est.set(r.id,newEstimate(r));renderEst();saveEstimate();add.textContent='Добавлено в смету ✓';add.disabled=true});
+document.getElementById('detailPane').addEventListener('click',e=>{
+  const add=e.target.closest('[data-add]'),remove=e.target.closest('[data-remove]');if(!add&&!remove)return;
+  const id=+(add?.dataset.add||remove?.dataset.remove),r=DATA.find(x=>x.id===id);
+  if(remove)est.delete(id);else if(!est.has(id))est.set(id,newEstimate(r));
+  renderEst();saveEstimate();renderDetail(r);
+});
 document.getElementById('estlines').addEventListener('change',e=>{
   const f=e.target.closest('[data-field]'); if(!f) return;
   const row=est.get(+f.dataset.id); if(!row)return;
