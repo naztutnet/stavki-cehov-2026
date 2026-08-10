@@ -273,9 +273,10 @@ header .eyebrow{padding-right:170px}
 .quick-catalog{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-height:0;border-right:1px solid var(--rule);background:#fafbf9}
 .quick-catalog h3{margin:0;padding:17px 16px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
 .quick-catalog input{margin:0 12px 10px;min-height:36px;padding:8px 10px;border:1px solid var(--rule-hard);border-radius:7px;font:11px var(--body)}
+.quick-catalog input[type=search]{padding-left:36px}
 .quick-results{overflow:auto;padding:0 8px 18px}
 .quick-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;width:100%;padding:10px 8px;border:0;border-bottom:1px solid var(--rule);background:transparent;text-align:left;cursor:pointer}
-.quick-item:hover{background:var(--blue-soft)}.quick-item b{display:block;color:var(--ink);font:650 10px/1.35 var(--body);overflow-wrap:anywhere}.quick-item small{display:block;margin-top:3px;color:var(--ink-3);font:8px/1.35 var(--body)}.quick-item>span:first-child{min-width:0;color:var(--ink);white-space:normal}.quick-item>span:last-child{color:var(--blue);font:700 10px/1.3 var(--mono);white-space:nowrap;text-align:right}
+.quick-item:hover{background:var(--blue-soft)}.quick-item b{display:block;color:var(--ink);font:650 10px/1.35 var(--body);overflow-wrap:anywhere}.quick-item small{display:block;margin-top:3px;color:var(--ink-3);font:8px/1.35 var(--body)}.quick-item small.quick-condition{color:var(--ink-2);font-size:8.5px;line-height:1.4}.quick-item>span:first-child{min-width:0;color:var(--ink);white-space:normal}.quick-item>span:last-child{color:var(--blue);font:700 10px/1.3 var(--mono);white-space:nowrap;text-align:right}
 .budget-canvas{min-width:0;overflow:auto;padding:18px;background:var(--paper)}
 .budget-empty{display:grid;place-items:center;min-height:320px;border:1px dashed var(--rule-hard);border-radius:10px;background:#fff;color:var(--ink-3);text-align:center;font-size:11px}
 .budget-table{min-width:1120px;border:1px solid var(--rule);background:#fff}
@@ -691,8 +692,8 @@ document.getElementById('pdf').addEventListener('click',()=>{
 const builder=document.getElementById('builder');
 function renderQuickCatalog(query=''){
   const words=query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const rows=DATA.filter(r=>r.amount!=null&&words.every(w=>(r.dept+' '+r.prof+' '+r.cond).toLowerCase().includes(w))).slice(0,80);
-  document.getElementById('quickResults').innerHTML=rows.length?rows.map(r=>`<button class="quick-item" data-quick-add="${r.id}"><span><b>${r.prof}</b><small>${r.dept} · ${r.unit}</small></span><span>${Math.round(r.amount).toLocaleString('ru-RU')} ₽</span></button>`).join(''):'<div class="detail-empty">Ничего не найдено</div>';
+  const rows=DATA.filter(r=>r.amount!=null&&words.every(w=>(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase().includes(w))).slice(0,80);
+  document.getElementById('quickResults').innerHTML=rows.length?rows.map(r=>`<button class="quick-item" data-quick-add="${r.id}"><span><b>${r.prof}</b><small>${r.dept} · ${r.content} · ${r.unit}</small><small class="quick-condition">${r.cond||'Условие не указано'}</small></span><span>${Math.round(r.amount).toLocaleString('ru-RU')} ₽</span></button>`).join(''):'<div class="detail-empty">Ничего не найдено</div>';
 }
 function inputFor(e){
   if(e.r.unit==='месяц')return `<div class="input-stack two"><label>Прикрепление<input type="date" value="${e.start}" data-builder-field="start" data-id="${e.r.id}"></label><label>Открепление<input type="date" value="${e.end}" data-builder-field="end" data-id="${e.r.id}"></label></div>`;
