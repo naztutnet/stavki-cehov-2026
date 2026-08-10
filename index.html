@@ -258,7 +258,7 @@ header .eyebrow{padding-right:390px}
   :root{--nav:320px;--inspector:320px}.row1{grid-template-columns:repeat(4,minmax(0,1fr))}.row1 select#sort{display:none}
 }
 @media(max-width:920px){
-  header{grid-template-columns:1fr}.lede{align-self:auto}.workspace{grid-template-columns:1fr}.dept-nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);padding:12px 16px}.nav-head{margin-bottom:8px}.chips{flex-direction:row;overflow-x:auto}.chip{flex:0 0 auto;width:auto;white-space:nowrap}.layout{grid-template-columns:1fr}.est{position:static;height:auto;border-left:0;border-top:1px solid var(--rule);order:-1}.sources,footer{padding-right:18px;margin-right:18px}.row1{grid-template-columns:1fr 1fr}.row1 input[type=search]{grid-column:1/-1}.stats{grid-template-columns:repeat(3,1fr)}
+  header{grid-template-columns:1fr}.lede{align-self:auto}.workspace{grid-template-columns:1fr}.dept-nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);padding:12px 16px}.nav-head{margin-bottom:8px}.chips{flex-direction:row;overflow-x:auto}.chip{flex:0 0 auto;width:auto;white-space:nowrap}.layout{grid-template-columns:1fr}.est{position:static;height:auto;border-left:0;border-top:1px solid var(--rule);order:-1;scroll-margin-top:10px}.sources,footer{padding-right:18px;margin-right:18px}.row1{grid-template-columns:1fr 1fr}.row1 input[type=search]{grid-column:1/-1}.stats{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:600px){
   header{padding:20px 16px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{display:none}.controls{padding:10px 12px}.row1{grid-template-columns:1fr}.row1 input[type=search]{grid-column:auto}.table-shell{padding:12px}.layout table{min-width:0;table-layout:auto}.layout table,.layout thead,.layout tbody,.layout tr,.layout td{display:block;width:100%}.layout thead{display:none}.layout tbody tr.r{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:3px;padding:12px 58px 12px 12px;border-bottom:1px solid var(--rule)}.layout tbody td{grid-column:1;padding:1px 0}.layout .prof{grid-row:1;overflow:visible;white-space:normal;font-size:13px;line-height:1.3}.layout .dept{grid-row:2;max-width:none}.layout .cond{grid-row:3;max-width:none;line-height:1.4}.layout .unit{display:none}.layout .sum{grid-row:4;text-align:left}.layout tbody td:nth-child(6){grid-row:5}.layout tbody td:nth-child(7){position:absolute;right:10px;top:10px;width:40px}.layout .addbtn{width:40px;height:40px;font-size:20px}.layout .rate-source{width:40px;min-width:40px;height:40px;padding:0;overflow:hidden;font-size:0}.layout .rate-source::before{content:"↗";font-size:16px}.sources{padding-left:14px;padding-right:14px;margin-right:0}footer{margin-left:14px;margin-right:14px}
@@ -300,7 +300,7 @@ header .eyebrow{padding-right:390px}
 @media(max-width:700px){
   header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-feedback{position:static;width:100%;margin-bottom:12px}
   .builder-head{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 12px}.builder-head h2{font-size:18px}.builder-head .feedback-action{grid-column:1/-1;grid-row:2;width:100%;white-space:normal;line-height:1.25;padding:8px 10px}.builder-close{min-height:40px}
-  .builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px 10px 118px;overflow-y:auto;overflow-x:hidden}
+  .builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px 10px 170px;overflow-y:auto;overflow-x:hidden}
   .budget-table{min-width:0;border:0;background:transparent}.budget-row.head{display:none}
   .budget-row:not(.head){position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;padding:14px 12px;border:1px solid var(--rule);border-radius:9px;background:#fff;align-items:start}
   .budget-row:not(.head)>div{padding:0}.budget-row:not(.head)>div:nth-child(1){display:none}
@@ -311,7 +311,7 @@ header .eyebrow{padding-right:390px}
   .budget-row .money{font-size:12px;text-align:left}.budget-row:not(.head)>div:nth-child(9).money{text-align:right}.budget-row:not(.head)>div:nth-child(10){position:absolute;right:7px;top:7px}.budget-row .row-remove{display:grid;place-items:center;width:36px;height:36px;border-radius:6px;font-size:20px}
   .budget-row input,.fixed-input{min-height:42px;font-size:12px}.input-stack label{font-size:8px}.input-stack.two{gap:6px}
   .budget-add-row{padding:4px 2px 12px;background:transparent}.budget-add-row button{width:100%;min-height:42px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff}
-  .budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button{min-height:42px}.summary-actions button:last-child{display:none}
+  .budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button{min-height:42px}.summary-actions button:last-child{display:block;grid-column:1/-1;border-color:#d9aaaa;background:var(--bad-bg);color:var(--bad)}
 }
 @media(max-width:520px){.custom-grid{grid-template-columns:1fr}.custom-grid .wide{grid-column:auto}}
 </style>
@@ -663,6 +663,12 @@ function setInspectorTab(tab){
   document.getElementById('detailPane').hidden=tab!=='detail';
   document.getElementById('budgetPane').hidden=tab!=='budget';
 }
+function revealMobileDetail(){
+  if(!window.matchMedia('(max-width:920px)').matches)return;
+  const inspector=document.querySelector('.est');
+  const behavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+  requestAnimationFrame(()=>inspector.scrollIntoView({behavior,block:'start'}));
+}
 function renderDetail(r){
   const pane=document.getElementById('detailPane');
   if(!r){pane.innerHTML='<div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div>';return}
@@ -757,7 +763,7 @@ document.getElementById('tb').addEventListener('click',e=>{
     if(remove)est.delete(id);else if(!est.has(r.id))est.set(r.id,newEstimate(r));
     renderEst();saveEstimate();render();return}
   const tr=e.target.closest('tr.r'); if(!tr) return;
-  const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');
+  const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');revealMobileDetail();
 });
 document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
 document.getElementById('detailPane').addEventListener('click',e=>{
