@@ -187,6 +187,8 @@ input[type=search]{padding-left:36px;background:#fff url("data:image/svg+xml,%3C
 .layout{display:grid;grid-template-columns:minmax(0,1fr) var(--inspector);gap:0;margin:0;align-items:start}
 .table-shell{min-width:0;padding:16px 18px 40px}
 .result-meta{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;color:var(--ink-3);font-size:10px}
+.calculator-note{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:11px;margin:0 0 10px;padding:10px 11px;border:1px solid #c9d5ff;border-left:3px solid var(--blue);border-radius:7px;background:#f4f7ff;color:var(--ink-2)}
+.calculator-note[hidden]{display:none}.calculator-note .calc-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:var(--blue);color:#fff;font:700 14px var(--mono)}.calculator-note b{display:block;margin-bottom:2px;color:var(--ink);font-size:10px}.calculator-note span{font-size:9px;line-height:1.4}.calculator-note a{padding:8px 10px;border-radius:6px;background:#fff;border:1px solid #aebfff;color:var(--blue);font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap}.calculator-note a:hover{background:var(--blue);color:#fff}
 table{border:1px solid var(--rule);border-radius:0;overflow:visible}
 thead th{top:62px;padding:10px 9px;background:#252925;color:#fff;font-family:var(--body);font-size:8px;letter-spacing:.08em}
 tbody td{padding:10px 9px;border-top:1px solid var(--rule)}
@@ -250,6 +252,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 @media(max-width:600px){
   header{padding:20px 16px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{display:none}.controls{padding:10px 12px}.row1{grid-template-columns:1fr}.row1 input[type=search]{grid-column:auto}.table-shell{padding:12px}.layout table,.layout thead,.layout tbody,.layout tr,.layout td{display:block;width:100%}.layout thead{display:none}.layout tbody tr.r{display:grid;grid-template-columns:1fr auto;padding:10px;border-bottom:1px solid var(--rule)}.layout tbody td{padding:2px 0}.layout .dept,.layout .cond,.layout .unit,.layout .sum{grid-column:1}.layout .addbtn{grid-column:2;grid-row:1/5}.sources{padding-left:14px;padding-right:14px;margin-right:0}footer{margin-left:14px;margin-right:14px}
 }
+@media(max-width:600px){.calculator-note{grid-template-columns:auto 1fr}.calculator-note a{grid-column:1/-1;text-align:center}}
 
 /* full-width estimate workspace */
 .beta-mark{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:5px 8px;border:1px solid #b9c9ff;border-radius:999px;background:#f0f4ff;color:var(--blue);font:700 9px var(--body);letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}
@@ -319,6 +322,11 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 <div class="layout">
   <div class="table-shell">
     <div class="result-meta"><span id="resultCount">340 позиций</span><span>Выберите строку для подробностей</span></div>
+    <aside class="calculator-note" id="calculatorNote" hidden aria-label="Калькулятор стоимости цветокоррекции">
+      <span class="calc-icon" aria-hidden="true">∑</span>
+      <div><b>Рассчитайте актуальную стоимость цветокоррекции</b><span>Ставки в таблице взяты из письма ICG 2022 года. Калькулятор учитывает хронометраж, жанр, HDR, сложность материала и уровень колориста.</span></div>
+      <a href="https://icguild.org/calculator" target="_blank" rel="noopener">Открыть калькулятор ICG →</a>
+    </aside>
     <table>
       <thead><tr>
         <th class="sortable" data-s="dept">Цех</th>
@@ -489,6 +497,7 @@ function amountCell(r){
 }
 function render(){
   const rows = sorted(DATA.filter(match));
+  document.getElementById('calculatorNote').hidden=!(rows.length&&rows.every(r=>r.dept==='Цветокоррекция'));
   document.getElementById('empty').hidden = rows.length>0;
   document.getElementById('resultCount').textContent = `${rows.length} ${rows.length===1?'позиция':'позиций'}`;
   document.getElementById('tb').innerHTML = rows.map(r=>{
