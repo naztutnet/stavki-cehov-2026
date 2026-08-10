@@ -14,13 +14,13 @@
   "mpk-source-page": {
     "name": "Страница справочника МПК",
     "url": "https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/",
-    "sha256": "790f2a2f3c30c9ede39235079775959322c2848cbad4940c3f15eb4c71c4afe6",
-    "checked_at": "2026-08-10T21:28:26+00:00"
+    "sha256": "c331a1b7e2f083d011e2f701a884671168ca139d1e6734ff06896f52813df28a",
+    "checked_at": "2026-08-10T21:31:27+00:00"
   },
   "camera-source-page": {
     "name": "Страница операторского цеха МПК",
     "url": "https://kinoprofsoyuz.ru/camera/",
-    "sha256": "90ee862d46c7357d801e4ed030990c001bd267d482574fe6f8392a13a614d806",
-    "checked_at": "2026-08-10T21:28:26+00:00"
+    "sha256": "7d5b399981d74d76db2703b0b48249b0a054ccf8ba24efecdfe7f71e9acf3bf0",
+    "checked_at": "2026-08-10T21:31:27+00:00"
   }
 }
