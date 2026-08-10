@@ -255,8 +255,8 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 @media(max-width:600px){.calculator-note{grid-template-columns:auto 1fr}.calculator-note a{grid-column:1/-1;text-align:center}}
 
 /* full-width estimate workspace */
-.beta-mark{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:5px 8px;border:1px solid #b9c9ff;border-radius:999px;background:#f0f4ff;color:var(--blue);font:700 9px var(--body);letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}
-.beta-mark::before{content:"β";display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--blue);color:#fff;font:700 11px Georgia,serif}
+.beta-mark{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:999px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none;vertical-align:middle}
+.beta-mark::before{content:"β";display:inline;color:var(--ink-2);font:400 13px Georgia,serif;line-height:1}
 .open-builder{width:calc(100% - 32px);margin:12px 16px 14px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
 .feedback-fab{position:fixed;right:18px;bottom:66px;z-index:91;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid var(--rule);border-radius:9px;background:#fff;color:var(--ink);box-shadow:0 8px 28px rgba(20,25,20,.12);font:650 10px var(--body);cursor:pointer}
@@ -293,7 +293,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
-  <div class="title-block"><h1>Минимальные ставки <span class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta</span><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
+  <div class="title-block"><h1>Минимальные ставки <span class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</span><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
   <div class="stats" id="stats"></div>
 </header>
@@ -363,7 +363,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 
 <section class="builder" id="builder" hidden aria-label="Конструктор предварительной сметы">
   <div class="builder-head">
-    <div><h2>Предварительная смета <span class="beta-mark">Beta</span></h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
+    <div><h2>Предварительная смета <span class="beta-mark">Beta version</span></h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
     <button class="head-action" id="builderFeedback">Нашли ошибку или есть свежие ставки?</button>
     <button class="builder-close" id="closeBuilder">Вернуться к справочнику</button>
   </div>
