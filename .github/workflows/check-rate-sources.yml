@@ -10,7 +10,7 @@ on:
   schedule:
     - cron: "17 8 * * *"
       timezone: "Europe/Moscow"
-    - cron: "0 10 * * 1"
+    - cron: "0 10 1 * *"
       timezone: "Europe/Moscow"
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
       - name: Проверить первоисточники
         id: monitor
         env:
-          PUBLISH_CHECK: ${{ github.event.schedule == '0 10 * * 1' || inputs.publish_check }}
+          PUBLISH_CHECK: ${{ github.event.schedule == '0 10 1 * *' || inputs.publish_check }}
         run: python3 scripts/check_sources.py
 
       - name: Сохранить новые контрольные значения
