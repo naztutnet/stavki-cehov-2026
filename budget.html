@@ -245,7 +245,7 @@ tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blu
 footer{margin:28px calc(var(--inspector) + 18px) 0 18px}
 header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-bottom:14px;position:relative}header .eyebrow{grid-column:1/-1}header h1{font-size:34px}header .lede{max-width:58ch}.stats{grid-template-columns:repeat(5,minmax(110px,1fr));grid-column:1/-1}.est{box-shadow:-10px 0 32px rgba(20,25,20,.06)}.inspector-tabs{grid-template-columns:110px 1fr}.total{background:#f8faf6}.total b{font-size:28px}.line{padding-top:13px;padding-bottom:13px}
 .header-estimate{min-height:38px;padding:0 14px;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:#fff;font:700 10px var(--body);cursor:pointer;white-space:nowrap}.header-estimate:hover{background:#103a5d;border-color:#103a5d}
-header .eyebrow{padding-right:0}
+header .eyebrow{padding-right:390px}
 :focus-visible{outline:3px solid rgba(36,87,245,.28);outline-offset:2px}
 @media(max-width:1180px){
   :root{--nav:220px;--inspector:320px}.row1{grid-template-columns:minmax(220px,1fr) repeat(2,minmax(120px,auto))}.row1 select#sort{display:none}
@@ -262,15 +262,12 @@ header .eyebrow{padding-right:0}
 .beta-mark{display:table;margin:0 0 8px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:7px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
 .open-builder{width:calc(100% - 28px);margin:0 14px 12px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
-.feedback-fab{position:fixed;right:18px;bottom:66px;z-index:91;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid var(--rule);border-radius:9px;background:#fff;color:var(--ink);box-shadow:0 8px 28px rgba(20,25,20,.12);font:650 10px var(--body);cursor:pointer}
-.feedback-fab::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}
-.feedback-fab:hover{border-color:var(--ink)}
+.feedback-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--bad);border-radius:7px;background:#fff;color:var(--bad);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.feedback-action::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}.feedback-action:hover{background:var(--bad-bg)}.header-feedback{position:absolute;right:0;top:18px}
 .builder{position:fixed;inset:0;z-index:200;display:grid;grid-template-rows:auto minmax(0,1fr);background:var(--paper)}
 .builder[hidden]{display:none}
 .builder-head{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;padding:13px 18px;border-bottom:1px solid var(--rule);background:#fff}
 .builder-head h2{margin:0;font-size:20px;letter-spacing:-.03em}.builder-head p{margin:2px 0 0;color:var(--ink-3);font-size:9px}
-.builder-close,.builder-head .head-action{min-height:36px;padding:0 12px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;color:var(--ink);font:650 10px var(--body);cursor:pointer}
-.builder-close:hover,.builder-head .head-action:hover{border-color:var(--ink)}
+.builder-close{min-height:36px;padding:0 12px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;color:var(--ink);font:650 10px var(--body);cursor:pointer}.builder-close:hover{border-color:var(--ink)}
 .builder-body{display:grid;grid-template-columns:290px minmax(680px,1fr) 270px;min-height:0}
 .quick-catalog{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-height:0;border-right:1px solid var(--rule);background:#fafbf9}
 .quick-catalog h3{margin:0;padding:17px 16px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
@@ -282,6 +279,7 @@ header .eyebrow{padding-right:0}
 .budget-canvas{min-width:0;overflow:auto;padding:18px;background:var(--paper)}
 .budget-empty{display:grid;place-items:center;min-height:320px;border:1px dashed var(--rule-hard);border-radius:10px;background:#fff;color:var(--ink-3);text-align:center;font-size:11px}
 .budget-table{min-width:1120px;border:1px solid var(--rule);background:#fff}
+.budget-add-row{padding:10px;border-top:1px solid var(--rule);background:#fafbf9}.budget-add-row button{width:100%;min-height:36px;border:1px dashed var(--blue);border-radius:6px;background:#fff;color:var(--blue);font:700 10px var(--body);cursor:pointer}.budget-add-row button:hover{border-style:solid;background:var(--blue-soft)}
 .budget-row{display:grid;grid-template-columns:32px minmax(240px,1.5fr) 78px 110px 220px 76px 62px 110px 110px 34px;align-items:center;border-top:1px solid var(--rule)}
 .budget-row:first-child{border-top:0}.budget-row>div{min-width:0;padding:9px 7px}.budget-row.head{position:sticky;top:0;z-index:2;background:var(--ink);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.budget-row .position b{display:block;font-size:10px}.budget-row .position small{display:block;color:var(--ink-3);font-size:8px}.budget-row input{width:100%;min-height:32px;padding:6px 7px;border:1px solid var(--rule-hard);border-radius:5px;background:#fff;color:var(--ink);font:10px var(--body)}.budget-row .unit{font-size:9px}.budget-row .money{font:700 10px var(--mono);text-align:right}.budget-row .row-remove{border:0;background:transparent;color:var(--ink-3);font-size:16px;cursor:pointer}.budget-row .row-remove:hover{color:var(--bad)}
 .input-stack{display:grid;grid-template-columns:1fr;gap:4px}.input-stack.two{grid-template-columns:1fr 1fr;gap:8px}.input-stack label{display:grid;gap:4px;min-width:0;font-size:7px;color:var(--ink-3);text-transform:uppercase}.fixed-input{display:flex;align-items:center;min-height:32px;padding:6px 7px;border:1px solid var(--rule);border-radius:5px;background:#f5f6f3;color:var(--ink-2);font:10px var(--body)}
@@ -290,8 +288,8 @@ header .eyebrow{padding-right:0}
 .feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{border:0;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note,.feedback-status{margin:0;color:var(--ink-3);font-size:9px}.feedback-status.ok{color:var(--ok)}.feedback-status.error{color:var(--bad)}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.feedback-submit:disabled{opacity:.65;cursor:wait}
 .custom-add{width:calc(100% - 32px);min-height:38px;margin:12px 16px;border:1px dashed var(--blue);border-radius:7px;background:var(--blue-soft);color:var(--blue);font:700 10px var(--body);cursor:pointer}.custom-add:hover{border-style:solid}.custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.custom-grid .wide{grid-column:1/-1}
 @media(max-width:1050px){.builder-body{grid-template-columns:230px minmax(650px,1fr)}.budget-summary{position:absolute;right:14px;top:74px;width:250px;max-height:calc(100vh - 90px);box-shadow:0 12px 34px rgba(20,25,20,.14)}}
-@media(max-width:700px){header .eyebrow{padding-right:0}.header-estimate{width:100%}.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
-@media(max-width:520px){.custom-grid{grid-template-columns:1fr}.custom-grid .wide{grid-column:auto}.feedback-fab{max-width:calc(100vw - 24px)}}
+@media(max-width:700px){header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-feedback{position:static;width:100%;margin-bottom:12px}.builder-head{grid-template-columns:1fr auto}.builder-head .feedback-action{grid-column:1/-1;grid-row:2}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
+@media(max-width:520px){.custom-grid{grid-template-columns:1fr}.custom-grid .wide{grid-column:auto}}
 </style>
 </head>
 <body>
@@ -299,6 +297,7 @@ header .eyebrow{padding-right:0}
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
+  <button class="feedback-action header-feedback" id="feedbackOpen">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
   <div class="title-block"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><h1><span>Минимальные ставки</span><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
   <div class="stats" id="stats"></div>
@@ -366,7 +365,7 @@ header .eyebrow{padding-right:0}
 <section class="builder" id="builder" hidden aria-label="Конструктор предварительной сметы">
   <div class="builder-head">
     <div><small class="beta-mark">Beta version</small><h2>Предварительная смета</h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
-    <button class="head-action" id="builderFeedback">Обратная связь</button>
+    <button class="feedback-action" id="builderFeedback">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
     <button class="builder-close" id="closeBuilder">Вернуться к справочнику</button>
   </div>
   <div class="builder-body">
@@ -383,12 +382,11 @@ header .eyebrow{padding-right:0}
       <div class="summary-line"><span>Позиций</span><b id="builderCount">0</b></div>
       <div class="summary-line"><span>Без налога</span><b id="builderNet">0 ₽</b></div>
       <div class="summary-line grand"><span>С налогом</span><b id="builderGross">0 ₽</b></div>
-      <div class="summary-actions"><button id="builderCustom">+ Своя статья</button><button class="primary" id="builderXlsx">Экспорт Excel</button><button id="builderPdf">Экспорт PDF</button><button id="builderClear">Очистить смету</button></div>
+      <div class="summary-actions"><button class="primary" id="builderXlsx">Экспорт Excel</button><button id="builderPdf">Экспорт PDF</button><button id="builderClear">Очистить смету</button></div>
     </aside>
   </div>
 </section>
 
-<button class="feedback-fab" id="feedbackOpen">Обратная связь · ошибка или свежие ставки</button>
 <dialog class="feedback-dialog" id="customDialog">
   <div class="feedback-inner">
     <div class="feedback-top"><div><h2>Добавить свою статью</h2><p>Создайте позицию, которой нет в справочнике. Её можно будет изменить в смете.</p></div><button class="dialog-x" id="customClose" aria-label="Закрыть">×</button></div>
@@ -733,7 +731,8 @@ function inputFor(e){
 function renderBuilder(){
   const values=[...est.values()];let net=0,gross=0;
   const rows=values.map((e,index)=>{const c=calcEstimate(e);net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${e.r.prof}</b><small>${e.r.dept}</small></div><div class="unit">${e.r.unit}</div><div><div class="input-stack"><label>Ставка<input type="number" min="0" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка"></label></div></div><div>${inputFor(e)}</div><div>${e.r.unit==='месяц'?`<div class="input-stack"><label>Специалистов<input type="number" min="0" step="1" value="${e.qty}" data-builder-field="qty" data-id="${e.r.id}" aria-label="Специалистов"></label></div>`:'—'}</div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
-  document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка</div><div>Параметр расчёта</div><div>Кол-во</div><div>%</div><div>Без налога</div><div>С налогом</div><div></div></div>${rows}</div>`:'<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>';
+  const addCustom='<div class="budget-add-row"><button data-builder-custom>+ Добавить свою статью</button></div>';
+  document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка</div><div>Параметр расчёта</div><div>Кол-во</div><div>%</div><div>Без налога</div><div>С налогом</div><div></div></div>${rows}${addCustom}</div>`:`<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>${addCustom}`;
   document.getElementById('builderCount').textContent=values.length;
   document.getElementById('builderNet').textContent=fmt(net);
   document.getElementById('builderGross').textContent=fmt(gross);
@@ -746,7 +745,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!builder.hidden)clo
 document.getElementById('quickSearch').addEventListener('input',e=>renderQuickCatalog(e.target.value));
 document.getElementById('quickResults').addEventListener('click',e=>{const b=e.target.closest('[data-quick-add]');if(!b)return;const r=DATA.find(x=>x.id==b.dataset.quickAdd);if(!est.has(r.id))est.set(r.id,newEstimate(r));saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderRows').addEventListener('change',e=>{const f=e.target.closest('[data-builder-field]');if(!f)return;const row=est.get(+f.dataset.id);if(!row)return;if(f.dataset.builderField==='taxPercent')row.tax=Math.min(99.99,Math.max(0,+f.value||0))/100;else row[f.dataset.builderField]=['rate','qty'].includes(f.dataset.builderField)?Math.max(0,+f.value||0):f.value;saveEstimate();renderBuilder();renderEst()});
-document.getElementById('builderRows').addEventListener('click',e=>{const b=e.target.closest('[data-builder-del]');if(!b)return;est.delete(+b.dataset.builderDel);saveEstimate();renderBuilder();renderEst()});
+document.getElementById('builderRows').addEventListener('click',e=>{const custom=e.target.closest('[data-builder-custom]');if(custom){openCustom();return}const b=e.target.closest('[data-builder-del]');if(!b)return;est.delete(+b.dataset.builderDel);saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderClear').addEventListener('click',()=>{if(!est.size||confirm('Очистить все позиции сметы?')){est.clear();saveEstimate();renderBuilder();renderEst()}});
 document.getElementById('builderXlsx').addEventListener('click',()=>document.getElementById('xlsx').click());
 document.getElementById('builderPdf').addEventListener('click',()=>document.getElementById('pdf').click());
@@ -755,7 +754,6 @@ document.getElementById('builderPdf').addEventListener('click',()=>document.getE
 const customDialog=document.getElementById('customDialog');
 function openCustom(){if(typeof customDialog.showModal==='function')customDialog.showModal();else customDialog.setAttribute('open','')}
 document.getElementById('customOpen').addEventListener('click',openCustom);
-document.getElementById('builderCustom').addEventListener('click',openCustom);
 document.getElementById('customClose').addEventListener('click',()=>customDialog.close());
 customDialog.addEventListener('click',e=>{if(e.target===customDialog)customDialog.close()});
 document.getElementById('customForm').addEventListener('submit',e=>{
