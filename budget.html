@@ -241,7 +241,9 @@ tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blu
 .sources h2{font-family:var(--body);font-size:18px;text-transform:none;letter-spacing:-.02em}
 .sitem{border-top-color:var(--rule)}
 footer{margin:28px calc(var(--inspector) + 18px) 0 18px}
-header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-bottom:14px}header .eyebrow{grid-column:1/-1}header h1{font-size:34px}header .lede{max-width:58ch}.stats{grid-template-columns:repeat(5,minmax(110px,1fr));grid-column:1/-1}.est{box-shadow:-10px 0 32px rgba(20,25,20,.06)}.inspector-tabs{grid-template-columns:110px 1fr}.total{background:#f8faf6}.total b{font-size:28px}.line{padding-top:13px;padding-bottom:13px}
+header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-bottom:14px;position:relative}header .eyebrow{grid-column:1/-1}header h1{font-size:34px}header .lede{max-width:58ch}.stats{grid-template-columns:repeat(5,minmax(110px,1fr));grid-column:1/-1}.est{box-shadow:-10px 0 32px rgba(20,25,20,.06)}.inspector-tabs{grid-template-columns:110px 1fr}.total{background:#f8faf6}.total b{font-size:28px}.line{padding-top:13px;padding-bottom:13px}
+.header-estimate{position:absolute;right:28px;top:18px;min-height:36px;padding:0 13px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;color:var(--ink);font:700 10px var(--body);cursor:pointer}.header-estimate:hover{border-color:var(--ink);background:#f5f6f3}
+header .eyebrow{padding-right:170px}
 :focus-visible{outline:3px solid rgba(36,87,245,.28);outline-offset:2px}
 @media(max-width:1180px){
   :root{--nav:220px;--inspector:320px}.row1{grid-template-columns:minmax(220px,1fr) repeat(2,minmax(120px,auto))}.row1 select#sort{display:none}
@@ -255,7 +257,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 @media(max-width:600px){.calculator-note{grid-template-columns:auto 1fr}.calculator-note a{grid-column:1/-1;text-align:center}}
 
 /* full-width estimate workspace */
-.beta-mark{display:table;margin:8px 0 7px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:7px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
+.beta-mark{display:table;margin:0 0 8px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:7px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
 .open-builder{width:calc(100% - 28px);margin:0 14px 12px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
 .feedback-fab{position:fixed;right:18px;bottom:66px;z-index:91;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid var(--rule);border-radius:9px;background:#fff;color:var(--ink);box-shadow:0 8px 28px rgba(20,25,20,.12);font:650 10px var(--body);cursor:pointer}
@@ -276,15 +278,15 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 .quick-item:hover{background:var(--blue-soft)}.quick-item b{display:block;color:var(--ink);font:650 10px/1.35 var(--body);overflow-wrap:anywhere}.quick-item small{display:block;margin-top:3px;color:var(--ink-3);font:8px/1.35 var(--body)}.quick-item>span:first-child{min-width:0;color:var(--ink);white-space:normal}.quick-item>span:last-child{color:var(--blue);font:700 10px/1.3 var(--mono);white-space:nowrap;text-align:right}
 .budget-canvas{min-width:0;overflow:auto;padding:18px;background:var(--paper)}
 .budget-empty{display:grid;place-items:center;min-height:320px;border:1px dashed var(--rule-hard);border-radius:10px;background:#fff;color:var(--ink-3);text-align:center;font-size:11px}
-.budget-table{min-width:1040px;border:1px solid var(--rule);background:#fff}
-.budget-row{display:grid;grid-template-columns:32px minmax(210px,1.4fr) 92px 120px 130px 86px 70px 120px 120px 34px;align-items:center;border-top:1px solid var(--rule)}
+.budget-table{min-width:1120px;border:1px solid var(--rule);background:#fff}
+.budget-row{display:grid;grid-template-columns:32px minmax(240px,1.5fr) 78px 110px 220px 76px 62px 110px 110px 34px;align-items:center;border-top:1px solid var(--rule)}
 .budget-row:first-child{border-top:0}.budget-row>div{min-width:0;padding:9px 7px}.budget-row.head{position:sticky;top:0;z-index:2;background:var(--ink);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.budget-row .position b{display:block;font-size:10px}.budget-row .position small{display:block;color:var(--ink-3);font-size:8px}.budget-row input{width:100%;min-height:32px;padding:6px 7px;border:1px solid var(--rule-hard);border-radius:5px;background:#fff;color:var(--ink);font:10px var(--body)}.budget-row .unit{font-size:9px}.budget-row .money{font:700 10px var(--mono);text-align:right}.budget-row .row-remove{border:0;background:transparent;color:var(--ink-3);font-size:16px;cursor:pointer}.budget-row .row-remove:hover{color:var(--bad)}
-.input-stack{display:grid;grid-template-columns:1fr;gap:4px}.input-stack.two{grid-template-columns:1fr 1fr}.input-stack label{font-size:7px;color:var(--ink-3);text-transform:uppercase}
+.input-stack{display:grid;grid-template-columns:1fr;gap:4px}.input-stack.two{grid-template-columns:1fr 1fr;gap:8px}.input-stack label{display:grid;gap:4px;min-width:0;font-size:7px;color:var(--ink-3);text-transform:uppercase}.fixed-input{display:flex;align-items:center;min-height:32px;padding:6px 7px;border:1px solid var(--rule);border-radius:5px;background:#f5f6f3;color:var(--ink-2);font:10px var(--body)}
 .budget-summary{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--rule);background:#fff;padding:18px 16px}
 .budget-summary h3{margin:0 0 16px;font-size:13px}.summary-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--rule);font-size:9px;color:var(--ink-3)}.summary-line b{color:var(--ink);font:700 13px var(--mono)}.summary-line.grand{margin-top:2px;padding-top:15px;border-top:2px solid var(--ink)}.summary-line.grand b{font-size:18px}.summary-actions{display:grid;gap:7px;margin-top:auto}.summary-actions button{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:650 10px var(--body);cursor:pointer}.summary-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-.feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{border:0;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note{margin:0;color:var(--ink-3);font-size:9px}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
+.feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{border:0;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note,.feedback-status{margin:0;color:var(--ink-3);font-size:9px}.feedback-status.ok{color:var(--ok)}.feedback-status.error{color:var(--bad)}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.feedback-submit:disabled{opacity:.65;cursor:wait}
 @media(max-width:1050px){.builder-body{grid-template-columns:230px minmax(650px,1fr)}.budget-summary{position:absolute;right:14px;top:74px;width:250px;max-height:calc(100vh - 90px);box-shadow:0 12px 34px rgba(20,25,20,.14)}}
-@media(max-width:700px){.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
+@media(max-width:700px){header .eyebrow{padding-right:0}.header-estimate{position:static;width:100%;margin-top:12px}.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -292,7 +294,8 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
-  <div class="title-block"><h1><span>Минимальные ставки</span><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
+  <button class="header-estimate" id="openBuilder">Открыть смету · 0</button>
+  <div class="title-block"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><h1><span>Минимальные ставки</span><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
   <div class="stats" id="stats"></div>
 </header>
@@ -342,17 +345,11 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
   </div>
 
   <aside class="est" aria-label="Инспектор позиции и смета">
-    <h3>Черновая смета <em id="estn">0 позиций</em></h3>
-    <div class="inspector-tabs" role="tablist">
-      <button class="inspector-tab active" data-inspector-tab="detail" role="tab" aria-selected="true">Позиция</button>
-      <button class="inspector-tab" data-inspector-tab="budget" role="tab" aria-selected="false">Смета</button>
-    </div>
-    <button class="open-builder" id="openBuilder">Открыть смету · 0</button>
     <div class="inspector-pane" id="detailPane"><div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div></div>
-    <div class="inspector-pane" id="budgetPane" hidden>
+    <div class="inspector-pane" id="budgetPane" hidden aria-hidden="true">
       <p class="hint" id="esthint">Добавляйте позиции кнопкой «+». Ставка и единица подтянутся из справочника; даты, количество и процент можно изменить.</p>
       <div id="estlines"></div>
-      <div class="totals"><div class="total"><i>Без налога</i><b id="estsubtotal">0 ₽</b></div><div class="total"><i>С налогом</i><b id="esttotal">0 ₽</b></div></div>
+      <span id="estn">0 позиций</span><div class="totals"><div class="total"><i>Без налога</i><b id="estsubtotal">0 ₽</b></div><div class="total"><i>С налогом</i><b id="esttotal">0 ₽</b></div></div>
       <div class="acts"><button id="xlsx">Экспорт Excel</button><button id="pdf">Экспорт PDF</button><button id="clear">Очистить</button></div>
     </div>
   </aside>
@@ -362,8 +359,8 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 
 <section class="builder" id="builder" hidden aria-label="Конструктор предварительной сметы">
   <div class="builder-head">
-    <div><h2>Предварительная смета</h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
-    <button class="head-action" id="builderFeedback">Нашли ошибку или есть свежие ставки?</button>
+    <div><small class="beta-mark">Beta version</small><h2>Предварительная смета</h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
+    <button class="head-action" id="builderFeedback">Обратная связь</button>
     <button class="builder-close" id="closeBuilder">Вернуться к справочнику</button>
   </div>
   <div class="builder-body">
@@ -393,8 +390,9 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
       <label>Тема<select id="feedbackType"><option>Нашёл ошибку</option><option>Хочу поделиться актуальными ставками</option><option>Есть новое письмо цеха</option><option>Другое предложение</option></select></label>
       <label>Ваш email<input type="email" id="feedbackEmail" autocomplete="email" placeholder="name@example.com" required></label>
       <label>Что нужно исправить или добавить<textarea id="feedbackText" placeholder="Укажите цех, профессию, ставку и, если есть, ссылку на первоисточник" required></textarea></label>
-      <p class="feedback-note">После нажатия откроется ваше почтовое приложение с подготовленным письмом. Сайт не сохраняет введённые данные.</p>
-      <button class="feedback-submit" type="submit">Подготовить письмо →</button>
+      <p class="feedback-note">Сообщение будет отправлено владельцу справочника. Для доставки используется защищённый сервис обработки форм.</p>
+      <p class="feedback-status" id="feedbackStatus" role="status" aria-live="polite"></p>
+      <button class="feedback-submit" type="submit">Отправить →</button>
     </form>
   </div>
 </dialog>
@@ -563,9 +561,10 @@ function calcEstimate(e){
   const start=parseDate(e.start),end=parseDate(e.end);
   const elapsed=start&&end&&end>=start?(end-start)/86400000+1:0;
   const monthly=e.r.unit==='месяц';
-  const period=monthly?elapsed/30:(e.qty||0);
+  const quantity=e.r.unit==='аккорд'?1:(e.qty||0);
+  const period=monthly?elapsed/30:quantity;
   const base=monthly?monthlyProrata(start,end,e.rate):(e.rate||0);
-  const net=Math.max(0,base*(e.qty||0));
+  const net=Math.max(0,base*quantity);
   const gross=e.tax<1?net/(1-e.tax):net;
   return {period,net,gross};
 }
@@ -614,7 +613,6 @@ document.getElementById('tb').addEventListener('click',e=>{
   const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');
 });
 document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
-document.querySelector('.inspector-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-inspector-tab]');if(b)setInspectorTab(b.dataset.inspectorTab)});
 document.getElementById('detailPane').addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(!add)return;const r=DATA.find(x=>x.id==add.dataset.add);if(!est.has(r.id))est.set(r.id,newEstimate(r));renderEst();saveEstimate();add.textContent='Добавлено в смету ✓';add.disabled=true});
 document.getElementById('estlines').addEventListener('change',e=>{
   const f=e.target.closest('[data-field]'); if(!f) return;
@@ -630,7 +628,7 @@ document.getElementById('clear').addEventListener('click',()=>{est.clear();rende
 function budgetRows(){
   return [...est.values()].map((e,index)=>{
     const c=calcEstimate(e);
-    return {index:index+1,dept:e.r.dept,prof:e.r.prof,cond:e.r.cond||'',start:e.start,end:e.end,unit:e.r.unit,rate:e.rate,qty:e.qty,period:c.period,tax:e.tax,net:c.net,gross:c.gross};
+    return {index:index+1,dept:e.r.dept,prof:e.r.prof,cond:e.r.cond||'',start:e.start,end:e.end,unit:e.r.unit,rate:e.rate,qty:e.r.unit==='аккорд'?1:e.qty,period:c.period,tax:e.tax,net:c.net,gross:c.gross};
   });
 }
 function exportName(ext){return `Предварительная_смета_${new Date().toISOString().slice(0,10)}.${ext}`}
@@ -698,11 +696,12 @@ function renderQuickCatalog(query=''){
 }
 function inputFor(e){
   if(e.r.unit==='месяц')return `<div class="input-stack two"><label>Прикрепление<input type="date" value="${e.start}" data-builder-field="start" data-id="${e.r.id}"></label><label>Открепление<input type="date" value="${e.end}" data-builder-field="end" data-id="${e.r.id}"></label></div>`;
+  if(e.r.unit==='аккорд')return `<div class="input-stack"><label>Аккорд<span class="fixed-input">1</span></label></div>`;
   return `<div class="input-stack"><label>${quantityLabel(e.r.unit)}<input type="number" min="0" step="1" value="${e.qty}" data-builder-field="qty" data-id="${e.r.id}"></label></div>`;
 }
 function renderBuilder(){
   const values=[...est.values()];let net=0,gross=0;
-  const rows=values.map((e,index)=>{const c=calcEstimate(e);net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${e.r.prof}</b><small>${e.r.dept}</small></div><div class="unit">${e.r.unit}</div><div><input type="number" min="0" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка"></div><div>${inputFor(e)}</div><div>${e.r.unit==='месяц'?`<input type="number" min="0" step="1" value="${e.qty}" data-builder-field="qty" data-id="${e.r.id}" aria-label="Специалистов">`:'—'}</div><div><input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
+  const rows=values.map((e,index)=>{const c=calcEstimate(e);net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${e.r.prof}</b><small>${e.r.dept}</small></div><div class="unit">${e.r.unit}</div><div><div class="input-stack"><label>Ставка<input type="number" min="0" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка"></label></div></div><div>${inputFor(e)}</div><div>${e.r.unit==='месяц'?`<div class="input-stack"><label>Специалистов<input type="number" min="0" step="1" value="${e.qty}" data-builder-field="qty" data-id="${e.r.id}" aria-label="Специалистов"></label></div>`:'—'}</div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
   document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка</div><div>Параметр расчёта</div><div>Кол-во</div><div>%</div><div>Без налога</div><div>С налогом</div><div></div></div>${rows}</div>`:'<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>';
   document.getElementById('builderCount').textContent=values.length;
   document.getElementById('builderNet').textContent=fmt(net);
@@ -728,13 +727,20 @@ document.getElementById('feedbackOpen').addEventListener('click',openFeedback);
 document.getElementById('builderFeedback').addEventListener('click',openFeedback);
 document.getElementById('feedbackClose').addEventListener('click',()=>feedbackDialog.close());
 feedbackDialog.addEventListener('click',e=>{if(e.target===feedbackDialog)feedbackDialog.close()});
-document.getElementById('feedbackForm').addEventListener('submit',e=>{
+document.getElementById('feedbackForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  const form=e.currentTarget,button=form.querySelector('.feedback-submit'),status=document.getElementById('feedbackStatus');
   const type=document.getElementById('feedbackType').value,email=document.getElementById('feedbackEmail').value.trim(),message=document.getElementById('feedbackText').value.trim();
-  const subject=`Ставки цехов — ${type}`;
-  const body=`Тема: ${type}\nEmail для ответа: ${email}\nСтраница: ${location.href}\n\nСообщение:\n${message}`;
-  location.href=`mailto:snegproduction@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  feedbackDialog.close();
+  button.disabled=true;button.textContent='Отправляем…';status.className='feedback-status';status.textContent='';
+  try{
+    const response=await fetch('https://formsubmit.co/ajax/snegproduction@gmail.com',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:`Ставки цехов — ${type}`,type,email,message,page:location.href})});
+    const data=await response.json();
+    if(!response.ok||data.success===false||data.success==='false')throw new Error(data.message||'Ошибка отправки');
+    status.className='feedback-status ok';status.textContent='Сообщение отправлено. Спасибо!';form.reset();button.textContent='Отправлено ✓';
+    setTimeout(()=>{feedbackDialog.close();button.disabled=false;button.textContent='Отправить →';status.textContent=''},1800);
+  }catch(error){
+    console.error(error);status.className='feedback-status error';status.textContent='Не удалось отправить. Проверьте соединение и попробуйте ещё раз.';button.disabled=false;button.textContent='Отправить →';
+  }
 });
 // источники
 document.getElementById('slist').innerHTML = SRC.map(s=>`<div class="sitem"><time>${s.date}</time>
