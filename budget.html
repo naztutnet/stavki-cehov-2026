@@ -255,9 +255,8 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 @media(max-width:600px){.calculator-note{grid-template-columns:auto 1fr}.calculator-note a{grid-column:1/-1;text-align:center}}
 
 /* full-width estimate workspace */
-.beta-mark{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:999px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none;vertical-align:middle}
-.beta-mark::before{content:"β";display:inline;color:var(--ink-2);font:400 13px Georgia,serif;line-height:1}
-.open-builder{width:calc(100% - 32px);margin:12px 16px 14px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
+.beta-mark{display:table;margin:8px 0 7px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:7px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
+.open-builder{width:calc(100% - 28px);margin:0 14px 12px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
 .feedback-fab{position:fixed;right:18px;bottom:66px;z-index:91;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid var(--rule);border-radius:9px;background:#fff;color:var(--ink);box-shadow:0 8px 28px rgba(20,25,20,.12);font:650 10px var(--body);cursor:pointer}
 .feedback-fab::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}
@@ -285,7 +284,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 .budget-summary h3{margin:0 0 16px;font-size:13px}.summary-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--rule);font-size:9px;color:var(--ink-3)}.summary-line b{color:var(--ink);font:700 13px var(--mono)}.summary-line.grand{margin-top:2px;padding-top:15px;border-top:2px solid var(--ink)}.summary-line.grand b{font-size:18px}.summary-actions{display:grid;gap:7px;margin-top:auto}.summary-actions button{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:650 10px var(--body);cursor:pointer}.summary-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{border:0;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note{margin:0;color:var(--ink-3);font-size:9px}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 @media(max-width:1050px){.builder-body{grid-template-columns:230px minmax(650px,1fr)}.budget-summary{position:absolute;right:14px;top:74px;width:250px;max-height:calc(100vh - 90px);box-shadow:0 12px 34px rgba(20,25,20,.14)}}
-@media(max-width:700px){.beta-mark{margin:8px 0 0}.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
+@media(max-width:700px){.feedback-fab{right:12px;bottom:62px}.builder-head{grid-template-columns:1fr auto}.builder-head .head-action{display:none}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -293,7 +292,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
-  <div class="title-block"><h1>Минимальные ставки <span class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</span><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
+  <div class="title-block"><h1><span>Минимальные ставки</span><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><span>цехов кинопроизводства РФ</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
   <div class="stats" id="stats"></div>
 </header>
@@ -348,10 +347,10 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
       <button class="inspector-tab active" data-inspector-tab="detail" role="tab" aria-selected="true">Позиция</button>
       <button class="inspector-tab" data-inspector-tab="budget" role="tab" aria-selected="false">Смета</button>
     </div>
+    <button class="open-builder" id="openBuilder">Открыть смету · 0</button>
     <div class="inspector-pane" id="detailPane"><div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div></div>
     <div class="inspector-pane" id="budgetPane" hidden>
       <p class="hint" id="esthint">Добавляйте позиции кнопкой «+». Ставка и единица подтянутся из справочника; даты, количество и процент можно изменить.</p>
-      <button class="open-builder" id="openBuilder">Открыть конструктор сметы →</button>
       <div id="estlines"></div>
       <div class="totals"><div class="total"><i>Без налога</i><b id="estsubtotal">0 ₽</b></div><div class="total"><i>С налогом</i><b id="esttotal">0 ₽</b></div></div>
       <div class="acts"><button id="xlsx">Экспорт Excel</button><button id="pdf">Экспорт PDF</button><button id="clear">Очистить</button></div>
@@ -363,7 +362,7 @@ header{grid-template-columns:1fr auto;align-items:end;padding-top:18px;padding-b
 
 <section class="builder" id="builder" hidden aria-label="Конструктор предварительной сметы">
   <div class="builder-head">
-    <div><h2>Предварительная смета <span class="beta-mark">Beta version</span></h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
+    <div><h2>Предварительная смета</h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
     <button class="head-action" id="builderFeedback">Нашли ошибку или есть свежие ставки?</button>
     <button class="builder-close" id="closeBuilder">Вернуться к справочнику</button>
   </div>
@@ -533,7 +532,7 @@ function renderDetail(r){
     <div class="detail-section"><b>Условия и доплаты</b><p>${r.extra||'Дополнительные условия не указаны.'}</p></div>
     <div class="detail-section"><b>Источник</b><p>${r.src}<br>Действует с ${r.eff}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть письмо цеха →</a>`:''}</p></div>
     ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
-    <button class="detail-add" data-add="${r.id}">Добавить в смету</button>
+    <button class="detail-add" data-add="${r.id}" ${est.has(r.id)?'disabled':''}>${est.has(r.id)?'Добавлено в смету ✓':'Добавить в смету'}</button>
   </div>`;
 }
 // смета
@@ -592,6 +591,7 @@ function renderEst(){
   document.getElementById('estsubtotal').textContent=fmt(subtotal);
   document.getElementById('esttotal').textContent=fmt(total);
   document.getElementById('estn').textContent=est.size+' '+(est.size%10===1&&est.size%100!==11?'позиция':'позиций');
+  document.getElementById('openBuilder').textContent=`Открыть смету · ${est.size}`;
 }
 // события
 document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();render()});
@@ -609,13 +609,13 @@ document.getElementById('tb').addEventListener('click',e=>{
   const add=e.target.closest('[data-add]');
   if(add){const r=DATA.find(x=>x.id==add.dataset.add);
     if(!est.has(r.id)) est.set(r.id,newEstimate(r));
-    renderEst();saveEstimate();setInspectorTab('budget');return}
+    renderEst();saveEstimate();return}
   const tr=e.target.closest('tr.r'); if(!tr) return;
   const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');
 });
 document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
 document.querySelector('.inspector-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-inspector-tab]');if(b)setInspectorTab(b.dataset.inspectorTab)});
-document.getElementById('detailPane').addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(!add)return;const r=DATA.find(x=>x.id==add.dataset.add);if(!est.has(r.id))est.set(r.id,newEstimate(r));renderEst();saveEstimate();setInspectorTab('budget')});
+document.getElementById('detailPane').addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(!add)return;const r=DATA.find(x=>x.id==add.dataset.add);if(!est.has(r.id))est.set(r.id,newEstimate(r));renderEst();saveEstimate();add.textContent='Добавлено в смету ✓';add.disabled=true});
 document.getElementById('estlines').addEventListener('change',e=>{
   const f=e.target.closest('[data-field]'); if(!f) return;
   const row=est.get(+f.dataset.id); if(!row)return;
@@ -739,7 +739,7 @@ document.getElementById('feedbackForm').addEventListener('submit',e=>{
 // источники
 document.getElementById('slist').innerHTML = SRC.map(s=>`<div class="sitem"><time>${s.date}</time>
   ${s.url?`<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`:`<span class="no">${s.name}</span>`}</div>`).join('');
-render();renderEst();setInspectorTab('budget');
+render();renderEst();setInspectorTab('detail');
 </script>
 </body>
 </html>
