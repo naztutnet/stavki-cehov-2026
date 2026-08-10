@@ -665,9 +665,13 @@ function setInspectorTab(tab){
 }
 function revealMobileDetail(){
   if(!window.matchMedia('(max-width:920px)').matches)return;
-  const inspector=document.querySelector('.est');
+  const inspector=document.querySelector('.est'),controls=document.querySelector('.controls');
   const behavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
-  requestAnimationFrame(()=>inspector.scrollIntoView({behavior,block:'start'}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const controlsHeight=controls?.getBoundingClientRect().height||0;
+    const top=window.scrollY+inspector.getBoundingClientRect().top-controlsHeight-10;
+    window.scrollTo({top:Math.max(0,top),behavior});
+  }));
 }
 function renderDetail(r){
   const pane=document.getElementById('detailPane');
