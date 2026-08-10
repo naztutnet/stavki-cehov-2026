@@ -12,7 +12,7 @@ import urllib.request
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -88,7 +88,12 @@ class PageDigest(HTMLParser):
                 return
             if re.search(r"\.(?:css|js|png|jpe?g|gif|webp|svg|woff2?)(?:$|\?)", absolute.path, re.I):
                 return
-            self.links.add(urlunsplit((absolute.scheme, absolute.netloc, absolute.path, absolute.query, "")))
+            query = urlencode([
+                (key, value)
+                for key, value in parse_qsl(absolute.query, keep_blank_values=True)
+                if key.lower() != "sphrase_id" and not key.lower().startswith("utm_")
+            ])
+            self.links.add(urlunsplit((absolute.scheme, absolute.netloc, absolute.path, query, "")))
 
     def digest_payload(self) -> bytes:
         return "\n".join(sorted(self.links)).encode("utf-8")

@@ -167,6 +167,11 @@ tr.detail>td{background:#F4F7FA;border-top:0;padding:0 10px 16px 10px}
 .sources{margin-top:46px;border-top:2px solid var(--ink);padding-top:18px}
 .sources h2{font-family:var(--disp);text-transform:uppercase;font-size:20px;letter-spacing:.03em;margin:0 0 4px}
 .sources p.sub{color:var(--ink-2);margin:0 0 16px;max-width:70ch}
+.regional-note{display:grid;grid-template-columns:72px minmax(0,1fr) 132px auto;align-items:center;gap:18px;margin:0 0 28px;padding:16px 18px;border:1px solid var(--rule-hard);border-left:3px solid var(--blue);border-radius:8px;background:#fff}
+.regional-kicker{color:var(--blue);font:700 9px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.regional-copy h3{margin:0 0 4px;font-size:14px;letter-spacing:-.015em}.regional-copy p{margin:0!important;max-width:82ch!important;color:var(--ink-2);font-size:10.5px;line-height:1.55}
+.regional-figure{display:grid;gap:1px;padding-left:16px;border-left:1px solid var(--rule)}.regional-figure b{font:700 24px var(--mono);letter-spacing:-.04em}.regional-figure span{color:var(--ink-3);font-size:9px;line-height:1.35}
+.regional-note>a{min-height:36px;display:flex;align-items:center;justify-content:center;padding:0 12px;border:1px solid var(--rule-hard);border-radius:7px;color:var(--ink);font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap}.regional-note>a:hover{border-color:var(--blue);color:var(--blue)}
 .slist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0 22px}
 .sitem{display:grid;grid-template-columns:74px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--rule)}
 .sitem time{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
@@ -310,6 +315,7 @@ header .eyebrow{padding-right:390px}
 @media(max-width:920px){
   header{grid-template-columns:1fr}.lede{align-self:auto}.workspace{grid-template-columns:1fr}.dept-nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);padding:12px 16px}.nav-head{margin-bottom:8px}.chips{flex-direction:row;overflow-x:auto}.chip{flex:0 0 auto;width:auto;white-space:nowrap}.layout{grid-template-columns:1fr}.est{position:static;height:auto;border-left:0;border-top:1px solid var(--rule);order:-1;scroll-margin-top:10px}.sources,footer{padding-right:18px;margin-right:18px}.row1{grid-template-columns:1fr 1fr}.row1 input[type=search]{grid-column:1/-1}.stats{grid-template-columns:repeat(3,1fr)}
 }
+@media(max-width:760px){.regional-note{grid-template-columns:1fr;gap:12px}.regional-figure{display:flex;align-items:baseline;gap:8px;padding:10px 0 0;border-left:0;border-top:1px solid var(--rule)}.regional-note>a{justify-self:start}}
 @media(max-width:600px){
   header{padding:20px 16px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{display:none}.controls{padding:10px 12px}.row1{grid-template-columns:1fr}.row1 input[type=search]{grid-column:auto}.table-shell{padding:12px}.layout table{min-width:0;table-layout:auto}.layout table,.layout thead,.layout tbody,.layout tr,.layout td{display:block;width:100%}.layout thead{display:none}.layout tbody tr.r{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:3px;padding:12px 58px 12px 12px;border-bottom:1px solid var(--rule)}.layout tbody td{grid-column:1;padding:1px 0}.layout .prof{grid-row:1;overflow:visible;white-space:normal;font-size:13px;line-height:1.3}.layout .dept{grid-row:2;max-width:none}.layout .cond{grid-row:3;max-width:none;line-height:1.4}.layout .unit{display:none}.layout .sum{grid-row:4;text-align:left}.layout tbody td:nth-child(6){grid-row:5;text-align:left}.layout tbody td:nth-child(7){position:absolute;right:10px;top:10px;width:40px}.layout .addbtn{width:40px;height:40px;font-size:20px}.layout .rate-source{width:40px;min-width:40px;height:40px;padding:0;overflow:hidden;font-size:0}.layout .rate-source::before{content:"↗";font-size:16px}.sources{padding-left:14px;padding-right:14px;margin-right:0}footer{margin-left:14px;margin-right:14px}
 }
@@ -505,6 +511,15 @@ header .eyebrow{padding-right:390px}
 </dialog>
 
 <section class="sources">
+  <aside class="regional-note" aria-labelledby="regionalTitle">
+    <div class="regional-kicker">Регионы</div>
+    <div class="regional-copy">
+      <h3 id="regionalTitle">Как применять ставки в регионах</h3>
+      <p>FilmRate не уменьшает ставки автоматически по региональному признаку. В исследовании МПК 79% участников высказались за одинаковую стоимость работы в Москве и регионах, а все респонденты — за обязательную оплату переработок. Это ориентир для переговоров, а не обязательный тариф.</p>
+    </div>
+    <div class="regional-figure"><b>172</b><span>специалиста участвовали в исследовании</span></div>
+    <a href="https://ktr.su/content/news/detail.php?ELEMENT_ID=57863" target="_blank" rel="noopener">Исследование КТР →</a>
+  </aside>
   <h2>Цеховые письма</h2>
   <p class="sub">Первоисточники, на которых стоит база. Ставки — это нижняя планка, а не рынок: цеха отдельно подчёркивают, что для опытных специалистов сумма выше.</p>
   <div class="slist" id="slist"></div>
