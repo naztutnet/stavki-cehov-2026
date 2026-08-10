@@ -12,7 +12,7 @@ import urllib.request
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "data" / "monitored-sources.json"
@@ -24,19 +24,22 @@ class PageDigest(HTMLParser):
     def __init__(self, base_url: str) -> None:
         super().__init__()
         self.base_url = base_url
-        self.parts: list[str] = []
+        self.links: set[str] = set()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag != "a":
             return
         href = dict(attrs).get("href")
         if href:
-            self.parts.append("LINK " + urljoin(self.base_url, href.strip()))
+            absolute = urlsplit(urljoin(self.base_url, href.strip()))
+            if absolute.scheme not in {"http", "https"}:
+                return
+            if re.search(r"\.(?:css|js|png|jpe?g|gif|webp|svg|woff2?)(?:$|\?)", absolute.path, re.I):
+                return
+            self.links.add(urlunsplit((absolute.scheme, absolute.netloc, absolute.path, absolute.query, "")))
 
-    def handle_data(self, data: str) -> None:
-        text = re.sub(r"\s+", " ", data).strip()
-        if text:
-            self.parts.append(text)
+    def digest_payload(self) -> bytes:
+        return "\n".join(sorted(self.links)).encode("utf-8")
 
 
 def download(source: dict[str, str]) -> bytes:
@@ -49,7 +52,7 @@ def download(source: dict[str, str]) -> bytes:
     if source["kind"] == "html":
         parser = PageDigest(source["url"])
         parser.feed(payload.decode("utf-8", "replace"))
-        payload = "\n".join(parser.parts).encode("utf-8")
+        payload = parser.digest_payload()
     return payload
 
 
