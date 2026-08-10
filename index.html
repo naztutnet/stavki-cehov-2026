@@ -83,7 +83,7 @@ tbody tr.r{cursor:pointer}
 .addbtn{font-family:var(--mono);font-size:15px;line-height:1;background:var(--card);border:1px solid var(--rule-hard);
   color:var(--blue);width:28px;height:28px;cursor:pointer;padding:0}
 .addbtn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
-.addbtn.is-added,.addbtn.is-added:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.addbtn.is-added,.addbtn.is-added:hover{background:#7A263A;color:#fff;border-color:#7A263A}
 .rate-source{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 8px;border:1px solid var(--rule-hard);border-radius:6px;background:#fff;color:var(--blue);font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap}.rate-source:hover{border-color:var(--blue);background:var(--blue-soft)}
 tr.detail>td{background:#F4F7FA;border-top:0;padding:0 10px 16px 10px}
 .dwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;padding-top:2px}
@@ -586,7 +586,7 @@ function render(){
       <td class="unit">${r.unit}</td>
       ${amountCell(r)}
       <td><span class="badge b-${r.status}" title="${TIP[r.status]}">${LBL[r.status]}</span></td>
-      <td>${isScreenwriter(r)?`<a class="rate-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Ставки ↗</a>`:`<button class="addbtn${est.has(r.id)?' is-added':''}" data-add="${r.id}" title="${est.has(r.id)?'Уже добавлено в смету':'Добавить в смету'}" aria-label="${est.has(r.id)?'Уже добавлено в смету':'Добавить в смету'}" aria-pressed="${est.has(r.id)}">+</button>`}</td>
+      <td>${isScreenwriter(r)?`<a class="rate-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Ставки ↗</a>`:est.has(r.id)?`<button class="addbtn is-added" data-remove="${r.id}" title="Убрать из сметы" aria-label="Убрать из сметы" aria-pressed="true">−</button>`:`<button class="addbtn" data-add="${r.id}" title="Добавить в смету" aria-label="Добавить в смету" aria-pressed="false">+</button>`}</td>
     </tr>`;
   }).join('');
 }
@@ -685,9 +685,9 @@ chips.addEventListener('click',e=>{
   render();
 });
 document.getElementById('tb').addEventListener('click',e=>{
-  const add=e.target.closest('[data-add]');
-  if(add){const r=DATA.find(x=>x.id==add.dataset.add);
-    if(!est.has(r.id)) est.set(r.id,newEstimate(r));
+  const add=e.target.closest('[data-add]'),remove=e.target.closest('[data-remove]');
+  if(add||remove){const id=+(add?.dataset.add||remove?.dataset.remove),r=DATA.find(x=>x.id===id);
+    if(remove)est.delete(id);else if(!est.has(r.id))est.set(r.id,newEstimate(r));
     renderEst();saveEstimate();render();return}
   const tr=e.target.closest('tr.r'); if(!tr) return;
   const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');
