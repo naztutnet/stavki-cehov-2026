@@ -685,8 +685,8 @@ document.getElementById('xlsx').addEventListener('click',async()=>{
   try{
     if(!window.ExcelJS)throw new Error('ExcelJS unavailable');
     const rows=budgetRows(),workbook=new ExcelJS.Workbook(),sheet=workbook.addWorksheet('Смета');
-    workbook.creator='Ставки цехов 2026';workbook.created=new Date();
-    sheet.mergeCells('A1:M1');sheet.getCell('A1').value='Предварительная смета';
+    workbook.creator='FilmRate';workbook.title='FilmRate — Предварительная смета';workbook.subject='Предварительный расчёт ставок кинопроизводства';workbook.company='FilmRate';workbook.created=new Date();
+    sheet.mergeCells('A1:M1');sheet.getCell('A1').value='FilmRate · Предварительная смета';
     sheet.getCell('A1').font={name:'Arial',size:16,bold:true,color:{argb:'FF181B18'}};sheet.getCell('A1').alignment={vertical:'middle'};sheet.getRow(1).height=30;
     sheet.mergeCells('A2:M2');sheet.getCell('A2').value='Ставки носят рекомендательный характер. Финальная ставка определяется сторонами по договорённости.';
     sheet.getCell('A2').font={name:'Arial',size:10,bold:true,color:{argb:'FFAD3C36'}};sheet.getRow(2).height=24;
@@ -718,13 +718,13 @@ document.getElementById('pdf').addEventListener('click',()=>{
     const net=rows.reduce((s,r)=>s+r.net,0),gross=rows.reduce((s,r)=>s+r.gross,0);
     body.push(['','','','','','', 'ИТОГО',money(net),money(gross)]);
     const doc={pageSize:'A4',pageOrientation:'landscape',pageMargins:[28,34,28,32],
-      info:{title:'Предварительная смета'},defaultStyle:{font:'Roboto',fontSize:7.5,color:'#181b18'},
-      content:[{text:'Предварительная смета',fontSize:17,bold:true,margin:[0,0,0,5]},
+      info:{title:'FilmRate — Предварительная смета',author:'FilmRate',subject:'Предварительный расчёт ставок кинопроизводства',creator:'FilmRate'},defaultStyle:{font:'Roboto',fontSize:7.5,color:'#181b18'},
+      content:[{text:'FILMRATE',fontSize:7.5,bold:true,color:'#2457f5',characterSpacing:1.2,margin:[0,0,0,3]},{text:'Предварительная смета',fontSize:17,bold:true,margin:[0,0,0,5]},
         {text:'Все ставки носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.',fontSize:8.5,bold:true,color:'#ad3c36',margin:[0,0,0,14]},
         {table:{headerRows:1,widths:[18,145,72,42,58,60,30,68,68],body},layout:{fillColor:(i)=>i===0?'#252925':i===body.length-1?'#f1f3ef':null,hLineColor:()=> '#dfe2dc',vLineColor:()=> '#dfe2dc',paddingLeft:()=>4,paddingRight:()=>4,paddingTop:()=>5,paddingBottom:()=>5},
           style:'budgetTable'}],
       styles:{budgetTable:{fontSize:7}},
-      footer:(current,pageCount)=>({text:`${current} / ${pageCount}`,alignment:'right',margin:[0,8,28,0],fontSize:7,color:'#818781'})};
+      footer:(current,pageCount)=>({columns:[{text:'FilmRate',alignment:'left'},{text:`${current} / ${pageCount}`,alignment:'right'}],margin:[28,8,28,0],fontSize:7,color:'#818781'})};
     pdfMake.createPdf(doc).download(exportName('pdf'),()=>{btn.textContent='готово ✓';setTimeout(done,1400)});
   }catch(err){console.error(err);btn.textContent='ошибка';setTimeout(done,1800)}
 });
