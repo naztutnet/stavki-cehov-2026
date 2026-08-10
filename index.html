@@ -193,13 +193,13 @@ input[type=search]{padding-left:36px;background:#fff url("data:image/svg+xml,%3C
 .calculator-note{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:11px;margin:0 0 10px;padding:10px 11px;border:1px solid #c9d5ff;border-left:3px solid var(--blue);border-radius:7px;background:#f4f7ff;color:var(--ink-2)}
 .calculator-note[hidden]{display:none}.calculator-note .calc-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:var(--blue);color:#fff;font:700 14px var(--mono)}.calculator-note b{display:block;margin-bottom:2px;color:var(--ink);font-size:10px}.calculator-note span{font-size:9px;line-height:1.4}.calculator-note a{padding:8px 10px;border-radius:6px;background:#fff;border:1px solid #aebfff;color:var(--blue);font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap}.calculator-note a:hover{background:var(--blue);color:#fff}
 table{border:1px solid var(--rule);border-radius:0;overflow:visible}
-.layout table{min-width:1085px;table-layout:fixed}.layout th:nth-child(1){width:170px}.layout th:nth-child(2){width:240px}.layout th:nth-child(4){width:64px}.layout th:nth-child(5){width:155px}.layout th:nth-child(6){width:94px}.layout th:nth-child(7){width:92px;white-space:normal;text-align:center;line-height:1.25}
+.layout table{min-width:1125px;table-layout:fixed}.layout th:nth-child(1){width:170px}.layout th:nth-child(2){width:340px}.layout th:nth-child(3){width:210px}.layout th:nth-child(4){width:64px}.layout th:nth-child(5){width:155px}.layout th:nth-child(6){width:94px}.layout th:nth-child(7){width:92px;white-space:normal;text-align:center;line-height:1.25}
 thead th{top:0;padding:10px 9px;background:#252925;color:#fff;font-family:var(--body);font-size:8px;letter-spacing:.08em}
 tbody td{padding:10px 9px;border-top:1px solid var(--rule)}
 tbody tr.r:hover{background:#f5f7f3}
 tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blue)}
 .dept{font-family:var(--body);font-size:9px;letter-spacing:0;text-transform:none;max-width:170px;color:var(--ink-3)}
-.prof{font-size:12px}.cond{font-size:11px;max-width:320px}.unit{font-size:9px}.sum{font-size:13px}.layout .sum{text-align:center}.sum small{font-size:8px}.layout .sum small{white-space:normal;text-align:center;line-height:1.25}
+.prof{font-size:12px}.layout .prof{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cond{font-size:11px;max-width:210px}.unit{font-size:9px}.sum{font-size:13px}.layout .sum{text-align:center}.sum small{font-size:8px}.layout .sum small{white-space:normal;text-align:center;line-height:1.25}
 .badge{border-radius:4px;font-family:var(--body);font-size:8px;letter-spacing:.02em;text-transform:none}
 .addbtn{width:30px;height:30px;border-radius:6px;border-color:var(--rule-hard);background:#fff;color:var(--blue)}
 .addbtn:hover{background:var(--blue);border-color:var(--blue)}
@@ -614,7 +614,7 @@ function render(){
     const selected = state.open.has(r.id);
     return `<tr class="r${selected?' selected':''}" data-id="${r.id}" tabindex="0" aria-selected="${selected}">
       <td class="dept">${r.dept}</td>
-      <td class="prof">${r.prof}</td>
+      <td class="prof" title="${esc(r.prof)}">${r.prof}</td>
       <td class="cond">${r.cond||'—'}</td>
       <td class="unit">${r.unit}</td>
       ${amountCell(r)}
