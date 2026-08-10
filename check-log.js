@@ -1,0 +1,1 @@
+window.FILMRATE_CHECKS = [];

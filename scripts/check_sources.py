@@ -13,11 +13,52 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit, urlunsplit
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "data" / "monitored-sources.json"
 STATE = ROOT / "data" / "source-state.json"
 REPORT = ROOT / "source-change-report.md"
+CHECK_LOG = ROOT / "check-log.js"
+
+MONTHS_RU = (
+    "января", "февраля", "марта", "апреля", "мая", "июня",
+    "июля", "августа", "сентября", "октября", "ноября", "декабря",
+)
+
+
+def publish_check_entry(changes: list[dict[str, str]], errors: list[str]) -> bool:
+    now = datetime.now(ZoneInfo("Europe/Moscow"))
+    date = now.date().isoformat()
+    existing_text = CHECK_LOG.read_text(encoding="utf-8") if CHECK_LOG.exists() else "window.FILMRATE_CHECKS = [];"
+    payload = existing_text.split("=", 1)[1].strip().removesuffix(";")
+    entries = json.loads(payload)
+    if any(item.get("date") == date for item in entries):
+        return False
+
+    if errors:
+        title = "Часть источников временно недоступна"
+        text = "Плановая проверка выполнена не полностью. Источники будут проверены повторно автоматически."
+    elif changes:
+        title = "Обнаружены изменения в первоисточниках"
+        text = "Найдены изменения в письмах или таблицах. Данные проходят проверку; ставки на сайте пока не изменены."
+    else:
+        title = "Еженедельная проверка завершена"
+        text = "Проверены первоисточники ставок и цеховых писем. Новых подтверждённых данных не обнаружено."
+
+    entries.insert(0, {
+        "date": date,
+        "dateLabel": f"{now.day} {MONTHS_RU[now.month - 1]} {now.year}",
+        "type": "check",
+        "title": title,
+        "text": text,
+    })
+    del entries[16:]
+    CHECK_LOG.write_text(
+        "window.FILMRATE_CHECKS = " + json.dumps(entries, ensure_ascii=False, indent=2) + ";\n",
+        encoding="utf-8",
+    )
+    return True
 
 
 class PageDigest(HTMLParser):
@@ -97,12 +138,14 @@ def main() -> int:
     if errors:
         lines += ["", "## Ошибки проверки", "", *errors]
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    log_updated = publish_check_entry(changes, errors) if os.environ.get("PUBLISH_CHECK") == "true" else False
 
     output = os.environ.get("GITHUB_OUTPUT")
     if output:
         with open(output, "a", encoding="utf-8") as file:
             file.write(f"changed={'true' if changes else 'false'}\n")
             file.write(f"errors={'true' if errors else 'false'}\n")
+            file.write(f"log_updated={'true' if log_updated else 'false'}\n")
     print("\n".join(lines))
     return 0 if not errors else 2
 

@@ -2,8 +2,15 @@ name: Проверка писем и ставок
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_check:
+        description: "Добавить запись о проверке в журнал обновлений"
+        type: boolean
+        default: false
   schedule:
     - cron: "17 8 * * *"
+      timezone: "Europe/Moscow"
+    - cron: "0 10 * * 1"
       timezone: "Europe/Moscow"
 
 permissions:
@@ -22,15 +29,17 @@ jobs:
 
       - name: Проверить первоисточники
         id: monitor
+        env:
+          PUBLISH_CHECK: ${{ github.event.schedule == '0 10 * * 1' || inputs.publish_check }}
         run: python3 scripts/check_sources.py
 
       - name: Сохранить новые контрольные значения
-        if: steps.monitor.outputs.changed == 'true'
+        if: steps.monitor.outputs.changed == 'true' || steps.monitor.outputs.log_updated == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/source-state.json
-          git commit -m "Update monitored source fingerprints"
+          git add data/source-state.json check-log.js
+          git commit -m "Update FilmRate source check"
           git push
 
       - name: Создать уведомление для проверки
