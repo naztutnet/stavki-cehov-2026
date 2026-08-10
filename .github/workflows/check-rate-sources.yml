@@ -1,0 +1,45 @@
+name: Проверка писем и ставок
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 8 * * *"
+      timezone: "Europe/Moscow"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: filmrate-source-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверить первоисточники
+        id: monitor
+        run: python3 scripts/check_sources.py
+
+      - name: Сохранить новые контрольные значения
+        if: steps.monitor.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/source-state.json
+          git commit -m "Update monitored source fingerprints"
+          git push
+
+      - name: Создать уведомление для проверки
+        if: steps.monitor.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create source-update --color B1443D --description "Изменение первоисточника" --force
+          gh issue create \
+            --title "Найдены обновления писем или ставок — $(date -u +%d.%m.%Y)" \
+            --body-file source-change-report.md \
+            --label source-update

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "mpk-rates",
+    "name": "Справочник ставок МПК",
+    "kind": "csv",
+    "url": "https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/export?format=csv&gid=0"
+  },
+  {
+    "id": "tochno-producer",
+    "name": "Реестр «Точно продюсер»",
+    "kind": "csv",
+    "url": "https://docs.google.com/spreadsheets/d/1BCgusuck7uhHvDZ2d-nUVyjZHlzrf05286fwpahlwdE/export?format=csv&gid=0"
+  },
+  {
+    "id": "mpk-source-page",
+    "name": "Страница справочника МПК",
+    "kind": "html",
+    "url": "https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/"
+  },
+  {
+    "id": "camera-source-page",
+    "name": "Страница операторского цеха МПК",
+    "kind": "html",
+    "url": "https://kinoprofsoyuz.ru/camera/"
+  }
+]

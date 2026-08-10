@@ -273,7 +273,7 @@ header .eyebrow{padding-right:390px}
 .beta-mark{display:table;margin:0 0 8px;padding:5px 8px;border:1px solid var(--bad);border-radius:7px;background:var(--bad-bg);color:var(--bad);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
 .open-builder{width:calc(100% - 28px);margin:0 14px 12px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
-.feedback-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--bad);border-radius:7px;background:#fff;color:var(--bad);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.feedback-action::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}.feedback-action:hover{background:var(--bad-bg)}.header-feedback{position:absolute;right:28px;top:18px}
+.feedback-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--bad);border-radius:7px;background:#fff;color:var(--bad);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.feedback-action::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}.feedback-action:hover{background:var(--bad-bg)}.header-actions{position:absolute;right:28px;top:18px;display:flex;gap:7px}.updates-action{display:flex;align-items:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;color:var(--ink);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.updates-action:hover{border-color:var(--blue);color:var(--blue)}.updates-count{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--blue);color:#fff;font:700 8px var(--mono)}
 .builder{position:fixed;inset:0;z-index:200;display:grid;grid-template-rows:auto minmax(0,1fr);background:var(--paper)}
 .builder[hidden]{display:none}
 .builder-head{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;padding:13px 18px;border-bottom:1px solid var(--rule);background:#fff}
@@ -298,11 +298,12 @@ header .eyebrow{padding-right:390px}
 .input-stack{display:grid;grid-template-columns:1fr;gap:4px}.input-stack.two{grid-template-columns:1fr 1fr;gap:8px}.input-stack label{display:grid;gap:4px;min-width:0;font-size:7px;color:var(--ink-3);text-transform:uppercase}.fixed-input{display:flex;align-items:center;min-height:32px;padding:6px 7px;border:1px solid var(--rule);border-radius:5px;background:#f5f6f3;color:var(--ink-2);font:10px var(--body)}
 .budget-summary{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--rule);background:#fff;padding:18px 16px}
 .budget-summary h3{margin:0 0 16px;font-size:13px}.summary-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--rule);font-size:9px;color:var(--ink-3)}.summary-line b{color:var(--ink);font:700 13px var(--mono)}.summary-line.grand{margin-top:2px;padding-top:15px;border-top:2px solid var(--ink)}.summary-line.grand b{font-size:18px}.summary-actions{display:grid;gap:7px;margin-top:auto}.summary-actions button{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:650 10px var(--body);cursor:pointer}.summary-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-.feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;min-width:32px;min-height:32px;margin:-5px -5px 0 0;padding:0;border:0;border-radius:6px;background:transparent;color:var(--ink-3);font:400 22px/1 var(--body);cursor:pointer}.dialog-x:hover{background:#eef0eb;color:var(--ink)}.dialog-x:focus-visible{outline:2px solid var(--blue);outline-offset:2px}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note,.feedback-status{margin:0;color:var(--ink-3);font-size:9px}.feedback-status.ok{color:var(--ok)}.feedback-status.error{color:var(--bad)}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.feedback-submit:disabled{opacity:.65;cursor:wait}
+.feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;min-width:32px;min-height:32px;margin:-5px -5px 0 0;padding:0;border:0;border-radius:6px;background:transparent;color:var(--ink-3);font:400 22px/1 var(--body);cursor:pointer}.dialog-x:hover{background:#eef0eb;color:var(--ink)}.dialog-x:focus-visible{outline:2px solid var(--blue);outline-offset:2px}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note,.feedback-status{margin:0;color:var(--ink-3);font-size:9px}.feedback-status.ok{color:var(--ok)}.feedback-status.error{color:var(--bad)}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.feedback-submit:disabled{opacity:.65;cursor:wait}.updates-dialog{width:min(680px,calc(100vw - 28px));max-height:min(84vh,760px)}.updates-list{margin-top:18px;border-top:1px solid var(--rule)}.update-item{display:grid;grid-template-columns:104px minmax(0,1fr);gap:18px;padding:16px 0;border-bottom:1px solid var(--rule)}.update-meta time{display:block;font:700 9px var(--mono);color:var(--ink-2)}.update-type{display:inline-block;margin-top:7px;padding:3px 6px;border:1px solid var(--rule-hard);border-radius:4px;color:var(--ink-3);font-size:8px}.update-type.data{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}.update-content h3{margin:0 0 5px;font-size:13px;letter-spacing:-.01em}.update-content p{margin:0;color:var(--ink-2);font-size:10px;line-height:1.5}.update-content a{display:inline-block;margin-top:7px;color:var(--blue);font-size:9px}.updates-empty{padding:24px 0;color:var(--ink-3);font-size:10px}
 .custom-add{min-height:34px;margin:10px 16px;padding:0;border:0;background:transparent;color:var(--blue);font:700 10px var(--body);cursor:pointer}.custom-add:hover{text-decoration:underline}.custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.custom-grid .wide{grid-column:1/-1}
 @media(max-width:1050px){.builder-body{grid-template-columns:230px minmax(650px,1fr)}.budget-summary{position:absolute;right:14px;top:74px;width:250px;max-height:calc(100vh - 90px);box-shadow:0 12px 34px rgba(20,25,20,.14)}}
+@media(max-width:1100px){header .eyebrow{padding-right:0}.header-actions{position:static;grid-column:1/-1;justify-self:start;margin-bottom:6px}}
 @media(max-width:700px){
-  header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-feedback{position:static;width:100%;margin-bottom:12px}
+  header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-actions{position:static;grid-column:1/-1;display:grid;grid-template-columns:1fr;margin-bottom:12px}.header-feedback,.updates-action{width:100%}
   .builder-head{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 12px}.builder-head h2{font-size:18px}.builder-head .feedback-action{grid-column:1/-1;grid-row:2;width:100%;white-space:normal;line-height:1.25;padding:8px 10px}.builder-close{min-height:40px}
   .builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px 10px 170px;overflow-y:auto;overflow-x:hidden}
   .budget-table{min-width:0;border:0;background:transparent}.budget-row.head{display:none}
@@ -318,6 +319,7 @@ header .eyebrow{padding-right:390px}
   .budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button{min-height:42px}.summary-actions button:last-child{display:block;grid-column:1/-1;border-color:#d9aaaa;background:var(--bad-bg);color:var(--bad)}
 }
 @media(max-width:520px){.custom-grid{grid-template-columns:1fr}.custom-grid .wide{grid-column:auto}}
+@media(max-width:560px){.update-item{grid-template-columns:1fr;gap:7px}.update-type{margin-top:4px}}
 @media(max-width:620px){.cookie-banner{left:10px;right:10px;bottom:10px;grid-template-columns:1fr;gap:12px;padding:14px}.cookie-actions{display:grid;grid-template-columns:1fr 1fr}.cookie-actions button{width:100%;min-width:0;min-height:42px}}
 </style>
 </head>
@@ -325,7 +327,10 @@ header .eyebrow{padding-right:390px}
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
-  <button class="feedback-action header-feedback" id="feedbackOpen">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
+  <div class="header-actions">
+    <button class="updates-action" id="updatesOpen">Обновления <span class="updates-count" id="updatesCount">4</span></button>
+    <button class="feedback-action header-feedback" id="feedbackOpen">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
+  </div>
   <div class="title-block"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><h1><span>Справочник ставок</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
   <div class="stats" id="stats"></div>
@@ -445,6 +450,12 @@ header .eyebrow{padding-right:390px}
     </form>
   </div>
 </dialog>
+<dialog class="feedback-dialog updates-dialog" id="updatesDialog">
+  <div class="feedback-inner">
+    <div class="feedback-top"><div><h2>Обновления FilmRate</h2><p>Что изменилось в базе ставок и в самом сервисе.</p></div><button class="dialog-x" id="updatesClose" aria-label="Закрыть">×</button></div>
+    <div class="updates-list" id="updatesList"></div>
+  </div>
+</dialog>
 
 <section class="sources">
   <h2>Цеховые письма</h2>
@@ -478,6 +489,7 @@ header .eyebrow{padding-right:390px}
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" integrity="sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js" integrity="sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js" integrity="sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15" crossorigin="anonymous"></script>
+<script src="updates.js"></script>
 <script>
 // Аналитика загружается только после явного согласия посетителя.
 const METRIKA_ID=111460200,CONSENT_KEY='filmrate_analytics_consent';
@@ -927,6 +939,19 @@ document.getElementById('customForm').addEventListener('submit',e=>{
   const r=sanitizeCustomRecord({id,custom:true,dept:document.getElementById('customDept').value,prof:document.getElementById('customName').value,cond:document.getElementById('customCond').value,unit,amount:rate});if(!r)return;
   est.set(id,{r,start:'',end:'',rate,qty:unit==='аккорд'?1:qty,people:1,tax:.08});saveEstimate();renderEst();renderBuilder();customDialog.close();e.currentTarget.reset();document.getElementById('customRate').value=0;document.getElementById('customQty').value=1;
 });
+
+// Журнал обновлений: данные лежат отдельно в updates.js, чтобы их можно было дополнять автоматически.
+const updatesDialog=document.getElementById('updatesDialog'),updates=Array.isArray(window.FILMRATE_UPDATES)?window.FILMRATE_UPDATES:[];
+const safeUpdateUrl=url=>{if(typeof url!=='string'||!url.trim())return'';try{const u=new URL(url);return u.protocol==='https:'?u.href:''}catch(e){return''}};
+const updatesEscape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+document.getElementById('updatesCount').textContent=updates.length;
+document.getElementById('updatesList').innerHTML=updates.length?updates.map(item=>{
+  const type=item.type==='data'?'База ставок':'Сервис',url=safeUpdateUrl(item.url);
+  return '<article class="update-item"><div class="update-meta"><time datetime="'+updatesEscape(item.date)+'">'+updatesEscape(item.dateLabel)+'</time><span class="update-type '+(item.type==='data'?'data':'')+'">'+type+'</span></div><div class="update-content"><h3>'+updatesEscape(item.title)+'</h3><p>'+updatesEscape(item.text)+'</p>'+(url?'<a href="'+updatesEscape(url)+'" target="_blank" rel="noopener">Открыть источник →</a>':'')+'</div></article>'
+}).join(''):'<p class="updates-empty">Записей об обновлениях пока нет.</p>';
+document.getElementById('updatesOpen').addEventListener('click',()=>{if(typeof updatesDialog.showModal==='function')updatesDialog.showModal();else updatesDialog.setAttribute('open','')});
+document.getElementById('updatesClose').addEventListener('click',()=>updatesDialog.close());
+updatesDialog.addEventListener('click',e=>{if(e.target===updatesDialog)updatesDialog.close()});
 
 // Обратная связь без внешнего хранилища: пользователь сам отправляет подготовленное письмо.
 const feedbackDialog=document.getElementById('feedbackDialog');
