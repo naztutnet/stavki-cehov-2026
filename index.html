@@ -193,13 +193,13 @@ input[type=search]{padding-left:36px;background:#fff url("data:image/svg+xml,%3C
 .calculator-note{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:11px;margin:0 0 10px;padding:10px 11px;border:1px solid #c9d5ff;border-left:3px solid var(--blue);border-radius:7px;background:#f4f7ff;color:var(--ink-2)}
 .calculator-note[hidden]{display:none}.calculator-note .calc-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:var(--blue);color:#fff;font:700 14px var(--mono)}.calculator-note b{display:block;margin-bottom:2px;color:var(--ink);font-size:10px}.calculator-note span{font-size:9px;line-height:1.4}.calculator-note a{padding:8px 10px;border-radius:6px;background:#fff;border:1px solid #aebfff;color:var(--blue);font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap}.calculator-note a:hover{background:var(--blue);color:#fff}
 table{border:1px solid var(--rule);border-radius:0;overflow:visible}
-.layout table{min-width:1050px;table-layout:fixed}.layout th:nth-child(1){width:170px}.layout th:nth-child(2){width:240px}.layout th:nth-child(4){width:64px}.layout th:nth-child(5){width:130px}.layout th:nth-child(6){width:94px}.layout th:nth-child(7){width:82px}
-thead th{top:62px;padding:10px 9px;background:#252925;color:#fff;font-family:var(--body);font-size:8px;letter-spacing:.08em}
+.layout table{min-width:1085px;table-layout:fixed}.layout th:nth-child(1){width:170px}.layout th:nth-child(2){width:240px}.layout th:nth-child(4){width:64px}.layout th:nth-child(5){width:155px}.layout th:nth-child(6){width:94px}.layout th:nth-child(7){width:92px;white-space:normal;text-align:center;line-height:1.25}
+thead th{top:0;padding:10px 9px;background:#252925;color:#fff;font-family:var(--body);font-size:8px;letter-spacing:.08em}
 tbody td{padding:10px 9px;border-top:1px solid var(--rule)}
 tbody tr.r:hover{background:#f5f7f3}
 tbody tr.r.selected{background:var(--blue-soft);box-shadow:inset 3px 0 var(--blue)}
 .dept{font-family:var(--body);font-size:9px;letter-spacing:0;text-transform:none;max-width:170px;color:var(--ink-3)}
-.prof{font-size:12px}.cond{font-size:11px;max-width:320px}.unit{font-size:9px}.sum{font-size:13px}.sum small{font-size:8px}
+.prof{font-size:12px}.cond{font-size:11px;max-width:320px}.unit{font-size:9px}.sum{font-size:13px}.layout .sum{text-align:center}.sum small{font-size:8px}.layout .sum small{white-space:normal;text-align:center;line-height:1.25}
 .badge{border-radius:4px;font-family:var(--body);font-size:8px;letter-spacing:.02em;text-transform:none}
 .addbtn{width:30px;height:30px;border-radius:6px;border-color:var(--rule-hard);background:#fff;color:var(--blue)}
 .addbtn:hover{background:var(--blue);border-color:var(--blue)}
@@ -283,7 +283,7 @@ header .eyebrow{padding-right:390px}
 .budget-empty{display:grid;place-items:center;min-height:320px;border:1px dashed var(--rule-hard);border-radius:10px;background:#fff;color:var(--ink-3);text-align:center;font-size:11px}
 .budget-table{min-width:1120px;border:1px solid var(--rule);background:#fff}
 .budget-add-row{padding:7px 10px;background:#fff}.budget-add-row button{min-height:32px;padding:0;border:0;background:transparent;color:var(--blue);font:700 10px var(--body);cursor:pointer}.budget-add-row button:hover{text-decoration:underline}
-.budget-row{display:grid;grid-template-columns:32px minmax(240px,1.5fr) 78px 110px 220px 76px 62px 110px 110px 34px;align-items:center;border-top:1px solid var(--rule)}
+.budget-row{display:grid;grid-template-columns:32px minmax(240px,1.5fr) 78px 110px 220px 96px 62px 110px 110px 34px;align-items:center;border-top:1px solid var(--rule)}
 .budget-row:first-child{border-top:0}.budget-row>div{min-width:0;padding:9px 7px}.budget-row.head{position:sticky;top:0;z-index:2;background:var(--ink);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.budget-row .position b{display:block;font-size:10px}.budget-row .position small{display:block;color:var(--ink-3);font-size:8px}.budget-row .position small.position-scope{margin-top:3px;color:var(--ink-2);font-size:8.5px;line-height:1.35}.budget-row input{width:100%;min-height:32px;padding:6px 7px;border:1px solid var(--rule-hard);border-radius:5px;background:#fff;color:var(--ink);font:10px var(--body)}.budget-row .unit{font-size:9px}.budget-row .money{font:700 10px var(--mono);text-align:right}.budget-row .row-remove{border:0;background:transparent;color:var(--ink-3);font-size:16px;cursor:pointer}.budget-row .row-remove:hover{color:var(--bad)}
 .budget-row input.needs-input{border-color:#c88928;background:#fffaf0;box-shadow:0 0 0 2px rgba(200,137,40,.13)}
 .input-stack{display:grid;grid-template-columns:1fr;gap:4px}.input-stack.two{grid-template-columns:1fr 1fr;gap:8px}.input-stack label{display:grid;gap:4px;min-width:0;font-size:7px;color:var(--ink-3);text-transform:uppercase}.fixed-input{display:flex;align-items:center;min-height:32px;padding:6px 7px;border:1px solid var(--rule);border-radius:5px;background:#f5f6f3;color:var(--ink-2);font:10px var(--body)}
@@ -344,7 +344,7 @@ header .eyebrow{padding-right:390px}
         <th>Ед.</th>
         <th class="num sortable" data-s="hi">Мин. ставка, ₽</th>
         <th>Статус</th>
-        <th>Добавить / убрать</th>
+        <th>Добавить<br>/ убрать</th>
       </tr></thead>
       <tbody id="tb"></tbody>
     </table>
@@ -550,10 +550,10 @@ const state = {q:'', unit:'', content:'', dept:'', only26:false, sort:'dept', op
 const est = new Map();
 const STORAGE_KEY='stavki-cehov-budget-v2';
 function saveEstimate(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...est.values()].slice(0,200).map(e=>({id:e.r.id,custom:!!e.r.custom,r:e.r.custom?sanitizeCustomRecord(e.r):undefined,start:safeDate(e.start),end:safeDate(e.end),rate:clampNumber(e.rate,0,1e9,0),qty:clampNumber(e.qty,0,1e5,1),tax:clampNumber(e.tax,0,.9999,.08)}))))}catch(_e){}
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...est.values()].slice(0,200).map(e=>({id:e.r.id,custom:!!e.r.custom,r:e.r.custom?sanitizeCustomRecord(e.r):undefined,start:safeDate(e.start),end:safeDate(e.end),rate:clampNumber(e.rate,0,1e9,0),qty:clampNumber(e.qty,0,1e5,1),people:clampNumber(e.people,0,1e5,1),tax:clampNumber(e.tax,0,.9999,.08)}))))}catch(_e){}
 }
 function restoreEstimate(){
-  try{const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(parsed))return;parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):DATA.find(x=>x.id===Number(saved.id));if(r)est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:clampNumber(saved.qty,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})})}catch(_e){}
+  try{const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(parsed))return;parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):DATA.find(x=>x.id===Number(saved.id));if(r){const legacyMonthly=saved.people==null&&r.unit==='месяц';est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:r.unit==='месяц'?1:clampNumber(saved.qty,0,1e5,1),people:legacyMonthly?clampNumber(saved.qty,0,1e5,1):clampNumber(saved.people,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})}})}catch(_e){}
 }
 restoreEstimate();
 
@@ -647,7 +647,7 @@ function renderDetail(r){
 }
 // смета
 function newEstimate(r){
-  return {r,start:'',end:'',rate:r.amount||0,qty:1,tax:.08};
+  return {r,start:'',end:'',rate:r.amount||0,qty:1,people:1,tax:.08};
 }
 const quantityLabels={'смена':'Смен','полсмены':'Полусмен','час':'Часов','серия':'Серий','минута':'Минут','проект':'Проектов','аккорд':'Аккордов','человек':'Человек','единоразово':'Количество','месяц':'Специалистов'};
 const quantityLabel=unit=>quantityLabels[unit]||'Количество';
@@ -673,10 +673,11 @@ function calcEstimate(e){
   const start=parseDate(e.start),end=parseDate(e.end);
   const elapsed=start&&end&&end>=start?(end-start)/86400000+1:0;
   const monthly=e.r.unit==='месяц';
-  const quantity=e.r.unit==='аккорд'?1:(e.qty||0);
+  const quantity=monthly?1:(e.r.unit==='аккорд'?1:(e.qty||0));
+  const people=e.people||0;
   const period=monthly?elapsed/30:quantity;
   const base=monthly?monthlyProrata(start,end,e.rate):(e.rate||0);
-  const net=Math.max(0,base*quantity);
+  const net=Math.max(0,base*quantity*people);
   const gross=e.tax<1?net/(1-e.tax):net;
   return {period,net,gross};
 }
@@ -692,7 +693,8 @@ function renderEst(){
       <div class="calc-grid">
         ${monthly?`<div class="calc-field"><label>Дата прикрепления</label><input type="date" value="${e.start}" data-field="start" data-id="${e.r.id}"></div><div class="calc-field"><label>Дата открепления</label><input type="date" value="${e.end}" data-field="end" data-id="${e.r.id}"></div>`:''}
         <div class="calc-field"><label>Ставка за ${esc(e.r.unit)}</label><input type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}"></div>
-        <div class="calc-field"><label>${quantityLabel(e.r.unit)}</label><input type="number" min="0" max="100000" step="1" value="${e.qty}" data-field="qty" data-id="${e.r.id}"></div>
+        ${monthly?'':`<div class="calc-field"><label>${quantityLabel(e.r.unit)}</label><input type="number" min="0" max="100000" step="1" value="${e.qty}" data-field="qty" data-id="${e.r.id}"></div>`}
+        <div class="calc-field"><label>Специалистов</label><input type="number" min="0" max="100000" step="1" value="${e.people}" data-field="people" data-id="${e.r.id}"></div>
         ${monthly?`<div class="calc-field"><label>Расчётный период</label><input readonly value="${calc.period.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>`:''}
         <div class="calc-field"><label>Единица</label><input readonly value="${esc(e.r.unit)}"></div>
         <div class="calc-field wide"><label>Процент, %</label><input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-field="taxPercent" data-id="${e.r.id}"></div>
@@ -737,6 +739,7 @@ document.getElementById('estlines').addEventListener('change',e=>{
   if(f.dataset.field==='taxPercent')row.tax=clampNumber(f.value,0,99.99,0)/100;
   else if(f.dataset.field==='rate')row.rate=clampNumber(f.value,0,1e9,0);
   else if(f.dataset.field==='qty')row.qty=clampNumber(f.value,0,1e5,0);
+  else if(f.dataset.field==='people')row.people=clampNumber(f.value,0,1e5,0);
   else row[f.dataset.field]=safeDate(f.value);
   renderEst();saveEstimate();renderBuilder();
 });
@@ -747,7 +750,7 @@ document.getElementById('clear').addEventListener('click',()=>{est.clear();rende
 function budgetRows(){
   return [...est.values()].map((e,index)=>{
     const c=calcEstimate(e);
-    return {index:index+1,dept:e.r.dept,prof:e.r.prof,cond:e.r.cond||'',start:e.start,end:e.end,unit:e.r.unit,rate:e.rate,qty:e.r.unit==='аккорд'?1:e.qty,period:c.period,tax:e.tax,net:c.net,gross:c.gross};
+    return {index:index+1,dept:e.r.dept,prof:e.r.prof,cond:e.r.cond||'',start:e.start,end:e.end,unit:e.r.unit,rate:e.rate,qty:e.r.unit==='месяц'?1:(e.r.unit==='аккорд'?1:e.qty),people:e.people,period:c.period,tax:e.tax,net:c.net,gross:c.gross};
   });
 }
 const safeSheetText=value=>/^[=+\-@]/.test(String(value??'').trimStart())?`'${String(value??'')}`:String(value??'');
@@ -764,20 +767,20 @@ document.getElementById('xlsx').addEventListener('click',async()=>{
     if(!window.ExcelJS)throw new Error('ExcelJS unavailable');
     const rows=budgetRows(),workbook=new ExcelJS.Workbook(),sheet=workbook.addWorksheet('Смета');
     workbook.creator='FilmRate';workbook.title='FilmRate — Предварительная смета';workbook.subject='Предварительный расчёт ставок кинопроизводства';workbook.company='FilmRate';workbook.created=new Date();
-    sheet.mergeCells('A1:M1');sheet.getCell('A1').value='FilmRate · Предварительная смета';
+    sheet.mergeCells('A1:N1');sheet.getCell('A1').value='FilmRate · Предварительная смета';
     sheet.getCell('A1').font={name:'Arial',size:16,bold:true,color:{argb:'FF181B18'}};sheet.getCell('A1').alignment={vertical:'middle'};sheet.getRow(1).height=30;
-    sheet.mergeCells('A2:M2');sheet.getCell('A2').value='Ставки носят рекомендательный характер. Финальная ставка определяется сторонами по договорённости.';
+    sheet.mergeCells('A2:N2');sheet.getCell('A2').value='Ставки носят рекомендательный характер. Финальная ставка определяется сторонами по договорённости.';
     sheet.getCell('A2').font={name:'Arial',size:10,bold:true,color:{argb:'FFAD3C36'}};sheet.getRow(2).height=24;
-    const headers=['№','Цех','Позиция','Условие','Прикрепление','Открепление','Ед.','Ставка','Кол-во','Период','Процент','Без налога','С налогом'];
+    const headers=['№','Цех','Позиция','Условие','Прикрепление','Открепление','Ед.','Ставка','Объём','Специалистов','Период','Процент','Без налога','С налогом'];
     sheet.addRow(headers);
-    rows.forEach(r=>sheet.addRow([r.index,safeSheetText(r.dept),safeSheetText(r.prof),safeSheetText(r.cond),r.start,r.end,safeSheetText(r.unit),r.rate,r.qty,r.period,r.tax,r.net,r.gross]));
-    const net=rows.reduce((s,r)=>s+r.net,0),gross=rows.reduce((s,r)=>s+r.gross,0),totalRow=sheet.addRow(['','','ИТОГО','','','','','','','','',net,gross]);
-    sheet.columns=[6,24,28,34,14,14,12,15,10,11,11,16,16].map(width=>({width}));
+    rows.forEach(r=>sheet.addRow([r.index,safeSheetText(r.dept),safeSheetText(r.prof),safeSheetText(r.cond),r.start,r.end,safeSheetText(r.unit),r.rate,r.qty,r.people,r.period,r.tax,r.net,r.gross]));
+    const net=rows.reduce((s,r)=>s+r.net,0),gross=rows.reduce((s,r)=>s+r.gross,0),totalRow=sheet.addRow(['','','ИТОГО','','','','','','','','','',net,gross]);
+    sheet.columns=[6,24,28,34,14,14,12,15,10,12,11,11,16,16].map(width=>({width}));
     const header=sheet.getRow(3);header.height=25;header.eachCell(cell=>{cell.font={name:'Arial',size:10,bold:true,color:{argb:'FFFFFFFF'}};cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF252925'}};cell.alignment={vertical:'middle',wrapText:true}});
     sheet.eachRow((row,rowNumber)=>{if(rowNumber>3){row.alignment={vertical:'top',wrapText:true};row.font={name:'Arial',size:10};row.height=32}});
-    ['H','L','M'].forEach(col=>{sheet.getColumn(col).numFmt='#,##0" ₽"'});sheet.getColumn('J').numFmt='0.00';sheet.getColumn('K').numFmt='0.00%';
+    ['H','M','N'].forEach(col=>{sheet.getColumn(col).numFmt='#,##0" ₽"'});sheet.getColumn('K').numFmt='0.00';sheet.getColumn('L').numFmt='0.00%';
     totalRow.font={name:'Arial',size:11,bold:true};totalRow.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1F3EF'}};
-    sheet.views=[{state:'frozen',ySplit:3}];sheet.autoFilter={from:'A3',to:`M${Math.max(3,3+rows.length)}`};
+    sheet.views=[{state:'frozen',ySplit:3}];sheet.autoFilter={from:'A3',to:`N${Math.max(3,3+rows.length)}`};
     sheet.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9};
     const buffer=await workbook.xlsx.writeBuffer();
     downloadBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),exportName('xlsx'));
@@ -791,15 +794,15 @@ document.getElementById('pdf').addEventListener('click',()=>{
   try{
     if(!window.pdfMake)throw new Error('pdfMake unavailable');
     const rows=budgetRows(),money=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
-    const body=[['№','Цех / позиция','Даты','Ед.','Ставка','Кол-во / период','%','Без налога','С налогом'].map(text=>({text,bold:true,color:'#ffffff'}))];
-    rows.forEach(r=>body.push([String(r.index),`${r.dept}\n${r.prof}`,`${r.start||'—'} - ${r.end||'—'}`,r.unit,money(r.rate),`${r.qty} / ${r.period.toLocaleString('ru-RU',{maximumFractionDigits:2})}`,`${(r.tax*100).toLocaleString('ru-RU',{maximumFractionDigits:2})}%`,money(r.net),money(r.gross)]));
+    const body=[['№','Цех / позиция','Даты','Ед.','Ставка','Объём / период','Спец.','%','Без налога','С налогом'].map(text=>({text,bold:true,color:'#ffffff'}))];
+    rows.forEach(r=>body.push([String(r.index),`${r.dept}\n${r.prof}`,`${r.start||'—'} - ${r.end||'—'}`,r.unit,money(r.rate),`${r.qty} / ${r.period.toLocaleString('ru-RU',{maximumFractionDigits:2})}`,String(r.people),`${(r.tax*100).toLocaleString('ru-RU',{maximumFractionDigits:2})}%`,money(r.net),money(r.gross)]));
     const net=rows.reduce((s,r)=>s+r.net,0),gross=rows.reduce((s,r)=>s+r.gross,0);
-    body.push(['','','','','','', 'ИТОГО',money(net),money(gross)]);
+    body.push(['','','','','','','', 'ИТОГО',money(net),money(gross)]);
     const doc={pageSize:'A4',pageOrientation:'landscape',pageMargins:[28,34,28,32],
       info:{title:'FilmRate — Предварительная смета',author:'FilmRate',subject:'Предварительный расчёт ставок кинопроизводства',creator:'FilmRate'},defaultStyle:{font:'Roboto',fontSize:7.5,color:'#181b18'},
       content:[{text:'FILMRATE',fontSize:7.5,bold:true,color:'#2457f5',characterSpacing:1.2,margin:[0,0,0,3]},{text:'Предварительная смета',fontSize:17,bold:true,margin:[0,0,0,5]},
         {text:'Все ставки носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.',fontSize:8.5,bold:true,color:'#ad3c36',margin:[0,0,0,14]},
-        {table:{headerRows:1,widths:[18,145,72,42,58,60,30,68,68],body},layout:{fillColor:(i)=>i===0?'#252925':i===body.length-1?'#f1f3ef':null,hLineColor:()=> '#dfe2dc',vLineColor:()=> '#dfe2dc',paddingLeft:()=>4,paddingRight:()=>4,paddingTop:()=>5,paddingBottom:()=>5},
+        {table:{headerRows:1,widths:[16,126,66,38,52,56,32,28,62,62],body},layout:{fillColor:(i)=>i===0?'#252925':i===body.length-1?'#f1f3ef':null,hLineColor:()=> '#dfe2dc',vLineColor:()=> '#dfe2dc',paddingLeft:()=>4,paddingRight:()=>4,paddingTop:()=>5,paddingBottom:()=>5},
           style:'budgetTable'}],
       styles:{budgetTable:{fontSize:7}},
       footer:(current,pageCount)=>({columns:[{text:'FilmRate',alignment:'left'},{text:`${current} / ${pageCount}`,alignment:'right'}],margin:[28,8,28,0],fontSize:7,color:'#818781'})};
@@ -821,9 +824,9 @@ function inputFor(e){
 }
 function renderBuilder(){
   const values=[...est.values()];let net=0,gross=0;
-  const rows=values.map((e,index)=>{const c=calcEstimate(e),scope=[e.r.content,e.r.cond].filter(Boolean).join(' · ');net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${esc(e.r.prof)}</b><small>${esc(e.r.dept)}</small>${scope?`<small class="position-scope">${esc(scope)}</small>`:''}</div><div class="unit">${esc(e.r.unit)}</div><div><div class="input-stack"><label>Ставка<input class="${e.rate>0?'':'needs-input'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?'false':'true'}"></label></div></div><div>${inputFor(e)}</div><div>${e.r.unit==='месяц'?`<div class="input-stack"><label>Специалистов<input class="${e.qty>0?'':'needs-input'}" type="number" min="0" max="100000" step="1" value="${e.qty}" data-builder-field="qty" data-id="${e.r.id}" aria-label="Специалистов" aria-invalid="${e.qty>0?'false':'true'}"></label></div>`:'—'}</div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
+  const rows=values.map((e,index)=>{const c=calcEstimate(e),scope=[e.r.content,e.r.cond].filter(Boolean).join(' · ');net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${esc(e.r.prof)}</b><small>${esc(e.r.dept)}</small>${scope?`<small class="position-scope">${esc(scope)}</small>`:''}</div><div class="unit">${esc(e.r.unit)}</div><div><div class="input-stack"><label>Ставка<input class="${e.rate>0?'':'needs-input'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?'false':'true'}"></label></div></div><div>${inputFor(e)}</div><div><div class="input-stack"><label>Специалистов<input class="${e.people>0?'':'needs-input'}" type="number" min="0" max="100000" step="1" value="${e.people}" data-builder-field="people" data-id="${e.r.id}" aria-label="Специалистов" aria-invalid="${e.people>0?'false':'true'}"></label></div></div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
   const addCustom='<div class="budget-add-row"><button data-builder-custom>+ Добавить свою статью</button></div>';
-  document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка, ₽</div><div>Параметр расчёта</div><div>Кол-во</div><div>%</div><div>Без налога, ₽</div><div>С налогом, ₽</div><div></div></div>${rows}${addCustom}</div>`:`<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>${addCustom}`;
+  document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка, ₽</div><div>Параметр расчёта</div><div>Спец.</div><div>%</div><div>Без налога, ₽</div><div>С налогом, ₽</div><div></div></div>${rows}${addCustom}</div>`:`<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>${addCustom}`;
   document.getElementById('builderCount').textContent=values.length;
   document.getElementById('builderNet').textContent=fmt(net);
   document.getElementById('builderGross').textContent=fmt(gross);
@@ -835,7 +838,7 @@ document.getElementById('closeBuilder').addEventListener('click',closeBuilder);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!builder.hidden)closeBuilder()});
 document.getElementById('quickSearch').addEventListener('input',e=>renderQuickCatalog(e.target.value));
 document.getElementById('quickResults').addEventListener('click',e=>{const b=e.target.closest('[data-quick-add]');if(!b)return;const r=DATA.find(x=>x.id==b.dataset.quickAdd);if(!est.has(r.id))est.set(r.id,newEstimate(r));saveEstimate();renderBuilder();renderEst()});
-document.getElementById('builderRows').addEventListener('change',e=>{const f=e.target.closest('[data-builder-field]');if(!f)return;const row=est.get(+f.dataset.id);if(!row)return;if(f.dataset.builderField==='taxPercent')row.tax=clampNumber(f.value,0,99.99,0)/100;else if(f.dataset.builderField==='rate')row.rate=clampNumber(f.value,0,1e9,0);else if(f.dataset.builderField==='qty')row.qty=clampNumber(f.value,0,1e5,0);else row[f.dataset.builderField]=safeDate(f.value);saveEstimate();renderBuilder();renderEst()});
+document.getElementById('builderRows').addEventListener('change',e=>{const f=e.target.closest('[data-builder-field]');if(!f)return;const row=est.get(+f.dataset.id);if(!row)return;if(f.dataset.builderField==='taxPercent')row.tax=clampNumber(f.value,0,99.99,0)/100;else if(f.dataset.builderField==='rate')row.rate=clampNumber(f.value,0,1e9,0);else if(f.dataset.builderField==='qty')row.qty=clampNumber(f.value,0,1e5,0);else if(f.dataset.builderField==='people')row.people=clampNumber(f.value,0,1e5,0);else row[f.dataset.builderField]=safeDate(f.value);saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderRows').addEventListener('click',e=>{const custom=e.target.closest('[data-builder-custom]');if(custom){openCustom();return}const b=e.target.closest('[data-builder-del]');if(!b)return;est.delete(+b.dataset.builderDel);saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderClear').addEventListener('click',()=>{if(!est.size||confirm('Очистить все позиции сметы?')){est.clear();saveEstimate();renderBuilder();renderEst()}});
 document.getElementById('builderXlsx').addEventListener('click',()=>document.getElementById('xlsx').click());
@@ -852,7 +855,7 @@ document.getElementById('customForm').addEventListener('submit',e=>{
   let id=-Date.now();while(est.has(id))id--;
   const unit=SAFE_UNITS.includes(document.getElementById('customUnit').value)?document.getElementById('customUnit').value:'проект',rate=clampNumber(document.getElementById('customRate').value,0,1e9,0),qty=clampNumber(document.getElementById('customQty').value,1,1e5,1);
   const r=sanitizeCustomRecord({id,custom:true,dept:document.getElementById('customDept').value,prof:document.getElementById('customName').value,cond:document.getElementById('customCond').value,unit,amount:rate});if(!r)return;
-  est.set(id,{r,start:'',end:'',rate,qty:unit==='аккорд'?1:qty,tax:.08});saveEstimate();renderEst();renderBuilder();customDialog.close();e.currentTarget.reset();document.getElementById('customRate').value=0;document.getElementById('customQty').value=1;
+  est.set(id,{r,start:'',end:'',rate,qty:unit==='аккорд'?1:qty,people:1,tax:.08});saveEstimate();renderEst();renderBuilder();customDialog.close();e.currentTarget.reset();document.getElementById('customRate').value=0;document.getElementById('customQty').value=1;
 });
 
 // Обратная связь без внешнего хранилища: пользователь сам отправляет подготовленное письмо.
