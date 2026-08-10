@@ -391,13 +391,13 @@ header .eyebrow{padding-right:390px}
 
 <dialog class="feedback-dialog" id="customDialog">
   <div class="feedback-inner">
-    <div class="feedback-top"><div><h2>Добавить свою статью</h2><p>Создайте позицию, которой нет в справочнике. Её можно будет изменить в смете.</p></div><button class="dialog-x" id="customClose" aria-label="Закрыть">×</button></div>
-    <form class="feedback-form" id="customForm">
+    <div class="feedback-top"><div><h2>Добавить свою статью</h2><p>Укажите, за что платим, к какому цеху относится расход и как его считать.</p></div><button class="dialog-x" id="customClose" aria-label="Закрыть">×</button></div>
+    <form class="feedback-form" id="customForm" autocomplete="off">
       <div class="custom-grid">
-        <label class="wide">Название статьи<input id="customName" maxlength="120" placeholder="Например, координатор постпродакшна" required></label>
-        <label>Категория<input id="customDept" maxlength="80" placeholder="Например, Постпродакшн" required></label>
-        <label>Условие<input id="customCond" maxlength="160" placeholder="Например, весь проект"></label>
-        <label>Единица<select id="customUnit"><option selected>проект</option><option>месяц</option><option>смена</option><option>час</option><option>аккорд</option><option>серия</option><option>минута</option><option>человек</option><option>единоразово</option></select></label>
+        <label class="wide">Название позиции<input id="customName" name="budget_item_title" maxlength="120" autocomplete="off" placeholder="Например, координатор постпродакшна" required></label>
+        <label>Цех / категория<input id="customDept" name="budget_item_department" maxlength="80" autocomplete="off" placeholder="Например, Постпродакшн" required></label>
+        <label>Проект / этап работы<input id="customCond" name="budget_item_scope" maxlength="160" autocomplete="off" placeholder="Например, весь проект или одна серия"></label>
+        <label>Единица расчёта<select id="customUnit"><option selected>проект</option><option>месяц</option><option>смена</option><option>час</option><option>аккорд</option><option>серия</option><option>минута</option><option>человек</option><option>единоразово</option></select></label>
         <label>Ставка, ₽<input type="number" id="customRate" min="0" max="1000000000" step="100" value="0" required></label>
         <label>Количество<input type="number" id="customQty" min="1" max="100000" step="1" value="1" required></label>
       </div>
