@@ -27,14 +27,24 @@ MONTHS_RU = (
 )
 
 
-def publish_check_entry(changes: list[dict[str, str]], errors: list[str]) -> bool:
+def publish_check_entry(changes: list[dict[str, str]], errors: list[str], monthly: bool) -> bool:
     now = datetime.now(ZoneInfo("Europe/Moscow"))
     date = now.date().isoformat()
     existing_text = CHECK_LOG.read_text(encoding="utf-8") if CHECK_LOG.exists() else "window.FILMRATE_CHECKS = [];"
     payload = existing_text.split("=", 1)[1].strip().removesuffix(";")
     entries = json.loads(payload)
-    if any(item.get("date") == date for item in entries):
+    status = "errors" if errors else "changes-found" if changes else "no-changes"
+    if any(item.get("date") == date and item.get("status") == status for item in entries):
         return False
+
+    if monthly and not changes and not errors:
+        recent_change = any(
+            item.get("status") == "changes-found"
+            and 0 <= (now.date() - datetime.fromisoformat(item["date"]).date()).days < 31
+            for item in entries
+        )
+        if recent_change:
+            return False
 
     if errors:
         title = "Часть источников временно недоступна"
@@ -50,6 +60,7 @@ def publish_check_entry(changes: list[dict[str, str]], errors: list[str]) -> boo
         "date": date,
         "dateLabel": f"{now.day} {MONTHS_RU[now.month - 1]} {now.year}",
         "type": "check",
+        "status": status,
         "title": title,
         "text": text,
     })
@@ -138,7 +149,8 @@ def main() -> int:
     if errors:
         lines += ["", "## Ошибки проверки", "", *errors]
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    log_updated = publish_check_entry(changes, errors) if os.environ.get("PUBLISH_CHECK") == "true" else False
+    monthly = os.environ.get("PUBLISH_CHECK") == "true"
+    log_updated = publish_check_entry(changes, errors, monthly) if monthly or changes else False
 
     output = os.environ.get("GITHUB_OUTPUT")
     if output:
