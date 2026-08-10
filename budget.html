@@ -154,8 +154,6 @@ footer a{color:var(--blue)}
 html,body{height:100%}
 body{background:var(--paper);background-image:none;font-size:13px;overflow-x:hidden}
 body::before{display:none}
-.variant-switcher{position:fixed;right:18px;bottom:18px;z-index:90;display:flex;gap:3px;padding:4px;border:1px solid var(--rule);border-radius:9px;background:rgba(255,255,255,.94);box-shadow:0 8px 28px rgba(20,25,20,.12);backdrop-filter:blur(10px)}
-.variant-switcher a{padding:8px 10px;border-radius:6px;color:var(--ink-2);font-size:9px;font-weight:700;text-decoration:none}.variant-switcher a:hover{background:#f0f2ed}.variant-switcher a.active{background:var(--ink);color:#fff}
 .wrap{max-width:none;margin:0;padding:0 0 48px}
 header{display:grid;grid-template-columns:minmax(340px,1.35fr) 1fr;gap:36px;padding:24px 28px 20px;border-bottom:1px solid var(--rule);background:#fff}
 .eyebrow{grid-column:1/-1;margin:0;color:var(--ink-3);font-size:9px;letter-spacing:.12em}
@@ -262,7 +260,7 @@ header .eyebrow{padding-right:390px}
 .beta-mark{display:table;margin:0 0 8px;padding:5px 8px;border:1px solid var(--rule-hard);border-radius:7px;background:transparent;color:var(--ink-3);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
 .open-builder{width:calc(100% - 28px);margin:0 14px 12px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
-.feedback-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--bad);border-radius:7px;background:#fff;color:var(--bad);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.feedback-action::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}.feedback-action:hover{background:var(--bad-bg)}.header-feedback{position:absolute;right:0;top:18px}
+.feedback-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--bad);border-radius:7px;background:#fff;color:var(--bad);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.feedback-action::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}.feedback-action:hover{background:var(--bad-bg)}.header-feedback{position:absolute;right:28px;top:18px}
 .builder{position:fixed;inset:0;z-index:200;display:grid;grid-template-rows:auto minmax(0,1fr);background:var(--paper)}
 .builder[hidden]{display:none}
 .builder-head{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;padding:13px 18px;border-bottom:1px solid var(--rule);background:#fff}
@@ -279,21 +277,20 @@ header .eyebrow{padding-right:390px}
 .budget-canvas{min-width:0;overflow:auto;padding:18px;background:var(--paper)}
 .budget-empty{display:grid;place-items:center;min-height:320px;border:1px dashed var(--rule-hard);border-radius:10px;background:#fff;color:var(--ink-3);text-align:center;font-size:11px}
 .budget-table{min-width:1120px;border:1px solid var(--rule);background:#fff}
-.budget-add-row{padding:10px;border-top:1px solid var(--rule);background:#fafbf9}.budget-add-row button{width:100%;min-height:36px;border:1px dashed var(--blue);border-radius:6px;background:#fff;color:var(--blue);font:700 10px var(--body);cursor:pointer}.budget-add-row button:hover{border-style:solid;background:var(--blue-soft)}
+.budget-add-row{padding:7px 10px;background:#fff}.budget-add-row button{min-height:32px;padding:0;border:0;background:transparent;color:var(--blue);font:700 10px var(--body);cursor:pointer}.budget-add-row button:hover{text-decoration:underline}
 .budget-row{display:grid;grid-template-columns:32px minmax(240px,1.5fr) 78px 110px 220px 76px 62px 110px 110px 34px;align-items:center;border-top:1px solid var(--rule)}
 .budget-row:first-child{border-top:0}.budget-row>div{min-width:0;padding:9px 7px}.budget-row.head{position:sticky;top:0;z-index:2;background:var(--ink);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.budget-row .position b{display:block;font-size:10px}.budget-row .position small{display:block;color:var(--ink-3);font-size:8px}.budget-row input{width:100%;min-height:32px;padding:6px 7px;border:1px solid var(--rule-hard);border-radius:5px;background:#fff;color:var(--ink);font:10px var(--body)}.budget-row .unit{font-size:9px}.budget-row .money{font:700 10px var(--mono);text-align:right}.budget-row .row-remove{border:0;background:transparent;color:var(--ink-3);font-size:16px;cursor:pointer}.budget-row .row-remove:hover{color:var(--bad)}
 .input-stack{display:grid;grid-template-columns:1fr;gap:4px}.input-stack.two{grid-template-columns:1fr 1fr;gap:8px}.input-stack label{display:grid;gap:4px;min-width:0;font-size:7px;color:var(--ink-3);text-transform:uppercase}.fixed-input{display:flex;align-items:center;min-height:32px;padding:6px 7px;border:1px solid var(--rule);border-radius:5px;background:#f5f6f3;color:var(--ink-2);font:10px var(--body)}
 .budget-summary{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--rule);background:#fff;padding:18px 16px}
 .budget-summary h3{margin:0 0 16px;font-size:13px}.summary-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--rule);font-size:9px;color:var(--ink-3)}.summary-line b{color:var(--ink);font:700 13px var(--mono)}.summary-line.grand{margin-top:2px;padding-top:15px;border-top:2px solid var(--ink)}.summary-line.grand b{font-size:18px}.summary-actions{display:grid;gap:7px;margin-top:auto}.summary-actions button{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:650 10px var(--body);cursor:pointer}.summary-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .feedback-dialog{width:min(520px,calc(100vw - 28px));border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(20,25,20,.24)}.feedback-dialog::backdrop{background:rgba(15,20,18,.48)}.feedback-inner{padding:22px}.feedback-top{display:flex;justify-content:space-between;gap:16px}.feedback-top h2{margin:0;font-size:20px;letter-spacing:-.03em}.feedback-top p{margin:5px 0 0;color:var(--ink-3);font-size:10px}.dialog-x{border:0;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer}.feedback-form{display:grid;gap:12px;margin-top:20px}.feedback-form label{display:grid;gap:5px;color:var(--ink-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.feedback-form input,.feedback-form select,.feedback-form textarea{width:100%;padding:9px 10px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font:11px var(--body);text-transform:none;letter-spacing:0}.feedback-form textarea{min-height:110px;resize:vertical}.feedback-note,.feedback-status{margin:0;color:var(--ink-3);font-size:9px}.feedback-status.ok{color:var(--ok)}.feedback-status.error{color:var(--bad)}.feedback-submit{min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}.feedback-submit:disabled{opacity:.65;cursor:wait}
-.custom-add{width:calc(100% - 32px);min-height:38px;margin:12px 16px;border:1px dashed var(--blue);border-radius:7px;background:var(--blue-soft);color:var(--blue);font:700 10px var(--body);cursor:pointer}.custom-add:hover{border-style:solid}.custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.custom-grid .wide{grid-column:1/-1}
+.custom-add{min-height:34px;margin:10px 16px;padding:0;border:0;background:transparent;color:var(--blue);font:700 10px var(--body);cursor:pointer}.custom-add:hover{text-decoration:underline}.custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.custom-grid .wide{grid-column:1/-1}
 @media(max-width:1050px){.builder-body{grid-template-columns:230px minmax(650px,1fr)}.budget-summary{position:absolute;right:14px;top:74px;width:250px;max-height:calc(100vh - 90px);box-shadow:0 12px 34px rgba(20,25,20,.14)}}
 @media(max-width:700px){header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-feedback{position:static;width:100%;margin-bottom:12px}.builder-head{grid-template-columns:1fr auto}.builder-head .feedback-action{grid-column:1/-1;grid-row:2}.builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px}.budget-summary{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:none;padding:9px 12px;box-shadow:0 -8px 26px rgba(20,25,20,.12)}.budget-summary h3,.summary-line:not(.grand){display:none}.summary-line.grand{padding:4px 0 8px;border:0}.summary-actions{grid-template-columns:1fr 1fr}.summary-actions button:last-child{display:none}}
 @media(max-width:520px){.custom-grid{grid-template-columns:1fr}.custom-grid .wide{grid-column:auto}}
 </style>
 </head>
 <body>
-<nav class="variant-switcher" aria-label="Варианты интерфейса"><a href="index.html">Реестр</a><a class="active" href="budget.html">Смета</a><a href="atlas.html">Атлас</a></nav>
 <div class="wrap">
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
@@ -365,8 +362,8 @@ header .eyebrow{padding-right:390px}
 <section class="builder" id="builder" hidden aria-label="Конструктор предварительной сметы">
   <div class="builder-head">
     <div><small class="beta-mark">Beta version</small><h2>Предварительная смета</h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
-    <button class="feedback-action" id="builderFeedback">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
     <button class="builder-close" id="closeBuilder">Вернуться к справочнику</button>
+    <button class="feedback-action" id="builderFeedback">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
   </div>
   <div class="builder-body">
     <aside class="quick-catalog">
@@ -449,6 +446,7 @@ DATA.forEach(r=>{
   }
   if(isScreenwriter(r)){r.doc=SCREENWRITER_RATES;r.src='Гильдия кинодраматургов Союза кинематографистов России — рекомендуемые гонорары от 29.01.2026'}
 });
+const breakRateIndex=DATA.findIndex(r=>r.prof==='Ставка «разрыва» (все специальности)');if(breakRateIndex>=0)DATA.splice(breakRateIndex,1);
 const writerSource=SRC.find(s=>s.name.includes('Гильдия кинодраматургов'));if(writerSource)writerSource.url=SCREENWRITER_RATES;
 const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"есть письмо 2026", expired:"срок истёк"};
 const TIP = {
@@ -770,19 +768,24 @@ document.getElementById('feedbackOpen').addEventListener('click',openFeedback);
 document.getElementById('builderFeedback').addEventListener('click',openFeedback);
 document.getElementById('feedbackClose').addEventListener('click',()=>feedbackDialog.close());
 feedbackDialog.addEventListener('click',e=>{if(e.target===feedbackDialog)feedbackDialog.close()});
+function openFeedbackEmail(type,email,message){
+  const subject=encodeURIComponent(`Ставки цехов — ${type}`),body=encodeURIComponent(`Email отправителя: ${email}\n\n${message}\n\nСтраница: ${location.href}`),link=document.createElement('a');
+  link.href=`mailto:snegproduction@gmail.com?subject=${subject}&body=${body}`;document.body.appendChild(link);link.click();link.remove();
+}
 document.getElementById('feedbackForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const form=e.currentTarget,button=form.querySelector('.feedback-submit'),status=document.getElementById('feedbackStatus');
   const type=document.getElementById('feedbackType').value,email=document.getElementById('feedbackEmail').value.trim(),message=document.getElementById('feedbackText').value.trim();
   button.disabled=true;button.textContent='Отправляем…';status.className='feedback-status';status.textContent='';
   try{
+    if(location.protocol==='file:')throw new Error('local-page');
     const response=await fetch('https://formsubmit.co/ajax/snegproduction@gmail.com',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:`Ставки цехов — ${type}`,type,email,message,page:location.href})});
     const data=await response.json();
     if(!response.ok||data.success===false||data.success==='false')throw new Error(data.message||'Ошибка отправки');
     status.className='feedback-status ok';status.textContent='Сообщение отправлено. Спасибо!';form.reset();button.textContent='Отправлено ✓';
     setTimeout(()=>{feedbackDialog.close();button.disabled=false;button.textContent='Отправить →';status.textContent=''},1800);
   }catch(error){
-    console.error(error);status.className='feedback-status error';status.textContent='Не удалось отправить. Проверьте соединение и попробуйте ещё раз.';button.disabled=false;button.textContent='Отправить →';
+    console.warn('Прямая отправка недоступна, открываем почтовое приложение.',error);openFeedbackEmail(type,email,message);status.className='feedback-status ok';status.textContent='Письмо подготовлено в почтовом приложении — осталось нажать «Отправить».';button.disabled=false;button.textContent='Открыть письмо ещё раз';
   }
 });
 // источники
