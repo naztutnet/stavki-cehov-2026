@@ -1,10 +1,10 @@
-window.FILMRATE_UPDATES = [
+window.KINORATES_UPDATES = [
   {
     date: "2026-08-11",
     dateLabel: "11 августа 2026",
     type: "service",
     title: "Защищённое соединение и управление аналитикой",
-    text: "FilmRate переведён на HTTPS. Яндекс Метрика теперь запускается только после согласия посетителя."
+    text: "KinoRates переведён на HTTPS. Яндекс Метрика теперь запускается только после согласия посетителя."
   },
   {
     date: "2026-08-10",
@@ -25,7 +25,7 @@ window.FILMRATE_UPDATES = [
     date: "2026-07-30",
     dateLabel: "30 июля 2026",
     type: "data",
-    title: "Собрана первая версия базы FilmRate",
+    title: "Собрана первая версия базы KinoRates",
     text: "Объединены справочник МПК и реестр «Точно продюсер»: 420 позиций в 23 цехах и департаментах.",
     url: "https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/"
   }

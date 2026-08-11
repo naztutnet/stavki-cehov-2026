@@ -1,1 +1,1 @@
-window.FILMRATE_CHECKS = [];
+window.KINORATES_CHECKS = [];
