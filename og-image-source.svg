@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FDFEFF"/>
+      <stop offset="1" stop-color="#E7EBF0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F1720" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <path d="M0 520 C180 455 260 575 420 500 S720 370 860 430 S1050 570 1200 500 V630 H0Z" fill="#F4F6F8"/>
+  <path d="M720 0 C800 80 875 100 960 76 S1110 10 1200 35 V0Z" fill="#F0F2F4"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#0F1720">
+    <text x="52" y="70" font-size="39" font-weight="700">KinoRates</text>
+    <text x="52" y="210" font-size="72" font-weight="700">Ставки</text>
+    <text x="52" y="290" font-size="72" font-weight="700">киноцехов</text>
+    <text x="52" y="370" font-size="72" font-weight="700">России</text>
+    <text x="54" y="435" font-size="24" fill="#4A5A68">Актуальные цеховые письма</text>
+    <text x="54" y="470" font-size="24" fill="#4A5A68">и конструктор предварительной сметы</text>
+    <text x="54" y="560" font-size="17">Ставки</text>
+    <circle cx="128" cy="554" r="3" fill="#17456B"/>
+    <text x="146" y="560" font-size="17">Цеховые письма</text>
+    <circle cx="280" cy="554" r="3" fill="#17456B"/>
+    <text x="298" y="560" font-size="17">Предварительная смета</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="500" y="78" width="650" height="390" rx="16" fill="#FDFEFF" stroke="#C4D0DA"/>
+    <text x="528" y="120" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#0F1720">Справочник ставок</text>
+    <rect x="528" y="142" width="86" height="30" rx="4" fill="#0F1720"/>
+    <text x="544" y="162" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#fff">Все группы</text>
+    <g font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#4A5A68">
+      <rect x="624" y="142" width="122" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/><text x="638" y="162">Режиссёрский цех</text>
+      <rect x="756" y="142" width="126" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/><text x="770" y="162">Операторский цех</text>
+      <rect x="892" y="142" width="134" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/><text x="906" y="162">Художественный цех</text>
+    </g>
+    <rect x="1038" y="142" width="88" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/>
+    <text x="1052" y="162" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#7C8B98">Поиск</text>
+    <g font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#7C8B98">
+      <text x="528" y="208">Должность</text><text x="848" y="208">Единица</text><text x="982" y="208">Ставка</text>
+    </g>
+    <g stroke="#D9E1E7" stroke-width="1"><line x1="528" y1="220" x2="1126" y2="220"/><line x1="528" y1="270" x2="1126" y2="270"/><line x1="528" y1="320" x2="1126" y2="320"/><line x1="528" y1="370" x2="1126" y2="370"/><line x1="528" y1="420" x2="1126" y2="420"/></g>
+    <g font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#0F1720">
+      <text x="528" y="252">Режиссёр-постановщик</text><text x="848" y="252">смена</text><text x="982" y="252">по письму цеха</text>
+      <text x="528" y="302">Оператор-постановщик</text><text x="848" y="302">смена</text><text x="982" y="302">по письму цеха</text>
+      <text x="528" y="352">Художник-постановщик</text><text x="848" y="352">проект</text><text x="982" y="352">по письму цеха</text>
+      <text x="528" y="402">Гримёр</text><text x="848" y="402">смена</text><text x="982" y="402">ставка</text>
+      <text x="528" y="452">Осветитель</text><text x="848" y="452">смена</text><text x="982" y="452">ставка</text>
+    </g>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="890" y="405" width="260" height="150" rx="14" fill="#FDFEFF" stroke="#C4D0DA"/>
+    <text x="912" y="440" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#0F1720">Предварительная смета</text>
+    <g font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#4A5A68">
+      <text x="912" y="474">Выбранные позиции</text><text x="1118" y="474" text-anchor="end">12</text>
+      <text x="912" y="500">Цехов в смете</text><text x="1118" y="500" text-anchor="end">5</text>
+    </g>
+    <line x1="912" y1="516" x2="1128" y2="516" stroke="#C4D0DA"/>
+    <text x="912" y="540" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#0F1720">Итого — рассчитывается автоматически</text>
+  </g>
+</svg>
