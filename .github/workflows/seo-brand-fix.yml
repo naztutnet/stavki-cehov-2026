@@ -1,0 +1,35 @@
+name: KinoRates SEO brand fix
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/seo-brand-fix.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Strengthen KinoRates brand signals
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('<title>KinoRates — ставки киноцехов и конструктор сметы</title>', '<title>KinoRates — ставки киноцехов России и конструктор сметы</title>')
+          s = s.replace('<meta property="og:title" content="KinoRates — ставки киноцехов и конструктор сметы">', '<meta property="og:title" content="KinoRates — ставки киноцехов России и конструктор сметы">')
+          s = s.replace('<meta name="twitter:title" content="KinoRates — ставки киноцехов и конструктор сметы">', '<meta name="twitter:title" content="KinoRates — ставки киноцехов России и конструктор сметы">')
+          s = s.replace('"name": "KinoRates",\n      "description":', '"name": "KinoRates",\n      "alternateName": "КиноРейтс",\n      "description":')
+          s = s.replace('"name": "KinoRates — справочник ставок и конструктор сметы",', '"name": "KinoRates — ставки киноцехов России и конструктор сметы",')
+          s = s.replace('<h1><a class="home-title" href="/" aria-label="Справочник ставок — на главную"><span>Справочник ставок</span></a></h1>', '<h1><a class="home-title" href="/" aria-label="KinoRates — на главную"><span>KinoRates — ставки киноцехов России</span></a></h1>')
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit changes and remove workflow
+        run: |
+          rm .github/workflows/seo-brand-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/seo-brand-fix.yml
+          git commit -m "Strengthen KinoRates SEO brand signals"
+          git push
