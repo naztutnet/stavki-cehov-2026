@@ -1,0 +1,28 @@
+name: Update OG to PNG
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-og-to-png.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-og:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch OG image to PNG
+        run: |
+          sed -i 's#https://kinorates.ru/og-image-v2.jpg#https://kinorates.ru/og-image.png#g' index.html
+          sed -i 's#content="image/jpeg"#content="image/png"#g' index.html
+          rm .github/workflows/update-og-to-png.yml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/update-og-to-png.yml
+          git commit -m "Use PNG for KinoRates OG image"
+          git push
