@@ -1,0 +1,60 @@
+name: Final KinoRates rebrand
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rebrand-now.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebrand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace legacy brand and domain everywhere
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          old_brand = 'Film' + 'Rate'
+          old_brand_upper = 'FILM' + 'RATE'
+          old_domain = 'film' + 'rate.ru'
+          new_brand = 'KinoRates'
+          new_brand_upper = 'KINORATES'
+          new_domain = 'kinorates.ru'
+
+          text_exts = {'.html','.htm','.js','.css','.json','.md','.txt','.xml','.yml','.yaml','.svg','.csv','.ts','.tsx','.jsx'}
+          skip_dirs = {'.git','node_modules'}
+          changed = []
+          for p in Path('.').rglob('*'):
+              if not p.is_file() or any(part in skip_dirs for part in p.parts):
+                  continue
+              if p.suffix.lower() not in text_exts and p.name not in {'CNAME'}:
+                  continue
+              try:
+                  s = p.read_text(encoding='utf-8')
+              except Exception:
+                  continue
+              n = s.replace(old_domain, new_domain).replace(old_brand, new_brand).replace(old_brand_upper, new_brand_upper)
+              if n != s:
+                  p.write_text(n, encoding='utf-8')
+                  changed.append(str(p))
+          print('Changed files:')
+          print('\n'.join(changed) if changed else '(none)')
+          PY
+      - name: Commit rebrand
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Complete KinoRates rebrand"
+            git push
+          fi
