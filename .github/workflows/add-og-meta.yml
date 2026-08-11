@@ -1,0 +1,41 @@
+name: Add FilmRate OG metadata
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-og-meta.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-og:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update index.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('<meta name="twitter:card" content="summary">', '<meta name="twitter:card" content="summary_large_image">')
+          needle = '<meta property="og:url" content="https://filmrate.ru/">\n'
+          og = '''<meta property="og:url" content="https://filmrate.ru/">\n<meta property="og:image" content="https://filmrate.ru/og-image.jpg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:type" content="image/jpeg">\n'''
+          if '<meta property="og:image"' not in s:
+              s = s.replace(needle, og)
+          tw = '<meta name="twitter:description" content="Рекомендованные ставки специалистов кинопроизводства России, актуальные цеховые письма и конструктор предварительной сметы.">\n'
+          if '<meta name="twitter:image"' not in s:
+              s = s.replace(tw, tw + '<meta name="twitter:image" content="https://filmrate.ru/og-image.jpg">\n')
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Remove temporary workflow and commit
+        run: |
+          rm -f .github/workflows/add-og-meta.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/add-og-meta.yml
+          git commit -m "Add FilmRate Open Graph image metadata"
+          git push
