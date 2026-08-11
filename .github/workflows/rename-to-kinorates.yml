@@ -1,0 +1,38 @@
+name: Rename FilmRate to KinoRates
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rename-to-kinorates.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Rename brand and domain in text files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' files < <(grep -rlIlZ --exclude-dir=.git -e 'FilmRate' -e 'FILMRATE' -e 'filmrate.ru' . || true)
+          if ((${#files[@]})); then
+            perl -pi -e 's/filmrate\.ru/kinorates.ru/g; s/FilmRate/KinoRates/g; s/FILMRATE/KINORATES/g' "${files[@]}"
+          fi
+          printf 'kinorates.ru' > CNAME
+          rm -f .github/workflows/rename-to-kinorates.yml
+      - name: Commit changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -A
+            git commit -m 'Complete KinoRates rebrand and domain migration'
+            git push
+          fi
