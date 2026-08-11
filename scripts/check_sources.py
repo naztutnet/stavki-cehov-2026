@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Detect changes in FilmRate's public source registry without publishing rates."""
+"""Detect changes in KinoRates' public source registry without publishing rates."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ MONTHS_RU = (
 def publish_check_entry(changes: list[dict[str, str]], errors: list[str], monthly: bool) -> bool:
     now = datetime.now(ZoneInfo("Europe/Moscow"))
     date = now.date().isoformat()
-    existing_text = CHECK_LOG.read_text(encoding="utf-8") if CHECK_LOG.exists() else "window.FILMRATE_CHECKS = [];"
+    existing_text = CHECK_LOG.read_text(encoding="utf-8") if CHECK_LOG.exists() else "window.KINORATES_CHECKS = [];"
     payload = existing_text.split("=", 1)[1].strip().removesuffix(";")
     entries = json.loads(payload)
     status = "errors" if errors else "changes-found" if changes else "no-changes"
@@ -66,7 +66,7 @@ def publish_check_entry(changes: list[dict[str, str]], errors: list[str], monthl
     })
     del entries[16:]
     CHECK_LOG.write_text(
-        "window.FILMRATE_CHECKS = " + json.dumps(entries, ensure_ascii=False, indent=2) + ";\n",
+        "window.KINORATES_CHECKS = " + json.dumps(entries, ensure_ascii=False, indent=2) + ";\n",
         encoding="utf-8",
     )
     return True
@@ -102,7 +102,7 @@ class PageDigest(HTMLParser):
 def download(source: dict[str, str]) -> bytes:
     request = urllib.request.Request(
         source["url"],
-        headers={"User-Agent": "FilmRate source monitor/1.0 (+https://filmrate.ru)"},
+        headers={"User-Agent": "KinoRates source monitor/1.0 (+https://kinorates.ru)"},
     )
     with urllib.request.urlopen(request, timeout=45) as response:
         payload = response.read()
@@ -140,7 +140,7 @@ def main() -> int:
 
     STATE.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    lines = ["# Проверка источников FilmRate", "", f"Проверено: {checked_at}", ""]
+    lines = ["# Проверка источников KinoRates", "", f"Проверено: {checked_at}", ""]
     if changes:
         lines += ["## Обнаружены изменения", ""]
         for source in changes:
