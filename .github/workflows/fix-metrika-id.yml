@@ -1,0 +1,32 @@
+name: Fix Metrika ID
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-metrika-id.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update Metrika ID and consent key
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace("const METRIKA_ID=111460200,CONSENT_KEY='filmrate_analytics_consent';","const METRIKA_ID=111489870,CONSENT_KEY='kinorates_analytics_consent';")
+          p.write_text(s)
+          PY
+      - name: Commit changes and remove workflow
+        run: |
+          rm .github/workflows/fix-metrika-id.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/fix-metrika-id.yml
+          git commit -m "Fix KinoRates Yandex Metrika ID"
+          git push
