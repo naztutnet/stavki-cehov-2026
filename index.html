@@ -240,11 +240,11 @@ h1 span{color:var(--ink);font-weight:750}
 .chip.reset{margin-top:8px;border:1px dashed var(--rule-hard);justify-content:center}
 .registry{min-width:0}
 .controls{top:0;padding:12px 18px 11px;margin:0;background:rgba(244,245,242,.96);border-bottom:1px solid var(--rule);backdrop-filter:blur(12px)}
-.row1{display:grid;grid-template-columns:minmax(260px,1fr) repeat(6,145px);gap:7px}
+.row1{display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,140px) 170px 145px 145px;gap:7px}
 input[type=search],select,.chk{min-height:38px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;font-size:11px}
 input[type=search]{padding-left:36px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23707770' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center}
 .row1>select,.row1>.chk,.row1>.header-letters,.row1>.header-estimate{width:100%;min-width:0;height:38px}
-.chk{justify-content:center;padding:8px 10px}
+.chk{justify-content:center;padding:8px 10px;white-space:nowrap}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) var(--inspector);gap:0;margin:0;align-items:start}
 .table-shell{min-width:0;padding:16px 18px 40px;overflow-x:auto}
 .result-meta{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;color:var(--ink-3);font-size:10px}
@@ -329,6 +329,7 @@ header .eyebrow{padding-right:390px}
 
 /* full-width estimate workspace */
 .beta-mark{display:table;margin:0 0 8px;padding:5px 8px;border:1px solid var(--bad);border-radius:7px;background:var(--bad-bg);color:var(--bad);font:650 9px var(--body);letter-spacing:.05em;text-transform:none}
+.title-meta{display:flex;align-items:center;gap:7px;margin-bottom:8px}.title-meta .beta-mark{margin:0}.title-meta .updates-action{min-height:29px;padding:0 9px;font-size:8.5px}
 .open-builder{width:calc(100% - 28px);margin:0 14px 12px;min-height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font:700 11px var(--body);cursor:pointer}
 .open-builder:hover{background:#163fc4}
 .feedback-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--bad);border-radius:7px;background:#fff;color:var(--bad);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.feedback-action::before{content:"!";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--bad-bg);color:var(--bad);font-weight:800}.feedback-action:hover{background:var(--bad-bg)}.header-actions{position:absolute;right:28px;top:18px;display:flex;gap:7px}.updates-action{display:flex;align-items:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid var(--rule-hard);border-radius:7px;background:#fff;color:var(--ink);font:700 9px var(--body);cursor:pointer;white-space:nowrap}.updates-action:hover{border-color:var(--blue);color:var(--blue)}.updates-count{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--blue);color:#fff;font:700 8px var(--mono)}
@@ -362,7 +363,7 @@ header .eyebrow{padding-right:390px}
 @media(max-width:1100px){header .eyebrow{padding-right:0}.header-actions{position:static;grid-column:1/-1;justify-self:start;margin-bottom:6px}}
 @media(max-width:700px){
   .dialog-x:focus,.dialog-x:focus-visible{outline:none;box-shadow:none}.dialog-x{-webkit-tap-highlight-color:transparent}
-  header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-actions{position:static;grid-column:1/-1;display:grid;grid-template-columns:1fr;margin-bottom:12px}.header-feedback,.updates-action{width:100%}
+  header .eyebrow{padding-right:0}.header-estimate{width:100%}.header-actions{position:static;grid-column:1/-1;display:grid;grid-template-columns:1fr;margin-bottom:12px}.header-feedback{width:100%}
   .builder-head{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 12px}.builder-head h2{font-size:18px}.builder-head .feedback-action{grid-column:1/-1;grid-row:2;width:100%;white-space:normal;line-height:1.25;padding:8px 10px}.builder-close{min-height:40px}
   .builder-body{grid-template-columns:1fr}.quick-catalog{display:none}.budget-canvas{padding:10px 10px 170px;overflow-y:auto;overflow-x:hidden}
   .budget-table{min-width:0;border:0;background:transparent}.budget-row.head{display:none}
@@ -387,10 +388,9 @@ header .eyebrow{padding-right:390px}
 <header>
   <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
   <div class="header-actions">
-    <button class="updates-action" id="updatesOpen">Обновления <span class="updates-count" id="updatesCount">4</span></button>
     <button class="feedback-action header-feedback" id="feedbackOpen">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
   </div>
-  <div class="title-block"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><h1><span>Справочник ставок</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
+  <div class="title-block"><div class="title-meta"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><button class="updates-action" id="updatesOpen">Обновления <span class="updates-count" id="updatesCount">4</span></button></div><h1><span>Справочник ставок</span></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
   <aside class="regional-note header-regional" aria-labelledby="regionalTitle">
     <div class="regional-kicker">Регионы</div>
     <div class="regional-copy">
