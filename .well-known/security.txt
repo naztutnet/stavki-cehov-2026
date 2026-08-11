@@ -1,0 +1,4 @@
+Contact: mailto:snegproduction@gmail.com
+Expires: 2027-08-11T23:59:59Z
+Preferred-Languages: ru, en
+Canonical: https://kinorates.ru/.well-known/security.txt
