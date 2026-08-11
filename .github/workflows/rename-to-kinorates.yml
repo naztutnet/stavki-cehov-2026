@@ -1,50 +1,11 @@
-name: Rename FilmRate to KinoRates
+name: KinoRates migration archive
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
-
-permissions:
-  contents: write
 
 jobs:
-  rename:
+  archived:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Rename brand and domain
-        shell: bash
-        run: |
-          set -e
-          python3 - <<'PY'
-          from pathlib import Path
-          for p in Path('.').rglob('*'):
-              if not p.is_file() or '.git' in p.parts:
-                  continue
-              try:
-                  s = p.read_text()
-              except UnicodeDecodeError:
-                  continue
-              ns = s.replace('filmrate.ru','kinorates.ru').replace('FilmRate','KinoRates').replace('FILMRATE','KINORATES')
-              if ns != s:
-                  p.write_text(ns)
-          Path('CNAME').write_text('kinorates.ru')
-          PY
-
-      - name: Remove temporary workflow and commit
-        shell: bash
-        run: |
-          set -e
-          rm -f .github/workflows/rename-to-kinorates.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Complete KinoRates rebrand and domain migration"
-            git push
-          fi
+      - name: Migration status
+        run: echo "KinoRates migration is complete. No action is required."
