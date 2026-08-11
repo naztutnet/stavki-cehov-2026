@@ -1,1 +1,1 @@
-Trigger final KinoRates rebrand workflow.
+Trigger final KinoRates rebrand workflow — retry.
