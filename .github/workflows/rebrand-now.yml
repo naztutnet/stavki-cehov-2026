@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Replace legacy brand and domain everywhere
         run: |
           python3 - <<'PY'
@@ -47,7 +48,16 @@ jobs:
           print('Changed files:')
           print('\n'.join(changed) if changed else '(none)')
           PY
-      - name: Commit rebrand
+
+      - name: Render social preview image
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin imagemagick
+          rsvg-convert -w 1200 -h 630 og-image-source.svg -o og-image.png
+          convert og-image.png -strip -quality 92 og-image.jpg
+          identify og-image.jpg
+
+      - name: Commit final rebrand
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -55,6 +65,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Complete KinoRates rebrand"
+            git commit -m "Complete KinoRates rebrand and OG image"
             git push
           fi
