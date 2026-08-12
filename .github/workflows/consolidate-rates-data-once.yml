@@ -84,36 +84,33 @@ jobs:
           fs.writeFileSync('rates-data.js',compact);
           fs.writeFileSync('sources-data.js',canonicalSourcesJs);
           fs.writeFileSync('app.js',newApp);
-          const report={
-            base_records:baseData.length,
-            runtime_records:canonicalData.length,
-            base_sources:baseSources.length,
-            runtime_sources:canonicalSources.length,
-            rates_before_bytes:Buffer.byteLength(fs.readFileSync('rates-data.js.before','utf8')),
-          };
           NODE
-        shell: bash
 
       - name: Verify generated production files and write size report
         run: |
-          # The migration script validates semantic identity before these checks.
           node --check rates-data.js
           node --check sources-data.js
           node --check app.js
           node - <<'NODE'
-          const fs=require('fs'),vm=require('vm');
+          const fs=require('fs'),vm=require('vm'),cp=require('child_process');
           const c={window:{}};vm.createContext(c);
           vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);
           vm.runInContext(fs.readFileSync('sources-data.js','utf8'),c);
           if(c.window.KINORATES_DATA.length!==420)throw new Error('После упаковки база не содержит 420 позиций');
           if(new Set(c.window.KINORATES_DATA.map(r=>r.id)).size!==420)throw new Error('После упаковки появились дубли ID');
+          const beforeRates=Number(cp.execSync('git show HEAD:rates-data.js | wc -c').toString().trim());
+          const beforeApp=Number(cp.execSync('git show HEAD:app.js | wc -c').toString().trim());
           const report={
             records:c.window.KINORATES_DATA.length,
             sources:c.window.KINORATES_SOURCES.length,
-            rates_bytes:fs.statSync('rates-data.js').size,
-            app_bytes:fs.statSync('app.js').size,
-            sources_bytes:fs.statSync('sources-data.js').size
+            rates_before_bytes:beforeRates,
+            rates_after_bytes:fs.statSync('rates-data.js').size,
+            app_before_bytes:beforeApp,
+            app_after_bytes:fs.statSync('app.js').size,
+            sources_after_bytes:fs.statSync('sources-data.js').size
           };
+          report.rates_saved_bytes=report.rates_before_bytes-report.rates_after_bytes;
+          report.app_saved_bytes=report.app_before_bytes-report.app_after_bytes;
           fs.writeFileSync('rates-data-migration-report.json',JSON.stringify(report,null,2)+'\n');
           console.log(report);
           NODE
