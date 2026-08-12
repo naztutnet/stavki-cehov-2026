@@ -328,3 +328,7 @@ header .eyebrow{padding-right:390px}
 .b-market2025{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}
 .stat.market b{color:var(--info)}
 @media(min-width:921px){.stats{grid-template-columns:repeat(7,minmax(0,1fr))}.stat{min-width:0;padding:11px 10px}.stat b{font-size:20px}.stat i{font-size:7.5px;line-height:1.25}}
+
+
+/* source range hint */
+.rate-range-note{display:block;margin-top:5px;color:var(--ink-3);font-size:8px;line-height:1.35;font-weight:500}

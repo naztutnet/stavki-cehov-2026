@@ -51,19 +51,25 @@ DATA.forEach(r=>{
   MAIN_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase());
   QUICK_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase());
 });
-const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};
+const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", check:"источник не найден", newdoc:"цифра не сверена", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"архивный документ"};
 const TIP = {
-  fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",
-  official2026:"Ставка подтверждена официальной публикацией профессионального объединения на 2026 год.",
-  market2025:"Публичный отраслевой ориентир рынка 2025 года. Это не коллективное письмо профсоюза и не официальный минимальный тариф для кино.",
-  check:"Ставка требует дополнительной проверки: нет актуального первоисточника, однозначно подтверждающего эту позицию.",
-  newdoc:"Первичный документ найден, но конкретную цифру или категорию ещё нужно сверить с его содержанием.",
-  verified2025:"Ставка подтверждена опубликованным коллективным письмом 2025 года. Более свежего письма на странице цеха не опубликовано.",
-  verified2024:"Ставка подтверждена опубликованным коллективным письмом 2024 года. Более свежего письма по этой категории на странице цеха не опубликовано.",
-  verified2023:"Ставка подтверждена опубликованным коллективным письмом 2023 года. Более свежего письма по этой категории на странице цеха не опубликовано.",
-  archive:"Архивный рыночный ориентир 2023 года. Используйте только как отправную точку и уточняйте ставку у исполнителя.",
-  expired:"Срок действия исходного документа закончился. Ставка приведена только как исторический ориентир."
+  fresh2026:"Конкретная ставка подтверждена опубликованным цеховым письмом 2026 года.",
+  official2026:"Конкретная ставка подтверждена официальной публикацией профессионального объединения 2026 года.",
+  market2025:"Рыночный ориентир 2025 года. Это не обязательный тариф и не цеховое письмо.",
+  check:"Первичный источник, однозначно подтверждающий эту конкретную ставку, пока не найден.",
+  newdoc:"Первичный документ найден, но конкретная цифра в нём ещё не подтверждена.",
+  verified2025:"Конкретная ставка подтверждена опубликованным документом 2025 года. Более свежий соответствующий документ пока не найден.",
+  verified2024:"Конкретная ставка подтверждена опубликованным документом 2024 года. Более свежий соответствующий документ пока не найден.",
+  verified2023:"Конкретная ставка подтверждена опубликованным документом 2023 года. Более свежий соответствующий документ пока не найден.",
+  archive:"Архивный рыночный ориентир. Не используйте его как подтверждённую текущую ставку.",
+  expired:"Документ относится к прошлому периоду. Актуальность этой ставки на 2026 год не подтверждена."
 };
+const SOURCE_KIND={fresh2026:'Цеховое письмо',official2026:'Официальные рекомендации',market2025:'Рыночное исследование / ориентир',check:'Источник требует проверки',newdoc:'Первичный документ',verified2025:'Профессиональный первоисточник',verified2024:'Профессиональный первоисточник',verified2023:'Профессиональный первоисточник',archive:'Архивный рыночный ориентир',expired:'Исторический документ'};
+const CONFIRMATION={fresh2026:'Цифра подтверждена ✓',official2026:'Цифра подтверждена ✓',market2025:'Рыночный ориентир — не официальный минимум',check:'Первичный источник цифры не найден',newdoc:'Документ найден, конкретная цифра не сверена',verified2025:'Цифра подтверждена ✓',verified2024:'Цифра подтверждена ✓',verified2023:'Цифра подтверждена ✓',archive:'Текущая актуальность не подтверждена',expired:'Текущая актуальность не подтверждена'};
+function sourceYear(r){const text=[r.eff,r.src].filter(Boolean).join(' '),m=text.match(/20\d{2}/);return r.status==='market2025'?'2025':r.status==='archive'?'2023':(m?m[0]:'не указан')}
+function sourceMeta(r){return {kind:SOURCE_KIND[r.status]||'Источник',year:sourceYear(r),confirmation:CONFIRMATION[r.status]||TIP[r.status],periodLine:r.eff?`Дата / период источника: ${r.eff}`:'Дата / период источника не указаны'}}
+function sourceRangeText(r){const t=String(r.amount_text||'').trim();return /\d[\d\s]*\s*[–—-]\s*\d/.test(t)?t:''}
+function rateRangeHint(r){const t=sourceRangeText(r);return t?`<small class="rate-range-note">Рекомендация источника: ${esc(t)}${/₽/.test(t)?'':' ₽'}</small>`:''}
 const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','сезон','гонорар','договор','минута','человек','единоразово'];
 const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const cleanText=(value,max=160)=>String(value??'').replace(/[\u0000-\u001F\u007F]/g,' ').trim().slice(0,max);
@@ -188,14 +194,14 @@ function renderDetail(r){
   if(!r){pane.innerHTML='<div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div>';return}
   const amountText=String(r.amount_text||'');
   const amount=amountText&&(/[–—+%]|бесплатно|договорённости/i.test(amountText))?amountText:(r.amount?fmt(r.amount):(amountText||'по договорённости'));
-  const sourcePeriod=r.status==='market2025'?'Рыночный ориентир: 2025':(r.eff?`Действует с ${r.eff}`:'Дата не указана');
+  const meta=sourceMeta(r);
   pane.innerHTML=`<div class="detail-card">
     <div class="kicker">${r.dept}</div><h4>${r.prof}</h4><div class="cond">${r.cond||'Условия не указаны'}</div>
     <div class="rate"><b>${amount}</b><span>${r.unit} · ${r.region}</span></div>
-    <div class="detail-section"><b>Актуальность</b><p><span class="badge b-${r.status}">${LBL[r.status]}</span><br><br>${TIP[r.status]}</p></div>
+    <div class="detail-section"><b>Источник и подтверждение</b><p><span class="badge b-${r.status}">${LBL[r.status]}</span><br><br><b>Тип:</b> ${meta.kind}<br><b>Год данных:</b> ${meta.year}<br><b>Подтверждение:</b> ${meta.confirmation}</p></div>
     <div class="detail-section"><b>Переработка</b><p>${r.ot||'В письме не зафиксирована.'}</p></div>
     <div class="detail-section"><b>Условия и доплаты</b><p>${r.extra||'Дополнительные условия не указаны.'}</p></div>
-    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${sourcePeriod}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
+    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${meta.periodLine}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
     ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
     ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:''}
     <button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>
@@ -248,7 +254,7 @@ function renderEst(){
       <div><button class="x" data-del="${e.r.id}" title="Убрать" aria-label="Убрать из сметы">×</button><div class="v">${fmt(calc.gross)}</div></div></div>
       <div class="calc-grid">
         ${monthly?`<div class="calc-field"><label>Дата прикрепления</label><input type="date" value="${e.start}" data-field="start" data-id="${e.r.id}"></div><div class="calc-field"><label>Дата открепления</label><input type="date" value="${e.end}" data-field="end" data-id="${e.r.id}"></div>`:''}
-        <div class="calc-field"><label>Ставка за ${esc(e.r.unit)}</label><input type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}"></div>
+        <div class="calc-field"><label>Ставка за ${esc(e.r.unit)}</label><input type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}">${rateRangeHint(e.r)}</div>
         ${monthly?'':`<div class="calc-field"><label>${quantityLabel(e.r.unit)}</label><input type="number" min="0" max="100000" step="1" value="${e.qty}" data-field="qty" data-id="${e.r.id}"></div>`}
         <div class="calc-field"><label>Специалистов</label><input type="number" min="0" max="100000" step="1" value="${e.people}" data-field="people" data-id="${e.r.id}"></div>
         ${monthly?`<div class="calc-field"><label>Расчётный период</label><input readonly value="${calc.period.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>`:''}
@@ -383,7 +389,7 @@ function inputFor(e){
 }
 function renderBuilder(){
   const values=[...est.values()];let net=0,gross=0;
-  const rows=values.map((e,index)=>{const c=calcEstimate(e),scope=[e.r.content,e.r.cond].filter(Boolean).join(' · ');net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${esc(e.r.prof)}</b><small>${esc(e.r.dept)}</small>${scope?`<small class="position-scope">${esc(scope)}</small>`:''}</div><div class="unit">${esc(e.r.unit)}</div><div><div class="input-stack"><label>Ставка<input class="${e.rate>0?'':'needs-input'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?'false':'true'}"></label></div></div><div>${inputFor(e)}</div><div><div class="input-stack"><label>Специалистов<input class="${e.people>0?'':'needs-input'}" type="number" min="0" max="100000" step="1" value="${e.people}" data-builder-field="people" data-id="${e.r.id}" aria-label="Специалистов" aria-invalid="${e.people>0?'false':'true'}"></label></div></div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
+  const rows=values.map((e,index)=>{const c=calcEstimate(e),scope=[e.r.content,e.r.cond].filter(Boolean).join(' · ');net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${esc(e.r.prof)}</b><small>${esc(e.r.dept)}</small>${scope?`<small class="position-scope">${esc(scope)}</small>`:''}</div><div class="unit">${esc(e.r.unit)}</div><div><div class="input-stack"><label>Ставка<input class="${e.rate>0?'':'needs-input'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?'false':'true'}"></label>${rateRangeHint(e.r)}</div></div><div>${inputFor(e)}</div><div><div class="input-stack"><label>Специалистов<input class="${e.people>0?'':'needs-input'}" type="number" min="0" max="100000" step="1" value="${e.people}" data-builder-field="people" data-id="${e.r.id}" aria-label="Специалистов" aria-invalid="${e.people>0?'false':'true'}"></label></div></div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
   const addCustom='<div class="budget-add-row"><button data-builder-custom>+ Добавить свою статью</button></div>';
   document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка, ₽</div><div>Параметр расчёта</div><div>Спец.</div><div>%</div><div>Без налога, ₽</div><div>С налогом, ₽</div><div></div></div>${rows}${addCustom}</div>`:`<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>${addCustom}`;
   document.getElementById('builderCount').textContent=values.length;
