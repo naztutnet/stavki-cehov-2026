@@ -1,0 +1,11 @@
+{
+  "records": 420,
+  "sources": 29,
+  "rates_before_bytes": 422151,
+  "rates_after_bytes": 92938,
+  "app_before_bytes": 53901,
+  "app_after_bytes": 44411,
+  "sources_after_bytes": 7044,
+  "rates_saved_bytes": 329213,
+  "app_saved_bytes": 9490
+}
