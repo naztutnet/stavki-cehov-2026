@@ -150,12 +150,18 @@ function sanitizeCustomRecord(source){
 const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
 const state = {q:'', unit:'', content:'', dept:'', only26:false, sort:'dept', open:new Set()};
 const est = new Map();
-const STORAGE_KEY='stavki-cehov-budget-v2';
+const STORAGE_KEY='kinorates-budget-v3',LEGACY_STORAGE_KEYS=['stavki-cehov-budget-v2'];
 function saveEstimate(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...est.values()].slice(0,200).map(e=>({id:e.r.id,custom:!!e.r.custom,r:e.r.custom?sanitizeCustomRecord(e.r):undefined,start:safeDate(e.start),end:safeDate(e.end),rate:clampNumber(e.rate,0,1e9,0),qty:clampNumber(e.qty,0,1e5,1),people:clampNumber(e.people,0,1e5,1),tax:clampNumber(e.tax,0,.9999,.08)}))))}catch(_e){}
 }
 function restoreEstimate(){
-  try{const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(parsed))return;parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):DATA.find(x=>x.id===Number(saved.id));if(r){const legacyMonthly=saved.people==null&&r.unit==='месяц';est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:r.unit==='месяц'?1:clampNumber(saved.qty,0,1e5,1),people:legacyMonthly?clampNumber(saved.qty,0,1e5,1):clampNumber(saved.people,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})}})}catch(_e){}
+  try{
+    let sourceKey=STORAGE_KEY,raw=localStorage.getItem(STORAGE_KEY);
+    if(raw==null){const legacyKey=LEGACY_STORAGE_KEYS.find(key=>localStorage.getItem(key)!=null);if(legacyKey){sourceKey=legacyKey;raw=localStorage.getItem(legacyKey)}}
+    const parsed=JSON.parse(raw||'[]');if(!Array.isArray(parsed))return;
+    parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):DATA.find(x=>x.id===Number(saved.id));if(r){const legacyMonthly=saved.people==null&&r.unit==='месяц';est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:r.unit==='месяц'?1:clampNumber(saved.qty,0,1e5,1),people:legacyMonthly?clampNumber(saved.qty,0,1e5,1):clampNumber(saved.people,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})}});
+    if(sourceKey!==STORAGE_KEY){saveEstimate();localStorage.removeItem(sourceKey)}
+  }catch(_e){}
 }
 restoreEstimate();
 
