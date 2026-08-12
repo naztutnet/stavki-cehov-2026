@@ -156,21 +156,20 @@ jobs:
           if (image_width, image_height) != (meta_width, meta_height):
               raise SystemExit(f'Размер OG не совпадает: PNG {image_width}x{image_height}, metadata {meta_width}x{meta_height}')
 
-          required = [
-              '<link rel="stylesheet" href="app.css">',
-              '<script src="rates-data.js"></script>',
-              '<script src="sources-data.js"></script>',
-              '<script src="market-data.js"></script>',
-              '<script src="app.js"></script>',
-          ]
-          for marker in required:
-              if marker not in index:
-                  raise SystemExit(f'В index.html отсутствует {marker}')
-          rate_pos = index.index('<script src="rates-data.js"></script>')
-          source_pos = index.index('<script src="sources-data.js"></script>')
-          market_pos = index.index('<script src="market-data.js"></script>')
-          app_pos = index.index('<script src="app.js"></script>')
-          if not rate_pos < source_pos < market_pos < app_pos:
+          required_patterns = {
+              'app.css': r'<link rel="stylesheet" href="app\.css(?:\?v=[^"]+)?">',
+              'rates-data.js': r'<script src="rates-data\.js(?:\?v=[^"]+)?"></script>',
+              'sources-data.js': r'<script src="sources-data\.js(?:\?v=[^"]+)?"></script>',
+              'market-data.js': r'<script src="market-data\.js(?:\?v=[^"]+)?"></script>',
+              'app.js': r'<script src="app\.js(?:\?v=[^"]+)?"></script>',
+          }
+          matches = {}
+          for name, pattern in required_patterns.items():
+              match = re.search(pattern, index)
+              if not match:
+                  raise SystemExit(f'В index.html отсутствует {name}')
+              matches[name] = match
+          if not matches['rates-data.js'].start() < matches['sources-data.js'].start() < matches['market-data.js'].start() < matches['app.js'].start():
               raise SystemExit('Нарушен порядок загрузки данных, рыночного слоя и app.js')
           if '<style>' in index:
               raise SystemExit('CSS снова встроен в index.html')
