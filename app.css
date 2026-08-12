@@ -52,6 +52,7 @@ tbody tr.r{cursor:pointer}
 .b-newdoc{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}
 .b-archive{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}
 .b-verified2025{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}
+.b-verified2024,.b-verified2023{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}
 .b-expired{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad)}
 .addbtn{
   font-family:var(--mono);font-size:15px;line-height:1;border:1px solid var(--rule-hard);cursor:pointer;padding:0
