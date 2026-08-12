@@ -1,0 +1,13 @@
+{
+  "record_count": 340,
+  "unique_id_count": 340,
+  "status_counts": {
+    "fresh2026": 176,
+    "check": 115,
+    "newdoc": 15,
+    "expired": 34
+  },
+  "exact_duplicate_groups": [],
+  "semantic_duplicate_groups": [],
+  "same_identity_different_amount_groups": []
+}
