@@ -7,6 +7,7 @@ KinoRates — отраслевой справочник рекомендован
 ## Структура
 
 - `index.html` — основной интерфейс справочника и конструктора сметы.
+- `rates-data.js` — база ставок, загружаемая отдельно от интерфейса.
 - `stavki-kinotsekhov/`, `smeta-filma/`, `operatorskiy-tsekh/`, `rezhisserskiy-tsekh/`, `hudozhestvennyy-tsekh/` — SEO-страницы.
 - `seo-pages.css` — общие стили SEO-страниц.
 - `updates.js` — журнал обновлений сервиса.
