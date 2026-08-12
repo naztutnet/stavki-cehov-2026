@@ -34,7 +34,7 @@ jobs:
         run: python3 scripts/check_sources.py
 
       - name: Сохранить новые контрольные значения
-        if: steps.monitor.outputs.changed == 'true' || steps.monitor.outputs.log_updated == 'true'
+        if: steps.monitor.outputs.changed == 'true' || steps.monitor.outputs.log_updated == 'true' || steps.monitor.outputs.state_updated == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
