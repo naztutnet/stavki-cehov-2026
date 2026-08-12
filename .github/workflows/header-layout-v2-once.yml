@@ -1,0 +1,32 @@
+name: Header Layout V2 Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/header-layout-v2-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply first-screen layout v2
+        run: node scripts/header-layout-v2-once.js
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q 'first screen layout v2' app.css
+          grep -q 'app.css?v=20260813-0240' index.html
+          grep -q 'header-guides' index.html
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html app.js app.css
+          git commit -m "Refine KinoRates first screen layout"
+          git push
