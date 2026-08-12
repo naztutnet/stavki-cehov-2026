@@ -1,0 +1,31 @@
+name: Resolve Unpublished Rates Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/resolve-unpublished-rates-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve six rows
+        run: node scripts/resolve-unpublished-rates-once.js
+      - name: Validate syntax
+        run: |
+          node --check app.js
+          node --check rates-data.js
+          node --check updates.js
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rates-data.js app.js updates.js
+          git commit -m "Resolve unpublished public rates" || exit 0
+          git push
