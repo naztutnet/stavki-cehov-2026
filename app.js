@@ -52,11 +52,12 @@ DATA.forEach(r=>{
   MAIN_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase());
   QUICK_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase());
 });
-const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", check:"источник не найден", newdoc:"цифра не сверена", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"архивный документ"};
+const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", no_public_rate:"нет публичной ставки", check:"источник не найден", newdoc:"цифра не сверена", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"архивный документ"};
 const TIP = {
   fresh2026:"Конкретная ставка подтверждена опубликованным цеховым письмом 2026 года.",
   official2026:"Конкретная ставка подтверждена официальной публикацией профессионального объединения 2026 года.",
   market2025:"Рыночный ориентир 2025 года. Это не обязательный тариф и не цеховое письмо.",
+  no_public_rate:"Профессия подтверждена, но опубликованной публичной тарифной ставки для этой конкретной работы нет. Сумма определяется по договорённости; рыночные ориентиры показываются отдельно.",
   check:"Первичный источник, однозначно подтверждающий эту конкретную ставку, пока не найден.",
   newdoc:"Первичный документ найден, но конкретная цифра в нём ещё не подтверждена.",
   verified2025:"Конкретная ставка подтверждена опубликованным документом 2025 года. Более свежий соответствующий документ пока не найден.",
@@ -65,10 +66,10 @@ const TIP = {
   archive:"Архивный рыночный ориентир. Не используйте его как подтверждённую текущую ставку.",
   expired:"Документ относится к прошлому периоду. Актуальность этой ставки на 2026 год не подтверждена."
 };
-const SOURCE_KIND={fresh2026:'Цеховое письмо',official2026:'Официальные рекомендации',market2025:'Рыночное исследование / ориентир',check:'Источник требует проверки',newdoc:'Первичный документ',verified2025:'Профессиональный первоисточник',verified2024:'Профессиональный первоисточник',verified2023:'Профессиональный первоисточник',archive:'Архивный рыночный ориентир',expired:'Исторический документ'};
-const CONFIRMATION={fresh2026:'Цифра подтверждена ✓',official2026:'Цифра подтверждена ✓',market2025:'Рыночный ориентир — не официальный минимум',check:'Первичный источник цифры не найден',newdoc:'Документ найден, конкретная цифра не сверена',verified2025:'Цифра подтверждена ✓',verified2024:'Цифра подтверждена ✓',verified2023:'Цифра подтверждена ✓',archive:'Текущая актуальность не подтверждена',expired:'Текущая актуальность не подтверждена'};
-function sourceYear(r){const text=[r.eff,r.src].filter(Boolean).join(' '),m=text.match(/20\d{2}/);return r.status==='market2025'?'2025':r.status==='archive'?'2023':(m?m[0]:'не указан')}
-function sourceMeta(r){return {kind:SOURCE_KIND[r.status]||'Источник',year:sourceYear(r),confirmation:CONFIRMATION[r.status]||TIP[r.status],periodLine:r.eff?`Дата / период источника: ${r.eff}`:'Дата / период источника не указаны'}}
+const SOURCE_KIND={fresh2026:'Цеховое письмо',official2026:'Официальные рекомендации',market2025:'Рыночное исследование / ориентир',no_public_rate:'Профессия подтверждена · публичного тарифа нет',check:'Источник требует проверки',newdoc:'Первичный документ',verified2025:'Профессиональный первоисточник',verified2024:'Профессиональный первоисточник',verified2023:'Профессиональный первоисточник',archive:'Архивный рыночный ориентир',expired:'Исторический документ'};
+const CONFIRMATION={fresh2026:'Цифра подтверждена ✓',official2026:'Цифра подтверждена ✓',market2025:'Рыночный ориентир — не официальный минимум',no_public_rate:'Публичная ставка не опубликована',check:'Первичный источник цифры не найден',newdoc:'Документ найден, конкретная цифра не сверена',verified2025:'Цифра подтверждена ✓',verified2024:'Цифра подтверждена ✓',verified2023:'Цифра подтверждена ✓',archive:'Текущая актуальность не подтверждена',expired:'Текущая актуальность не подтверждена'};
+function sourceYear(r){const text=[r.eff,r.src].filter(Boolean).join(' '),m=text.match(/20\d{2}/);return r.status==='market2025'?'2025':r.status==='archive'?'2023':r.status==='no_public_rate'?'проверено 13.08.2026':(m?m[0]:'не указан')}
+function sourceMeta(r){return {kind:SOURCE_KIND[r.status]||'Источник',year:sourceYear(r),confirmation:CONFIRMATION[r.status]||TIP[r.status],periodLine:r.status==='no_public_rate'?'Состояние открытых источников проверено 13.08.2026':(r.eff?`Дата / период источника: ${r.eff}`:'Дата / период источника не указаны')}}
 function sourceRangeText(r){const t=String(r.amount_text||'').trim();return /\d[\d\s]*\s*[–—-]\s*\d/.test(t)?t:''}
 function rateRangeHint(r){const t=sourceRangeText(r);return t?`<small class="rate-range-note">Рекомендация источника: ${esc(t)}${/₽/.test(t)?'':' ₽'}</small>`:''}
 function marketItemMatches(item,r){
@@ -121,12 +122,12 @@ const conts = [...new Set(DATA.map(r=>r.content))].sort((a,b)=>a.localeCompare(b
 // счётчики
 const cnt = s => STATUS_COUNTS.get(s)||0;
 const verifiedCount=cnt('fresh2026')+cnt('official2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');
-const reviewCount=cnt('check')+cnt('newdoc');
+const unpublishedCount=cnt('no_public_rate');
 document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${depts.length}</b><i>цеха и департамента</i></div>
   <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
   <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
-  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
+  <div class="stat"><b>${unpublishedCount}</b><i>без публичной ставки</i></div>
   <div class="stat market"><b>${cnt('market2025')}</b><i>рыночных ориентиров</i></div>
   <div class="stat bad"><b>${cnt('expired')}</b><i>исторические ставки</i></div>
   <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;
