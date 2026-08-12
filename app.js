@@ -115,7 +115,7 @@ document.getElementById('stats').innerHTML = `
   <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
   <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
   <div class="stat market"><b>${cnt('market2025')}</b><i>рыночных ориентиров</i></div>
-  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>
+  <div class="stat bad"><b>${cnt('expired')}</b><i>исторические ставки</i></div>
   <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;
 
 // фильтры
