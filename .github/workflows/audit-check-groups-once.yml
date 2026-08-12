@@ -1,4 +1,4 @@
-name: One-shot final unresolved rate audit
+name: One-shot transparent verification counters
 
 on:
   push:
@@ -9,28 +9,35 @@ permissions:
   contents: write
 
 jobs:
-  audit:
+  update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: List true unresolved and new-document rows
+      - name: Clarify status labels and homepage statistics
         run: |
           node - <<'NODE'
-          const fs=require('fs'),vm=require('vm');
-          const ctx={window:{}};vm.createContext(ctx);
-          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
-          const data=ctx.window.KINORATES_DATA;
-          if(!Array.isArray(data)||data.length!==424)throw new Error(`Expected 424, got ${data?.length}`);
-          const target=data.filter(r=>r.status==='check'||r.status==='newdoc');
-          const group=(rows,key)=>{const m=new Map();for(const r of rows){const k=r[key]||'(пусто)';if(!m.has(k))m.set(k,[]);m.get(k).push(r)}return [...m.entries()].map(([name,items])=>({name,count:items.length,ids:items.map(r=>r.id),professions:[...new Set(items.map(r=>r.prof))],docs:[...new Set(items.map(r=>r.doc).filter(Boolean))]})).sort((a,b)=>b.count-a.count)};
-          const report={counts:{check:data.filter(r=>r.status==='check').length,newdoc:data.filter(r=>r.status==='newdoc').length},check_by_source:group(data.filter(r=>r.status==='check'),'src'),newdoc_by_source:group(data.filter(r=>r.status==='newdoc'),'src'),rows:target.map(r=>({id:r.id,status:r.status,dept:r.dept,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,ot:r.ot,extra:r.extra,eff:r.eff,src:r.src,doc:r.doc}))};
-          fs.writeFileSync('remaining-unverified-temp.json',JSON.stringify(report,null,2)+'\n');
-          console.log(JSON.stringify({counts:report.counts,check_by_source:report.check_by_source,newdoc_by_source:report.newdoc_by_source},null,2));
+          const fs=require('fs');
+          let app=fs.readFileSync('app.js','utf8');
+          const oldLbl='const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"есть письмо 2026", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};';
+          const newLbl='const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};';
+          if(!app.includes(oldLbl))throw new Error('Expected LBL block not found');
+          app=app.replace(oldLbl,newLbl);
+          const oldNewdoc='  newdoc:"Цех выпустил письмо, вступившее в силу в 2026 году, но эту цифру ещё нужно сверить с текстом первоисточника.",';
+          const newNewdoc='  newdoc:"Первичный документ найден, но конкретную цифру или категорию ещё нужно сверить с его содержанием.",';
+          if(!app.includes(oldNewdoc))throw new Error('Expected newdoc tooltip not found');
+          app=app.replace(oldNewdoc,newNewdoc);
+          const oldStats='document.getElementById(\'stats\').innerHTML = `\n  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>\n  <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>\n  <div class="stat ok"><b>${cnt(\'fresh2026\')}</b><i>сверено по письмам 2026</i></div>\n  <div class="stat"><b>${cnt(\'newdoc\')}</b><i>ждут сверки с письмом 2026</i></div>\n  <div class="stat bad"><b>${cnt(\'expired\')}</b><i>по истёкшему письму</i></div>`;';
+          const newStats='const verifiedCount=cnt(\'fresh2026\')+cnt(\'verified2025\')+cnt(\'verified2024\')+cnt(\'verified2023\');\nconst reviewCount=cnt(\'check\')+cnt(\'newdoc\');\ndocument.getElementById(\'stats\').innerHTML = `\n  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>\n  <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>\n  <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>\n  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>\n  <div class="stat bad"><b>${cnt(\'expired\')}</b><i>по истёкшему документу</i></div>`;';
+          if(!app.includes(oldStats))throw new Error('Expected stats block not found');
+          app=app.replace(oldStats,newStats);
+          fs.writeFileSync('app.js',app);
           NODE
-      - name: Commit temporary unresolved audit
+          node --check app.js
+      - name: Commit transparent counters
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add remaining-unverified-temp.json
-          git commit -m "Audit remaining unresolved KinoRates records [skip ci]"
+          git add app.js
+          git commit -m "Clarify KinoRates verification counters"
+          git pull --rebase origin main
           git push
