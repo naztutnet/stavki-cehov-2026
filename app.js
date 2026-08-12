@@ -102,8 +102,8 @@ const cnt = s => STATUS_COUNTS.get(s)||0;
 const verifiedCount=cnt('fresh2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');
 const reviewCount=cnt('check')+cnt('newdoc');
 document.getElementById('stats').innerHTML = `
-  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
   <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>
+  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
   <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
   <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
   <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>
