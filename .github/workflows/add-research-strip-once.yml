@@ -1,4 +1,4 @@
-name: Audit Unresolved Rates Once
+name: Update Source Methodology Copy Once
 
 on:
   push:
@@ -9,28 +9,35 @@ permissions:
   contents: write
 
 jobs:
-  audit:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Export unresolved rates
+      - name: Clarify homepage source methodology
         run: |
-          node - <<'NODE'
-          const fs=require('fs'),vm=require('vm');
-          const context={window:{}};vm.createContext(context);
-          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),context,{filename:'rates-data.js'});
-          const data=context.window.KINORATES_DATA;
-          const unresolved=data.filter(r=>r.status==='check'||r.status==='newdoc');
-          const producers=data.filter(r=>r.id>=230&&r.id<=244);
-          fs.writeFileSync('unresolved-rates-temp.json',JSON.stringify({total:data.length,unresolved_count:unresolved.length,unresolved,producers},null,2));
-          console.log(`Exported ${unresolved.length} unresolved rows; producer slice ${producers.length}`);
-          NODE
-      - name: Commit audit report
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='  <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>'
+          new='  <p class="eyebrow">KinoRates · ревизия базы 13.08.2026</p>'
+          if old in s:
+              s=s.replace(old,new,1)
+          old_lede='  <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>'
+          new_lede='  <p class="lede">Основная база собрана из справочника МПК и реестра «Точно продюсер». После ревизии ставки разделены по уровню подтверждения: первоисточники, позиции на проверке, истёкшие документы и архивные ориентиры. Рыночные исследования показаны отдельно и не подменяют официальные ставки.</p>'
+          if old_lede not in s:
+              raise SystemExit('lede marker not found')
+          s=s.replace(old_lede,new_lede,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate and commit
         run: |
+          grep -q 'Рыночные исследования показаны отдельно' index.html
+          grep -q 'ревизия базы 13.08.2026' index.html
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add unresolved-rates-temp.json
-          git commit -m "Export unresolved rates for source audit"
+          git add index.html
+          git commit -m "Clarify source methodology on homepage"
           git push
