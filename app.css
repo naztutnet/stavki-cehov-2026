@@ -332,3 +332,14 @@ header .eyebrow{padding-right:390px}
 
 /* source range hint */
 .rate-range-note{display:block;margin-top:5px;color:var(--ink-3);font-size:8px;line-height:1.35;font-weight:500}
+
+
+/* market evidence in profession detail */
+.market-disclaimer{margin:5px 0 10px;color:var(--ink-3);font-size:8.5px;line-height:1.45}
+.market-evidence-list{display:grid;gap:7px;margin-top:7px}
+.market-evidence-item{padding:10px 11px;border:1px solid var(--rule);border-radius:8px;background:#fafbf9}
+.market-evidence-meta{margin-bottom:4px;font:700 7.5px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--blue)}
+.market-evidence-item strong{display:block;font-size:10px;line-height:1.3}
+.market-evidence-item p{margin:5px 0!important;font-size:9px!important;line-height:1.45!important;color:var(--ink-2)!important}
+.market-evidence-item small{display:block;margin-bottom:5px;color:var(--ink-3);font-size:7.5px;line-height:1.35}
+.market-evidence-item a{font-size:8.5px;font-weight:650;text-decoration:none}

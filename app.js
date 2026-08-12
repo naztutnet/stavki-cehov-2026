@@ -41,6 +41,7 @@ privacyDialog.addEventListener('click',e=>{if(e.target===privacyDialog)privacyDi
 document.querySelector('footer [data-open-privacy]').addEventListener('click',()=>{cookieBanner.hidden=false});
 const DATA = window.KINORATES_DATA;if(!Array.isArray(DATA))throw new Error('KinoRates data unavailable');
 const SRC=Array.isArray(window.KINORATES_SOURCES)?window.KINORATES_SOURCES.map(s=>({...s})):[];
+const MARKET=Array.isArray(window.KINORATES_MARKET_DATA)?window.KINORATES_MARKET_DATA.map(item=>({...item})):[];
 const SCREENWRITER_RATES='https://unikino.ru/%D0%B3%D0%B8%D0%BB%D1%8C%D0%B4%D0%B8%D1%8F-%D0%BA%D0%B8%D0%BD%D0%BE%D0%B4%D1%80%D0%B0%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B3%D0%BE%D0%B2-%D1%81%D0%BE%D1%8E%D0%B7%D0%B0-%D0%BA%D0%B8%D0%BD%D0%B5%D0%BC-10/#more-97531';
 const isScreenwriter=r=>r.dept==='Сценарно-редакторский департамент';
 const RATE_BY_ID=new Map(DATA.map(r=>[r.id,r]));
@@ -70,6 +71,18 @@ function sourceYear(r){const text=[r.eff,r.src].filter(Boolean).join(' '),m=text
 function sourceMeta(r){return {kind:SOURCE_KIND[r.status]||'Источник',year:sourceYear(r),confirmation:CONFIRMATION[r.status]||TIP[r.status],periodLine:r.eff?`Дата / период источника: ${r.eff}`:'Дата / период источника не указаны'}}
 function sourceRangeText(r){const t=String(r.amount_text||'').trim();return /\d[\d\s]*\s*[–—-]\s*\d/.test(t)?t:''}
 function rateRangeHint(r){const t=sourceRangeText(r);return t?`<small class="rate-range-note">Рекомендация источника: ${esc(t)}${/₽/.test(t)?'':' ₽'}</small>`:''}
+function marketItemMatches(item,r){
+  const m=item&&item.match||{};
+  if(m.dept&&r.dept!==m.dept)return false;
+  if(Array.isArray(m.deptIncludes)&&!m.deptIncludes.some(x=>r.dept.includes(x)))return false;
+  if(Array.isArray(m.profIncludes)&&!m.profIncludes.some(x=>r.prof.includes(x)))return false;
+  return Boolean(m.dept||m.deptIncludes||m.profIncludes);
+}
+function marketEvidenceFor(r){return MARKET.filter(item=>marketItemMatches(item,r)).sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,3)}
+function marketEvidenceHtml(r){
+  const items=marketEvidenceFor(r);if(!items.length)return '';
+  return `<div class="detail-section market-evidence"><b>Рыночные данные</b><p class="market-disclaimer">Не заменяют официальную или рекомендованную ставку выше. Год и период исследования указаны отдельно.</p><div class="market-evidence-list">${items.map(item=>`<article class="market-evidence-item"><div class="market-evidence-meta">${esc(item.kind)} · ${esc(item.year)}</div><strong>${esc(item.title)}</strong><p>${esc(item.text)}</p><small>${esc(item.period)}</small><a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.source)} →</a></article>`).join('')}</div></div>`;
+}
 const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','сезон','гонорар','договор','минута','человек','единоразово'];
 const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const cleanText=(value,max=160)=>String(value??'').replace(/[\u0000-\u001F\u007F]/g,' ').trim().slice(0,max);
@@ -202,6 +215,7 @@ function renderDetail(r){
     <div class="detail-section"><b>Переработка</b><p>${r.ot||'В письме не зафиксирована.'}</p></div>
     <div class="detail-section"><b>Условия и доплаты</b><p>${r.extra||'Дополнительные условия не указаны.'}</p></div>
     <div class="detail-section"><b>Источник</b><p>${r.src}<br>${meta.periodLine}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
+    ${marketEvidenceHtml(r)}
     ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
     ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:''}
     <button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>
