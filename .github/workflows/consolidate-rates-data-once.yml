@@ -1,0 +1,128 @@
+name: One-shot canonical rates data migration
+
+on:
+  push:
+    paths:
+      - '.github/workflows/consolidate-rates-data-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Consolidate runtime mutations and compact dataset
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+
+          function loadWindowScript(file){
+            const context={window:{}};vm.createContext(context);
+            vm.runInContext(fs.readFileSync(file,'utf8'),context,{filename:file});
+            return context.window;
+          }
+
+          const dataWindow=loadWindowScript('rates-data.js');
+          const sourceWindow=loadWindowScript('sources-data.js');
+          const baseData=JSON.parse(JSON.stringify(dataWindow.KINORATES_DATA));
+          const baseSources=JSON.parse(JSON.stringify(sourceWindow.KINORATES_SOURCES));
+          const app=fs.readFileSync('app.js','utf8');
+
+          const startMarker="const DATA = window.KINORATES_DATA;if(!Array.isArray(DATA))throw new Error('KinoRates data unavailable');";
+          const endMarker='const RATE_BY_ID=new Map(DATA.map(r=>[r.id,r]));';
+          const start=app.indexOf(startMarker),end=app.indexOf(endMarker);
+          if(start<0||end<0||end<=start)throw new Error('Не удалось найти legacy-блок мутаций данных в app.js');
+
+          const runtimeWindow={
+            KINORATES_DATA:JSON.parse(JSON.stringify(baseData)),
+            KINORATES_SOURCES:JSON.parse(JSON.stringify(baseSources))
+          };
+          const legacyBlock=app.slice(start,end)+"\nwindow.__MIGRATED_DATA=DATA;window.__MIGRATED_SOURCES=SRC;";
+          vm.runInNewContext(legacyBlock,{window:runtimeWindow,console},{filename:'legacy-data-block.js'});
+          const canonicalData=runtimeWindow.__MIGRATED_DATA;
+          const canonicalSources=runtimeWindow.__MIGRATED_SOURCES;
+
+          if(!Array.isArray(canonicalData)||canonicalData.length!==420)throw new Error(`Ожидалось 420 итоговых записей, получено ${canonicalData?.length}`);
+          const ids=canonicalData.map(row=>row.id);
+          if(new Set(ids).size!==ids.length||ids.some(id=>!Number.isSafeInteger(id)))throw new Error('Некорректные или дублирующиеся ID после миграции');
+          if(!Array.isArray(canonicalSources)||canonicalSources.length<baseSources.length)throw new Error('Потеряны источники при миграции');
+
+          const fields=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
+          const expectedKeys=[...fields].sort().join('|');
+          for(const row of canonicalData){
+            const keys=Object.keys(row).sort().join('|');
+            if(keys!==expectedKeys)throw new Error(`Неожиданная схема записи id=${row.id}: ${keys}`);
+          }
+
+          const rawFields=new Set(['amount','id']);
+          const dicts=fields.map(field=>rawFields.has(field)?null:[]);
+          const maps=fields.map(field=>rawFields.has(field)?null:new Map());
+          const rows=canonicalData.map(row=>fields.map((field,index)=>{
+            const value=row[field];
+            if(rawFields.has(field))return value;
+            if(value===null)return null;
+            if(typeof value!=='string')throw new Error(`Поле ${field} id=${row.id} должно быть строкой или null`);
+            const map=maps[index],dict=dicts[index];
+            if(!map.has(value)){map.set(value,dict.length);dict.push(value)}
+            return map.get(value);
+          }));
+
+          const compact=`/* Canonical KinoRates dataset: 420 runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(fields)},D=${JSON.stringify(dicts)},R=${JSON.stringify(rows)};return R.map(r=>{const o={};for(let i=0;i<K.length;i++){const d=D[i],v=r[i];o[K[i]]=d===null?v:(v===null?null:d[v])}return o})})();\n`;
+          const testContext={window:{}};vm.createContext(testContext);vm.runInContext(compact,testContext);
+          if(JSON.stringify(testContext.window.KINORATES_DATA)!==JSON.stringify(canonicalData))throw new Error('Компактная база не восстанавливается побайтно в тот же JSON');
+
+          const canonicalSourcesJs=`window.KINORATES_SOURCES = ${JSON.stringify(canonicalSources)};\n`;
+          const writerUrl='https://unikino.ru/%D0%B3%D0%B8%D0%BB%D1%8C%D0%B4%D0%B8%D1%8F-%D0%BA%D0%B8%D0%BD%D0%BE%D0%B4%D1%80%D0%B0%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B3%D0%BE%D0%B2-%D1%81%D0%BE%D1%8E%D0%B7%D0%B0-%D0%BA%D0%B8%D0%BD%D0%B5%D0%BC-10/#more-97531';
+          const replacement=`const DATA = window.KINORATES_DATA;if(!Array.isArray(DATA))throw new Error('KinoRates data unavailable');\nconst SRC=Array.isArray(window.KINORATES_SOURCES)?window.KINORATES_SOURCES.map(s=>({...s})):[];\nconst SCREENWRITER_RATES='${writerUrl}';\nconst isScreenwriter=r=>r.dept==='Сценарно-редакторский департамент';\n`;
+          const newApp=app.slice(0,start)+replacement+app.slice(end);
+          const forbidden=['CG_RATES_2023','COLOR_CORRECTION_FIXES','OPERATOR_POST_DOC','STEADICAM_DOC','SECOND_CAMERA_DOC','SHOW_CAMERA_DOC','FOCUS_PULLER_DOC','DATA.push(','DATA.splice(','SRC.push('];
+          for(const token of forbidden)if(newApp.includes(token))throw new Error(`Legacy-токен остался в app.js: ${token}`);
+
+          fs.writeFileSync('rates-data.js',compact);
+          fs.writeFileSync('sources-data.js',canonicalSourcesJs);
+          fs.writeFileSync('app.js',newApp);
+          const report={
+            base_records:baseData.length,
+            runtime_records:canonicalData.length,
+            base_sources:baseSources.length,
+            runtime_sources:canonicalSources.length,
+            rates_before_bytes:Buffer.byteLength(fs.readFileSync('rates-data.js.before','utf8')),
+          };
+          NODE
+        shell: bash
+
+      - name: Verify generated production files and write size report
+        run: |
+          # The migration script validates semantic identity before these checks.
+          node --check rates-data.js
+          node --check sources-data.js
+          node --check app.js
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const c={window:{}};vm.createContext(c);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);
+          vm.runInContext(fs.readFileSync('sources-data.js','utf8'),c);
+          if(c.window.KINORATES_DATA.length!==420)throw new Error('После упаковки база не содержит 420 позиций');
+          if(new Set(c.window.KINORATES_DATA.map(r=>r.id)).size!==420)throw new Error('После упаковки появились дубли ID');
+          const report={
+            records:c.window.KINORATES_DATA.length,
+            sources:c.window.KINORATES_SOURCES.length,
+            rates_bytes:fs.statSync('rates-data.js').size,
+            app_bytes:fs.statSync('app.js').size,
+            sources_bytes:fs.statSync('sources-data.js').size
+          };
+          fs.writeFileSync('rates-data-migration-report.json',JSON.stringify(report,null,2)+'\n');
+          console.log(report);
+          NODE
+
+      - name: Commit canonical compact data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rates-data.js sources-data.js app.js rates-data-migration-report.json
+          git commit -m "Consolidate KinoRates into one canonical dataset"
+          git pull --rebase origin main
+          git push
