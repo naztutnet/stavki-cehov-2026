@@ -1,0 +1,48 @@
+name: One-shot reorder stats
+
+on:
+  push:
+    paths:
+      - '.github/workflows/reorder-stats-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  reorder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reorder stats cards only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('app.js')
+          s = p.read_text(encoding='utf-8')
+          old = '''document.getElementById('stats').innerHTML = `
+  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
+  <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>
+  <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
+  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
+  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>
+  <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;'''
+          new = '''document.getElementById('stats').innerHTML = `
+  <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>
+  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
+  <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
+  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
+  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>
+  <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;'''
+          if old not in s:
+              raise SystemExit('Expected stats block not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+          node --check app.js
+      - name: Commit reorder
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js
+          git commit -m "Put departments first in stats"
+          git pull --rebase origin main
+          git push
