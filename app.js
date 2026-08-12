@@ -126,11 +126,13 @@ const unpublishedCount=cnt('no_public_rate');
 document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${depts.length}</b><i>цеха и департамента</i></div>
   <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
-  <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
+  <div class="stat ok"><b>${verifiedCount}</b><i>подтверждены первоисточниками</i></div>
   <div class="stat"><b>${unpublishedCount}</b><i>без публичной ставки</i></div>
-  <div class="stat market"><b>${cnt('market2025')}</b><i>рыночных ориентиров</i></div>
-  <div class="stat bad"><b>${cnt('expired')}</b><i>исторические ставки</i></div>
-  <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;
+  <div class="stats-secondary">
+    <span><b>${cnt('market2025')}</b> рыночных ориентиров</span>
+    <span><b>${cnt('expired')}</b> историческая ставка</span>
+    <span><b>${cnt('archive')}</b> архивный ориентир</span>
+  </div>`;
 
 // фильтры
 const uSel = document.getElementById('unit'), cSel = document.getElementById('content');
