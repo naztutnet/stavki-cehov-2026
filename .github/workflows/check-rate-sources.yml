@@ -1,6 +1,17 @@
 name: Проверка писем и ставок
 
 on:
+  push:
+    paths:
+      - 'index.html'
+      - 'app.js'
+      - 'app.css'
+      - 'rates-data.js'
+      - 'updates.js'
+      - 'check-log.js'
+      - 'scripts/**'
+      - 'data/**'
+      - '.github/workflows/check-rate-sources.yml'
   workflow_dispatch:
     inputs:
       publish_check:
@@ -22,7 +33,49 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверить структуру сайта и базу ставок
+        run: |
+          node --check app.js
+          node --check rates-data.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          index = Path('index.html').read_text(encoding='utf-8')
+          data_js = Path('rates-data.js').read_text(encoding='utf-8')
+          prefix = 'window.KINORATES_DATA = '
+          if not data_js.startswith(prefix) or not data_js.rstrip().endswith(';'):
+              raise SystemExit('Некорректная оболочка rates-data.js')
+          data = json.loads(data_js[len(prefix):].strip()[:-1])
+          if not isinstance(data, list) or len(data) < 300:
+              raise SystemExit(f'Подозрительный размер базы: {len(data) if isinstance(data, list) else "not-list"}')
+          ids = [row.get('id') for row in data if isinstance(row, dict)]
+          if len(ids) != len(data) or len(ids) != len(set(ids)):
+              raise SystemExit('В базе отсутствуют ID или найдены дубли ID')
+
+          required = [
+              '<link rel="stylesheet" href="app.css">',
+              '<script src="rates-data.js"></script>',
+              '<script src="app.js"></script>',
+          ]
+          for marker in required:
+              if marker not in index:
+                  raise SystemExit(f'В index.html отсутствует {marker}')
+          if index.index('<script src="rates-data.js"></script>') > index.index('<script src="app.js"></script>'):
+              raise SystemExit('app.js загружается раньше rates-data.js')
+          if '<style>' in index:
+              raise SystemExit('CSS снова встроен в index.html')
+          print(f'KinoRates validation OK: {len(data)} rate records')
+          PY
+          ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js
+
   check:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
