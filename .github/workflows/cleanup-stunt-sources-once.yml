@@ -1,0 +1,48 @@
+name: Cleanup Stunt Sources Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cleanup-stunt-sources-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove unsupported stunt letter attribution
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm'),c={window:{}};vm.createContext(c);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);
+          const data=c.window.KINORATES_DATA.map(r=>({...r}));
+          const ids=new Set([150,151,152,153]);
+          for(const r of data){
+            if(!ids.has(r.id))continue;
+            r.src='Требуется первоисточник';
+            r.eff='';
+            r.doc='';
+            r.status='check';
+            const note='Актуальный опубликованный документ с этой ставкой не найден в текущем разделе каскадерско-пиротехнического департамента МПК; цифра сохранена только как неподтвержденный ориентир.';
+            r.extra=(r.extra?String(r.extra).replace(/\s+$/,'')+' ':'')+note;
+          }
+          const K=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
+          const stringIndexes=K.map((_,i)=>i).filter(i=>i!==5&&i!==14),D=[],M=Array(K.length).fill(-1);
+          stringIndexes.forEach((fieldIndex,dictIndex)=>{M[fieldIndex]=dictIndex;const vals=[],seen=new Map();for(const row of data){const v=row[K[fieldIndex]];if(v==null)continue;if(!seen.has(v)){seen.set(v,vals.length);vals.push(v)}}D.push(vals)});
+          const maps=D.map(arr=>new Map(arr.map((v,i)=>[v,i])));
+          const R=data.map(row=>K.map((key,i)=>{const v=row[key];return M[i]>=0&&v!=null?maps[M[i]].get(v):v}));
+          fs.writeFileSync('rates-data.js',`/* Canonical KinoRates dataset: ${data.length} runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(K)},D=${JSON.stringify(D)},M=${JSON.stringify(M)},R=${JSON.stringify(R)};return R.map(r=>Object.fromEntries(K.map((k,i)=>[k,M[i]>=0&&r[i]!=null?D[M[i]][r[i]]:r[i]])))})();\n`);
+          const counts={};for(const r of data)counts[r.status]=(counts[r.status]||0)+1;
+          if(data.length!==451||counts.check!==7||counts.newdoc!==10)throw new Error(JSON.stringify({len:data.length,counts}));
+          for(const id of ids){const r=data.find(x=>x.id===id);if(!r||r.src!=='Требуется первоисточник'||r.eff||r.doc)throw new Error(`stunt cleanup failed for ${id}`)}
+          console.log({total:data.length,check:counts.check,newdoc:counts.newdoc});
+          NODE
+          node --check rates-data.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rates-data.js
+          git commit -m "Remove unsupported stunt letter attribution"
+          git push
