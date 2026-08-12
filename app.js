@@ -51,9 +51,11 @@ DATA.forEach(r=>{
   MAIN_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase());
   QUICK_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase());
 });
-const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};
+const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};
 const TIP = {
   fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",
+  official2026:"Ставка подтверждена официальной публикацией профессионального объединения на 2026 год.",
+  market2025:"Публичный отраслевой ориентир рынка 2025 года. Это не коллективное письмо профсоюза и не официальный минимальный тариф для кино.",
   check:"Ставка требует дополнительной проверки: нет актуального первоисточника, однозначно подтверждающего эту позицию.",
   newdoc:"Первичный документ найден, но конкретную цифру или категорию ещё нужно сверить с его содержанием.",
   verified2025:"Ставка подтверждена опубликованным коллективным письмом 2025 года. Более свежего письма на странице цеха не опубликовано.",
@@ -62,7 +64,7 @@ const TIP = {
   archive:"Архивный рыночный ориентир 2023 года. Используйте только как отправную точку и уточняйте ставку у исполнителя.",
   expired:"Срок действия исходного документа закончился. Ставка приведена только как исторический ориентир."
 };
-const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','минута','человек','единоразово'];
+const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','сезон','гонорар','договор','минута','человек','единоразово'];
 const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const cleanText=(value,max=160)=>String(value??'').replace(/[\u0000-\u001F\u007F]/g,' ').trim().slice(0,max);
 const clampNumber=(value,min,max,fallback)=>{const number=Number(value);return Number.isFinite(number)?Math.min(max,Math.max(min,number)):fallback};
@@ -99,13 +101,14 @@ const conts = [...new Set(DATA.map(r=>r.content))].sort((a,b)=>a.localeCompare(b
 
 // счётчики
 const cnt = s => STATUS_COUNTS.get(s)||0;
-const verifiedCount=cnt('fresh2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');
+const verifiedCount=cnt('fresh2026')+cnt('official2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');
 const reviewCount=cnt('check')+cnt('newdoc');
 document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${depts.length}</b><i>цеха и департамента</i></div>
   <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
   <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
   <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
+  <div class="stat market"><b>${cnt('market2025')}</b><i>рыночных ориентиров</i></div>
   <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>
   <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;
 
@@ -121,14 +124,14 @@ function match(r){
   if(state.unit && r.unit!==state.unit) return false;
   if(state.content && r.content!==state.content) return false;
   if(state.dept && r.dept!==state.dept) return false;
-  if(state.only26 && r.status!=='fresh2026') return false;
+  if(state.only26 && !['fresh2026','official2026'].includes(r.status)) return false;
   if(state.words.length){
     const h=MAIN_SEARCH_BY_ID.get(r.id)||'';
     if(!state.words.every(w=>h.includes(w))) return false;
   }
   return true;
 }
-const dnum = d => { const [a,b,c]=d.split('.'); return +(c+b+a); };
+const dnum=d=>{const text=String(d||'');const full=text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);if(full)return +(full[3]+full[2]+full[1]);const year=text.match(/(20\d{2})/);return year?+(year[1]+'0000'):0};
 function sorted(rows){
   const o={'месяц':0,'проект':1,'аккорд':2,'серия':3,'смена':4,'полсмены':5,'час':6,'единоразово':7,'человек':8,'минута':9};
   if(state.sort==='hi') return rows.sort((a,b)=>(b.amount??-1)-(a.amount??-1));
@@ -137,9 +140,11 @@ function sorted(rows){
   return rows.sort((a,b)=>a.dept.localeCompare(b.dept,'ru')||(o[a.unit]??9)-(o[b.unit]??9)||(b.amount??0)-(a.amount??0));
 }
 function amountCell(r){
-  if(r.amount==null) return `<td class="sum txt">${r.amount_text||'по договорённости'}</td>`;
+  const text=String(r.amount_text||'');
+  if(r.amount==null) return `<td class="sum txt">${esc(text||'по договорённости')}</td>`;
+  if(/[–—+%]|бесплатно|договорённости/i.test(text)) return `<td class="sum txt">${esc(text)}</td>`;
   const per = r.unit==='месяц' ? 'в месяц' : r.unit==='смена' ? 'за смену' : 'за '+r.unit;
-  const extra = r.amount_text.replace(/^[\d\s]+/,'').trim();
+  const extra = text.replace(/^[\d\s]+/,'').trim();
   return `<td class="sum">${fmt(r.amount)}<small>${per}${extra?' · '+extra:''}</small></td>`;
 }
 function render(){
@@ -181,23 +186,26 @@ function revealMobileDetail(){
 function renderDetail(r){
   const pane=document.getElementById('detailPane');
   if(!r){pane.innerHTML='<div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div>';return}
-  const amount=r.amount?fmt(r.amount):(r.amount_text||'по договорённости');
+  const amountText=String(r.amount_text||'');
+  const amount=amountText&&(/[–—+%]|бесплатно|договорённости/i.test(amountText))?amountText:(r.amount?fmt(r.amount):(amountText||'по договорённости'));
+  const sourcePeriod=r.status==='market2025'?'Рыночный ориентир: 2025':(r.eff?`Действует с ${r.eff}`:'Дата не указана');
   pane.innerHTML=`<div class="detail-card">
     <div class="kicker">${r.dept}</div><h4>${r.prof}</h4><div class="cond">${r.cond||'Условия не указаны'}</div>
     <div class="rate"><b>${amount}</b><span>${r.unit} · ${r.region}</span></div>
     <div class="detail-section"><b>Актуальность</b><p><span class="badge b-${r.status}">${LBL[r.status]}</span><br><br>${TIP[r.status]}</p></div>
     <div class="detail-section"><b>Переработка</b><p>${r.ot||'В письме не зафиксирована.'}</p></div>
     <div class="detail-section"><b>Условия и доплаты</b><p>${r.extra||'Дополнительные условия не указаны.'}</p></div>
-    <div class="detail-section"><b>Источник</b><p>${r.src}<br>Действует с ${r.eff}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть письмо цеха →</a>`:''}</p></div>
+    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${sourcePeriod}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
     ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
-    ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:`<button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>`}
+    ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:''}
+    <button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>
   </div>`;
 }
 // смета
 function newEstimate(r){
   return {r,start:'',end:'',rate:r.amount||0,qty:1,people:1,tax:.08};
 }
-const quantityLabels={'смена':'Смен','полсмены':'Полусмен','час':'Часов','серия':'Серий','минута':'Минут','проект':'Проектов','аккорд':'Аккордов','человек':'Человек','единоразово':'Количество','месяц':'Специалистов'};
+const quantityLabels={'смена':'Смен','полсмены':'Полусмен','час':'Часов','серия':'Серий','сезон':'Сезонов','гонорар':'Гонораров','договор':'Договоров','минута':'Минут','проект':'Проектов','аккорд':'Аккордов','человек':'Человек','единоразово':'Количество','месяц':'Специалистов'};
 const quantityLabel=unit=>quantityLabels[unit]||'Количество';
 function parseDate(value){
   if(!value)return null;

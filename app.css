@@ -322,3 +322,9 @@ header .eyebrow{padding-right:390px}
 .research-links span{color:var(--ink-3);font-size:8.5px;line-height:1.4}
 @media(max-width:1100px){.research-strip{grid-template-columns:1fr}.research-intro{border-right:0;border-bottom:1px solid var(--rule)}.research-links{grid-template-columns:repeat(2,minmax(0,1fr))}.research-links a:nth-child(2){border-right:0}.research-links a:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
 @media(max-width:620px){.research-links{grid-template-columns:1fr}.research-links a,.research-links a:nth-child(2){border-right:0;border-bottom:1px solid var(--rule)}.research-links a:last-child{border-bottom:0}}
+
+/* writer + market status expansion */
+.b-official2026{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok)}
+.b-market2025{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}
+.stat.market b{color:var(--info)}
+@media(min-width:921px){.stats{grid-template-columns:repeat(7,minmax(0,1fr))}.stat{min-width:0;padding:11px 10px}.stat b{font-size:20px}.stat i{font-size:7.5px;line-height:1.25}}
