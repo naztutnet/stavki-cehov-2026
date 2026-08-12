@@ -1,0 +1,67 @@
+name: One-shot app asset extraction
+
+on:
+  push:
+    paths:
+      - '.github/workflows/split-app-assets-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract application CSS and JavaScript
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          path=Path('index.html')
+          text=path.read_text(encoding='utf-8')
+
+          styles=re.findall(r'<style>\n?(.*?)\n?</style>',text,flags=re.S|re.I)
+          if len(styles)!=1:
+              raise SystemExit(f'Expected one style block, found {len(styles)}')
+          css=styles[0].strip()+"\n"
+          if len(css)<10000:
+              raise SystemExit('Extracted CSS unexpectedly small')
+          Path('app.css').write_text(css,encoding='utf-8')
+          text=re.sub(r'<style>\n?.*?\n?</style>','<link rel="stylesheet" href="app.css">',text,count=1,flags=re.S|re.I)
+
+          blocks=list(re.finditer(r'<script(?:\s[^>]*)?>(.*?)</script>',text,flags=re.S|re.I))
+          executable=[m for m in blocks if m.group(1).strip() and not m.group(1).lstrip().startswith('{')]
+          if len(executable)!=1:
+              raise SystemExit(f'Expected one executable inline script, found {len(executable)}')
+          match=executable[0]
+          js=match.group(1).strip()+"\n"
+          if len(js)<30000:
+              raise SystemExit('Extracted JS unexpectedly small')
+          Path('app.js').write_text(js,encoding='utf-8')
+          text=text[:match.start()]+'<script src="app.js"></script>'+text[match.end():]
+
+          if '<script src="updates.js"></script>' not in text or '<script src="check-log.js"></script>' not in text or '<script src="rates-data.js"></script>' not in text:
+              raise SystemExit('Required data scripts missing after extraction')
+          if text.index('<script src="rates-data.js"></script>') > text.index('<script src="app.js"></script>'):
+              raise SystemExit('Application script loads before rate data')
+
+          path.write_text(text,encoding='utf-8')
+          PY
+
+      - name: Validate and commit
+        run: |
+          git diff --check
+          test -s app.css
+          test -s app.js
+          node --check app.js
+          grep -q '<link rel="stylesheet" href="app.css">' index.html
+          grep -q '<script src="app.js"></script>' index.html
+          ! grep -q '<style>' index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html app.css app.js
+          git commit -m "Split application CSS and JavaScript from HTML [skip ci]"
+          git push
