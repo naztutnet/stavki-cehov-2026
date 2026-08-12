@@ -116,7 +116,12 @@ def download(source: dict[str, str]) -> bytes:
 def main() -> int:
     sources = json.loads(CONFIG.read_text(encoding="utf-8"))
     previous = json.loads(STATE.read_text(encoding="utf-8")) if STATE.exists() else {}
-    current = dict(previous)
+    source_ids = {source["id"] for source in sources}
+    current = {
+        source_id: previous[source_id]
+        for source_id in source_ids
+        if source_id in previous
+    }
     changes: list[dict[str, str]] = []
     errors: list[str] = []
     checked_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -138,7 +143,11 @@ def main() -> int:
         if old.get("sha256") and old["sha256"] != digest:
             changes.append(source)
 
-    STATE.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    state_text = json.dumps(current, ensure_ascii=False, indent=2) + "\n"
+    previous_state_text = STATE.read_text(encoding="utf-8") if STATE.exists() else ""
+    state_updated = state_text != previous_state_text
+    if state_updated:
+        STATE.write_text(state_text, encoding="utf-8")
 
     lines = ["# Проверка источников KinoRates", "", f"Проверено: {checked_at}", ""]
     if changes:
@@ -163,6 +172,7 @@ def main() -> int:
             file.write(f"changed={'true' if changes else 'false'}\n")
             file.write(f"errors={'true' if errors else 'false'}\n")
             file.write(f"log_updated={'true' if log_updated else 'false'}\n")
+            file.write(f"state_updated={'true' if state_updated else 'false'}\n")
     print("\n".join(lines))
     return 0 if not errors else 2
 
