@@ -24,26 +24,23 @@ jobs:
           const byId=new Map(data.map(r=>[r.id,r]));
           const get=id=>{const r=byId.get(id);if(!r)throw new Error(`Missing id ${id}`);return r};
           const setStatus=(ids,status)=>{for(const id of ids){const r=get(id);if(r.status!=='check')throw new Error(`Expected check for ${id}, got ${r.status}`);if(!r.doc)throw new Error(`Expected official document for ${id}`);r.status=status}};
-
           const verified2023=[...Array.from({length:16},(_,i)=>24+i),...Array.from({length:8},(_,i)=>69+i)];
           const verified2024=[104,105,106,107,154,162,197,198,199,200,219,222,223,225];
           const expiredColor=[...Array.from({length:9},(_,i)=>332+i)];
           setStatus(verified2023,'verified2023');
           setStatus(verified2024,'verified2024');
           for(const id of expiredColor){
-            const r=get(id);if(r.status!=='check')throw new Error(`Expected check for colorist ${id}`);
+            const r=get(id);
+            if(r.status!=='check')throw new Error(`Expected check for colorist ${id}`);
             r.status='expired';
             if(!r.extra.includes('31.12.2022'))r.extra=(r.extra+' Документ прямо ограничивает срок действия ценовой политики датой 31.12.2022.').trim();
           }
-
-          // Advertisement rate ID 220 is absent from the linked 2024 collective letter.
           const unsupported=get(220);
           if(unsupported.status!=='check'||unsupported.amount!==34000)throw new Error('Unexpected ID 220 precondition');
           unsupported.src='Требуется первоисточник';
           unsupported.doc='';
           unsupported.eff='';
           unsupported.extra='Ставка 34 000 ₽ требует первичного подтверждения: опубликованное письмо вторых операторов и камераменов с 01.03.2024 не содержит рекламной позиции.';
-
           const fields=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
           const rawFields=new Set(['amount','id']);
           const dicts=fields.map(f=>rawFields.has(f)?null:[]),maps=fields.map(f=>rawFields.has(f)?null:new Map());
@@ -66,26 +63,21 @@ jobs:
           const newLbl='const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"есть письмо 2026", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};';
           if(!app.includes(oldLbl))throw new Error('LBL block not found');
           app=app.replace(oldLbl,newLbl);
-          const oldTip=`const TIP = {
-  fresh2026:"Цифра взята из цехового письма 2026 года и сверена 30.07.2026.",
-  check:"Цифра из сводного реестра. Более свежего письма не найдено — уточните у цеха.",
-  newdoc:"Цех выпустил письмо, вступившее в силу в 2026 году. Цифра здесь — из реестра февраля 2025, откройте письмо и сверьте.",
-  verified2025:"Ставка подтверждена опубликованным коллективным письмом 2025 года. Более свежего письма не найдено.",
-  archive:"Архивный рыночный ориентир 2023 года. Используйте только как отправную точку и уточняйте ставку у исполнителя.",
-  expired:"Срок действия письма закончился. Ставка приведена как ориентир."
-};`;
-          const newTip=`const TIP = {
-  fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",
-  check:"Ставка требует дополнительной проверки: нет актуального первоисточника, однозначно подтверждающего эту позицию.",
-  newdoc:"Цех выпустил письмо, вступившее в силу в 2026 году, но эту цифру ещё нужно сверить с текстом первоисточника.",
-  verified2025:"Ставка подтверждена опубликованным коллективным письмом 2025 года. Более свежего письма на странице цеха не опубликовано.",
-  verified2024:"Ставка подтверждена опубликованным коллективным письмом 2024 года. Более свежего письма по этой категории на странице цеха не опубликовано.",
-  verified2023:"Ставка подтверждена опубликованным коллективным письмом 2023 года. Более свежего письма по этой категории на странице цеха не опубликовано.",
-  archive:"Архивный рыночный ориентир 2023 года. Используйте только как отправную точку и уточняйте ставку у исполнителя.",
-  expired:"Срок действия исходного документа закончился. Ставка приведена только как исторический ориентир."
-};`;
-          if(!app.includes(oldTip))throw new Error('TIP block not found');
-          app=app.replace(oldTip,newTip);
+          const tipLines=[
+            'const TIP = {',
+            '  fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",',
+            '  check:"Ставка требует дополнительной проверки: нет актуального первоисточника, однозначно подтверждающего эту позицию.",',
+            '  newdoc:"Цех выпустил письмо, вступившее в силу в 2026 году, но эту цифру ещё нужно сверить с текстом первоисточника.",',
+            '  verified2025:"Ставка подтверждена опубликованным коллективным письмом 2025 года. Более свежего письма на странице цеха не опубликовано.",',
+            '  verified2024:"Ставка подтверждена опубликованным коллективным письмом 2024 года. Более свежего письма по этой категории на странице цеха не опубликовано.",',
+            '  verified2023:"Ставка подтверждена опубликованным коллективным письмом 2023 года. Более свежего письма по этой категории на странице цеха не опубликовано.",',
+            '  archive:"Архивный рыночный ориентир 2023 года. Используйте только как отправную точку и уточняйте ставку у исполнителя.",',
+            '  expired:"Срок действия исходного документа закончился. Ставка приведена только как исторический ориентир."',
+            '};'
+          ];
+          const tipRegex=/const TIP = \{[\s\S]*?\n\};\nconst SAFE_UNITS=/;
+          if(!tipRegex.test(app))throw new Error('TIP block not found');
+          app=app.replace(tipRegex,tipLines.join('\n')+'\nconst SAFE_UNITS=');
           fs.writeFileSync('app.js',app);
           NODE
 
