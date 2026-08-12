@@ -133,7 +133,7 @@ function match(r){
 }
 const dnum=d=>{const text=String(d||'');const full=text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);if(full)return +(full[3]+full[2]+full[1]);const year=text.match(/(20\d{2})/);return year?+(year[1]+'0000'):0};
 function sorted(rows){
-  const o={'месяц':0,'проект':1,'аккорд':2,'серия':3,'смена':4,'полсмены':5,'час':6,'единоразово':7,'человек':8,'минута':9};
+  const o={'месяц':0,'проект':1,'сезон':2,'серия':3,'гонорар':4,'договор':5,'аккорд':6,'смена':7,'полсмены':8,'час':9,'единоразово':10,'человек':11,'минута':12};
   if(state.sort==='hi') return rows.sort((a,b)=>(b.amount??-1)-(a.amount??-1));
   if(state.sort==='lo') return rows.sort((a,b)=>(a.amount??1e12)-(b.amount??1e12));
   if(state.sort==='date') return rows.sort((a,b)=>dnum(b.eff)-dnum(a.eff)||a.dept.localeCompare(b.dept,'ru'));
@@ -161,7 +161,7 @@ function render(){
       <td class="unit">${r.unit}</td>
       ${amountCell(r)}
       <td><span class="badge b-${r.status}" title="${TIP[r.status]}">${LBL[r.status]}</span></td>
-      <td>${isScreenwriter(r)?`<a class="rate-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Ставки ↗</a>`:est.has(r.id)?`<button class="addbtn is-added" data-remove="${r.id}" title="Убрать из сметы" aria-label="Убрать из сметы" aria-pressed="true">−</button>`:`<button class="addbtn" data-add="${r.id}" title="Добавить в смету" aria-label="Добавить в смету" aria-pressed="false">+</button>`}</td>
+      <td>${est.has(r.id)?`<button class="addbtn is-added" data-remove="${r.id}" title="Убрать из сметы" aria-label="Убрать из сметы" aria-pressed="true">−</button>`:`<button class="addbtn" data-add="${r.id}" title="Добавить в смету" aria-label="Добавить в смету" aria-pressed="false">+</button>`}</td>
     </tr>`;
   }).join('');
 }
