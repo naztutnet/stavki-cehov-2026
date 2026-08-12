@@ -10,6 +10,7 @@ on:
       - 'sources-data.js'
       - 'updates.js'
       - 'check-log.js'
+      - 'og-image.png'
       - 'scripts/**'
       - 'data/**'
       - '.github/workflows/check-rate-sources.yml'
@@ -44,8 +45,12 @@ jobs:
           node --check app.js
           node --check rates-data.js
           node --check sources-data.js
+          node --check updates.js
+          node --check check-log.js
           python3 - <<'PY'
           import json
+          import re
+          import struct
           from pathlib import Path
 
           index = Path('index.html').read_text(encoding='utf-8')
@@ -96,6 +101,18 @@ jobs:
           if comment or quote or depth:
               raise SystemExit('Незакрытая конструкция в app.css')
 
+          og = Path('og-image.png').read_bytes()
+          if og[:8] != b'\x89PNG\r\n\x1a\n' or og[12:16] != b'IHDR':
+              raise SystemExit('og-image.png не является корректным PNG')
+          image_width, image_height = struct.unpack('>II', og[16:24])
+          width_match = re.search(r'<meta property="og:image:width" content="(\d+)">', index)
+          height_match = re.search(r'<meta property="og:image:height" content="(\d+)">', index)
+          if not width_match or not height_match:
+              raise SystemExit('В index.html отсутствуют размеры og:image')
+          meta_width, meta_height = int(width_match.group(1)), int(height_match.group(1))
+          if (image_width, image_height) != (meta_width, meta_height):
+              raise SystemExit(f'Размер OG не совпадает: PNG {image_width}x{image_height}, metadata {meta_width}x{meta_height}')
+
           required = [
               '<link rel="stylesheet" href="app.css">',
               '<script src="rates-data.js"></script>',
@@ -112,7 +129,7 @@ jobs:
               raise SystemExit('Нарушен порядок загрузки данных и app.js')
           if '<style>' in index:
               raise SystemExit('CSS снова встроен в index.html')
-          print(f'KinoRates validation OK: {len(data)} rate records, {len(sources)} sources')
+          print(f'KinoRates validation OK: {len(data)} rate records, {len(sources)} sources, OG {image_width}x{image_height}')
           PY
           ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js sources-data.js
 
