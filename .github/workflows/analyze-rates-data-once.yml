@@ -1,0 +1,62 @@
+name: One-shot rates data profiler
+
+on:
+  push:
+    paths:
+      - '.github/workflows/analyze-rates-data-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Profile repeated fields in rates-data.js
+        run: |
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          text=Path('rates-data.js').read_text(encoding='utf-8')
+          prefix='window.KINORATES_DATA = '
+          data=json.loads(text[len(prefix):].strip()[:-1])
+          fields=['dept','prof','cond','content','unit','amount_text','ot','extra','region','eff','src','status','doc']
+          report={'records':len(data),'file_bytes':len(text.encode('utf-8')),'fields':{}}
+          for field in fields:
+              values=[row.get(field) for row in data]
+              strings=[v for v in values if isinstance(v,str)]
+              counts=Counter(strings)
+              total=sum(len(v.encode('utf-8')) for v in strings)
+              unique=sum(len(v.encode('utf-8')) for v in counts)
+              repeated=total-unique
+              top=[{'value':v,'count':c,'bytes_each':len(v.encode('utf-8')),'repeat_waste_bytes':max(0,c-1)*len(v.encode('utf-8'))} for v,c in counts.most_common(12)]
+              report['fields'][field]={'non_null':sum(v is not None for v in values),'unique_values':len(counts),'total_string_bytes':total,'unique_string_bytes':unique,'repeat_waste_bytes':repeated,'top':top}
+          # Estimate a simple dictionary/index encoding for string fields with meaningful repetition.
+          dict_fields=[]
+          estimated=0
+          original_payload=0
+          for field,info in report['fields'].items():
+              original_payload += info['total_string_bytes']
+              if info['repeat_waste_bytes']>1000 and info['unique_values'] < len(data)*0.75:
+                  dict_fields.append(field)
+                  # rough UTF-8 payload estimate: one copy per unique string + ~3 bytes/reference average
+                  estimated += info['unique_string_bytes'] + len(data)*3
+              else:
+                  estimated += info['total_string_bytes']
+          report['candidate_dictionary_fields']=dict_fields
+          report['string_payload_bytes']=original_payload
+          report['estimated_dictionary_string_payload_bytes']=estimated
+          report['estimated_string_savings_bytes']=original_payload-estimated
+          Path('rates-data-profile.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:report[k] for k in ['records','file_bytes','candidate_dictionary_fields','string_payload_bytes','estimated_dictionary_string_payload_bytes','estimated_string_savings_bytes']},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit profile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rates-data-profile.json
+          git commit -m "Profile KinoRates rate data [skip ci]"
+          git push
