@@ -1,0 +1,211 @@
+name: Upgrade Writers And Producers Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/upgrade-writers-producers-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild canonical rate data
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const context={window:{}};vm.createContext(context);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),context,{filename:'rates-data.js'});
+          let data=context.window.KINORATES_DATA.map(r=>({...r}));
+          data=data.filter(r=>!((r.id>=230&&r.id<=244)||(r.id>=295&&r.id<=297)));
+          let nextId=Math.max(...data.map(r=>r.id))+1;
+          const writerUrl='https://www.unikino.ru/%D0%B3%D0%B8%D0%BB%D1%8C%D0%B4%D0%B8%D1%8F-%D0%BA%D0%B8%D0%BD%D0%BE%D0%B4%D1%80%D0%B0%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B3%D0%BE%D0%B2-%D1%81%D0%BE%D1%8E%D0%B7%D0%B0-%D0%BA%D0%B8%D0%BD%D0%B5%D0%BC-10/';
+          const writerSrc='Гильдия кинодраматургов Союза кинематографистов России — рекомендуемые авторские гонорары от 29.01.2026';
+          const baseWriter={dept:'Сценарно-редакторский департамент',region:'Россия',eff:'29.01.2026',src:writerSrc,status:'official2026',doc:writerUrl,ot:''};
+          const addWriter=(prof,cond,content,unit,amount,amount_text,extra='')=>data.push({...baseWriter,prof,cond,content,unit,amount,amount_text,extra,id:nextId++});
+          const tiers=(segment,content,unit,rows,extra='')=>rows.forEach(([level,amount,text])=>addWriter(`Сценарист — ${level} автор`,segment,content,unit,amount,text,extra));
+
+          addWriter('Сценарист','Короткий метр 15–20 минут · учебный / некоммерческий','Короткий метр','проект',0,'бесплатно','Рекомендация Гильдии: учебный и некоммерческий короткий метр — бесплатно.');
+          addWriter('Сценарист','Короткий метр 15–20 минут · коммерческий','Короткий метр','проект',null,'по договорённости','Рекомендация Гильдии: коммерческий короткий метр — по договорённости.');
+          tiers('Дневной / низкий сегмент','Сериал','гонорар',[
+            ['начинающий',100000,'100 000–200 000 ₽'],['уверенный',300000,'300 000–400 000 ₽'],['опытный',500000,'500 000+ ₽']
+          ],'В публикации Гильдии единица расчёта для дневного / низкого сегмента отдельно не уточнена; в KinoRates показан авторский гонорар без дополнительной интерпретации.');
+          tiers('Микродрама · сезон','Микродрама','сезон',[
+            ['начинающий',200000,'200 000–300 000 ₽'],['уверенный',400000,'400 000–600 000 ₽'],['опытный',700000,'700 000–800 000+ ₽']
+          ]);
+          tiers('Ситком · 24 минуты · гонорар за серию','Сериал','серия',[
+            ['начинающий',300000,'300 000–350 000 ₽'],['уверенный',400000,'400 000–500 000 ₽'],['опытный',700000,'700 000–800 000+ ₽']
+          ],'Для сезонов после первого Гильдия указывает коэффициент ×2.');
+          tiers('Прайм-сегмент · 24 минуты · гонорар за серию','Сериал','серия',[
+            ['начинающий',300000,'300 000–500 000 ₽'],['уверенный',500000,'500 000–800 000 ₽'],['опытный',900000,'900 000–1 500 000 ₽']
+          ]);
+          tiers('Прайм-сегмент · 45 минут · гонорар за серию','Сериал','серия',[
+            ['начинающий',400000,'400 000–600 000 ₽'],['уверенный',600000,'600 000–1 000 000 ₽'],['опытный',1000000,'1 000 000–2 500 000 ₽']
+          ]);
+          tiers('Полный метр · конкурс Министерства культуры · 90–120 минут','Полный метр','проект',[
+            ['начинающий',500000,'500 000–1 000 000 ₽'],['уверенный',1000000,'1 000 000–3 000 000 ₽'],['опытный',3000000,'3 000 000–7 000 000 ₽']
+          ]);
+          tiers('Полный метр · конкурс Фонда кино · 90–180 минут','Полный метр','проект',[
+            ['начинающий',1000000,'1 000 000–3 000 000 ₽'],['уверенный',3500000,'3 500 000–6 000 000 ₽'],['опытный',7000000,'7 000 000–15 000 000+ ₽']
+          ]);
+          tiers('Полный метр · роялти · 90–180 минут','Полный метр','проект',[
+            ['начинающий',1000000,'1 000 000 ₽ + 3%'],['уверенный',3000000,'3 000 000 ₽ + 5%'],['опытный',7000000,'7 000 000 ₽ + 7%']
+          ],'Гильдия указывает модель «минимальная сумма + процент».');
+          addWriter('Авторская комната','Эксклюзив · офлайн','Авторская комната','месяц',200000,'200 000+ ₽','Оклад от 200 000 ₽ в месяц + столько же за принятые серии аккорд в конце проекта.');
+          addWriter('Авторская комната','Неэксклюзив · онлайн','Авторская комната','месяц',100000,'100 000+ ₽','Оклад от 100 000 ₽ в месяц + столько же за принятые серии аккорд в конце проекта.');
+          addWriter('Сценарист','Договор опциона · бронь сценария на 6–18 месяцев','Специальный договор','договор',100000,'100 000–200 000 ₽','Применяется, если материал принадлежит автору; права возвращаются, если финансирование не найдено.');
+          addWriter('Сценарист','Договор If/Then','Специальный договор','договор',null,'+20–30% к стандартному договору','Оплата первого драфта при отчуждении прав; остальные драфты и оплата — после получения финансирования. Применяется, если студия нанимает автора.');
+
+          const producerUrl='https://t.me/tochnop2/832';
+          const producerSrc='«Точно продюсер» — минимальные продюсерские ставки в рекламе на 2025 год';
+          const producerExtra='Публичная публикация сообщества называет сумму минимальной нижней границей оплаты в рекламе. Это отраслевой рыночный ориентир, а не коллективное письмо профсоюза.';
+          const baseProducer={dept:'Продюсерский департамент',content:'Реклама',region:'Россия',eff:'2025',src:producerSrc,status:'market2025',doc:producerUrl,ot:'',extra:producerExtra};
+          const addProducer=(prof,cond,unit,amount)=>data.push({...baseProducer,prof,cond,unit,amount,amount_text:String(amount).replace(/\B(?=(\d{3})+(?!\d))/g,' '),id:nextId++});
+          addProducer('Ассистент продюсера','парт-тайм','месяц',40000);
+          addProducer('Ассистент продюсера','фулл-тайм','месяц',70000);
+          addProducer('Продюсер','маленький продакшен · до 5 человек','месяц',100000);
+          addProducer('Продюсер','средний продакшен · до 12 человек','месяц',110000);
+          addProducer('Продюсер','большой продакшен · от 12 человек','месяц',130000);
+          addProducer('Фриланс-продюсер','проект до 1 млн ₽','проект',90000);
+          addProducer('Фриланс-продюсер','проект до 3 млн ₽','проект',110000);
+          addProducer('Фриланс-продюсер','проект до 5 млн ₽','проект',120000);
+          addProducer('Фриланс-продюсер','проект до 10 млн ₽','проект',160000);
+          addProducer('Фриланс-продюсер','проект свыше 10 млн ₽','проект',200000);
+          addProducer('CG-продюсер','маленький CG-продакшен · до 10 человек','месяц',120000);
+          addProducer('CG-продюсер','средний CG-продакшен · до 20 человек','месяц',150000);
+          addProducer('CG-продюсер','большой CG-продакшен · от 20 человек','месяц',170000);
+          addProducer('Фриланс CG-продюсер','проект до 1 млн ₽','проект',100000);
+          addProducer('Фриланс CG-продюсер','проект до 2 млн ₽','проект',120000);
+          addProducer('Фриланс CG-продюсер','проект до 5 млн ₽','проект',150000);
+          addProducer('Фриланс CG-продюсер','проект от 5 млн ₽','проект',180000);
+
+          const K=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
+          const stringIndexes=K.map((_,i)=>i).filter(i=>i!==5&&i!==14);
+          const D=[],M=Array(K.length).fill(-1);
+          stringIndexes.forEach((fieldIndex,dictIndex)=>{
+            M[fieldIndex]=dictIndex;
+            const vals=[],seen=new Map();
+            for(const row of data){
+              const v=row[K[fieldIndex]];
+              if(v==null)continue;
+              if(!seen.has(v)){seen.set(v,vals.length);vals.push(v)}
+            }
+            D.push(vals);
+          });
+          const maps=D.map(arr=>new Map(arr.map((v,i)=>[v,i])));
+          const R=data.map(row=>K.map((key,i)=>{
+            const v=row[key];
+            return M[i]>=0&&v!=null?maps[M[i]].get(v):v;
+          }));
+          const js=`/* Canonical KinoRates dataset: ${data.length} runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(K)},D=${JSON.stringify(D)},M=${JSON.stringify(M)},R=${JSON.stringify(R)};return R.map(r=>Object.fromEntries(K.map((k,i)=>[k,M[i]>=0&&r[i]!=null?D[M[i]][r[i]]:r[i]])))})();\n`;
+          fs.writeFileSync('rates-data.js',js);
+
+          const counts={};for(const r of data)counts[r.status]=(counts[r.status]||0)+1;
+          console.log(JSON.stringify({total:data.length,counts,writerRows:data.filter(r=>r.status==='official2026').length,marketRows:data.filter(r=>r.status==='market2025').length},null,2));
+          if(data.length!==451)throw new Error(`Expected 451 rows, got ${data.length}`);
+          if((counts.official2026||0)!==30)throw new Error('Expected 30 official writer rows');
+          if((counts.market2025||0)!==17)throw new Error('Expected 17 market producer rows');
+          NODE
+
+      - name: Add producer source
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const context={window:{}};vm.createContext(context);
+          vm.runInContext(fs.readFileSync('sources-data.js','utf8'),context,{filename:'sources-data.js'});
+          const sources=context.window.KINORATES_SOURCES.map(s=>({...s}));
+          const url='https://t.me/tochnop2/832';
+          if(!sources.some(s=>s.url===url))sources.push({name:'«Точно продюсер» — минимальные продюсерские ставки в рекламе 2025 (рыночный ориентир)',date:'2025',url});
+          fs.writeFileSync('sources-data.js','window.KINORATES_SOURCES = '+JSON.stringify(sources)+';\n');
+          NODE
+
+      - name: Update interface and validation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app.js');s=p.read_text(encoding='utf-8')
+          s=s.replace('const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};',
+          'const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};')
+          s=s.replace('  fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",',
+          '  fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",\n  official2026:"Ставка подтверждена официальной публикацией профессионального объединения на 2026 год.",\n  market2025:"Публичный отраслевой ориентир рынка 2025 года. Это не коллективное письмо профсоюза и не официальный минимальный тариф для кино.",')
+          s=s.replace("const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','минута','человек','единоразово'];",
+          "const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','сезон','гонорар','договор','минута','человек','единоразово'];")
+          s=s.replace("const verifiedCount=cnt('fresh2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');",
+          "const verifiedCount=cnt('fresh2026')+cnt('official2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');")
+          old='''  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>\n  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>\n  <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;'''
+          new='''  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>\n  <div class="stat market"><b>${cnt('market2025')}</b><i>рыночных ориентиров</i></div>\n  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>\n  <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;'''
+          if old not in s: raise SystemExit('stats block marker not found')
+          s=s.replace(old,new,1)
+          s=s.replace("if(state.only26 && r.status!=='fresh2026') return false;","if(state.only26 && !['fresh2026','official2026'].includes(r.status)) return false;")
+          s=s.replace("const dnum = d => { const [a,b,c]=d.split('.'); return +(c+b+a); };",
+          "const dnum=d=>{const text=String(d||'');const full=text.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})$/);if(full)return +(full[3]+full[2]+full[1]);const year=text.match(/(20\\d{2})/);return year?+(year[1]+'0000'):0};")
+          old_amount='''function amountCell(r){\n  if(r.amount==null) return `<td class="sum txt">${r.amount_text||'по договорённости'}</td>`;\n  const per = r.unit==='месяц' ? 'в месяц' : r.unit==='смена' ? 'за смену' : 'за '+r.unit;\n  const extra = r.amount_text.replace(/^[\\d\\s]+/,'').trim();\n  return `<td class="sum">${fmt(r.amount)}<small>${per}${extra?' · '+extra:''}</small></td>`;\n}'''
+          new_amount='''function amountCell(r){\n  const text=String(r.amount_text||'');\n  if(r.amount==null) return `<td class="sum txt">${esc(text||'по договорённости')}</td>`;\n  if(/[–—+%]|бесплатно|договорённости/i.test(text)) return `<td class="sum txt">${esc(text)}</td>`;\n  const per = r.unit==='месяц' ? 'в месяц' : r.unit==='смена' ? 'за смену' : 'за '+r.unit;\n  const extra = text.replace(/^[\\d\\s]+/,'').trim();\n  return `<td class="sum">${fmt(r.amount)}<small>${per}${extra?' · '+extra:''}</small></td>`;\n}'''
+          if old_amount not in s: raise SystemExit('amountCell marker not found')
+          s=s.replace(old_amount,new_amount,1)
+          s=s.replace("  const amount=r.amount?fmt(r.amount):(r.amount_text||'по договорённости');",
+          "  const amountText=String(r.amount_text||'');\n  const amount=amountText&&(/[–—+%]|бесплатно|договорённости/i.test(amountText))?amountText:(r.amount?fmt(r.amount):(amountText||'по договорённости'));\n  const sourcePeriod=r.status==='market2025'?'Рыночный ориентир: 2025':(r.eff?`Действует с ${r.eff}`:'Дата не указана');")
+          s=s.replace('''    <div class="detail-section"><b>Источник</b><p>${r.src}<br>Действует с ${r.eff}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть письмо цеха →</a>`:''}</p></div>''',
+          '''    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${sourcePeriod}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>''')
+          old_button='''    ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:`<button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>`}\n'''
+          new_button='''    ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:''}\n    <button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>\n'''
+          if old_button not in s: raise SystemExit('detail button marker not found')
+          s=s.replace(old_button,new_button,1)
+          s=s.replace("const quantityLabels={'смена':'Смен','полсмены':'Полусмен','час':'Часов','серия':'Серий','минута':'Минут','проект':'Проектов','аккорд':'Аккордов','человек':'Человек','единоразово':'Количество','месяц':'Специалистов'};",
+          "const quantityLabels={'смена':'Смен','полсмены':'Полусмен','час':'Часов','серия':'Серий','сезон':'Сезонов','гонорар':'Гонораров','договор':'Договоров','минута':'Минут','проект':'Проектов','аккорд':'Аккордов','человек':'Человек','единоразово':'Количество','месяц':'Специалистов'};")
+          p.write_text(s,encoding='utf-8')
+
+          css=Path('app.css');c=css.read_text(encoding='utf-8')
+          marker='/* writer + market status expansion */'
+          if marker not in c:
+              c += '''\n\n/* writer + market status expansion */\n.b-official2026{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok)}\n.b-market2025{background:var(--info-bg);color:var(--info);border:1px solid var(--info)}\n.stat.market b{color:var(--info)}\n@media(min-width:921px){.stats{grid-template-columns:repeat(7,minmax(0,1fr))}.stat{min-width:0;padding:11px 10px}.stat b{font-size:20px}.stat i{font-size:7.5px;line-height:1.25}}\n'''
+              css.write_text(c,encoding='utf-8')
+
+          wf=Path('.github/workflows/check-rate-sources.yml');w=wf.read_text(encoding='utf-8')
+          w=w.replace('data.length!==422','data.length!==451').replace('ровно 422 позиции','ровно 451 позицию')
+          wf.write_text(w,encoding='utf-8')
+
+          up=Path('updates.js');u=up.read_text(encoding='utf-8')
+          entry='''  {\n    date: "2026-08-13",\n    dateLabel: "13 августа 2026",\n    type: "data",\n    title: "Сценарные ставки 2026 и рыночные ориентиры продюсеров",\n    text: "Добавлена полная сетка рекомендуемых авторских гонораров Гильдии кинодраматургов по форматам и уровням авторов. Продюсерские ставки в рекламе обновлены по публичной сетке «Точно продюсер» и отделены от первоисточников отдельным статусом «рынок 2025»."\n  },\n'''
+          if 'Сценарные ставки 2026 и рыночные ориентиры продюсеров' not in u:
+              u=u.replace('window.KINORATES_UPDATES = [\n','window.KINORATES_UPDATES = [\n'+entry,1)
+              up.write_text(u,encoding='utf-8')
+          PY
+
+      - name: Validate resulting database
+        run: |
+          node --check rates-data.js
+          node --check sources-data.js
+          node --check app.js
+          node --check updates.js
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');const context={window:{}};vm.createContext(context);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),context);const d=context.window.KINORATES_DATA;
+          const counts={};d.forEach(r=>counts[r.status]=(counts[r.status]||0)+1);
+          const verified=(counts.fresh2026||0)+(counts.official2026||0)+(counts.verified2025||0)+(counts.verified2024||0)+(counts.verified2023||0);
+          const review=(counts.check||0)+(counts.newdoc||0);
+          if(d.length!==451)throw new Error('Total must be 451');
+          if(verified!==285)throw new Error(`Verified must be 285, got ${verified}`);
+          if(review!==17)throw new Error(`Review must be 17, got ${review}`);
+          if((counts.market2025||0)!==17)throw new Error('Market must be 17');
+          if((counts.expired||0)!==51||(counts.archive||0)!==81)throw new Error('Historical counts changed unexpectedly');
+          if(d.some(r=>r.id>=230&&r.id<=244)||d.some(r=>r.id>=295&&r.id<=297))throw new Error('Legacy producer/writer placeholders remain');
+          console.log({total:d.length,verified,review,market:counts.market2025,expired:counts.expired,archive:counts.archive,official2026:counts.official2026});
+          NODE
+          grep -q 'grid-template-columns:repeat(7' app.css
+          grep -q 'market2025' app.js
+          grep -q 'data.length!==451' .github/workflows/check-rate-sources.yml
+
+      - name: Commit upgrade
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rates-data.js sources-data.js app.js app.css updates.js .github/workflows/check-rate-sources.yml
+          git commit -m "Add official writer rates and producer market benchmarks"
+          git push
