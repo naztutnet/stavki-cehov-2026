@@ -1,0 +1,46 @@
+name: One-shot optimized site validation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/validate-optimized-site-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate data and JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          index = Path('index.html').read_text(encoding='utf-8')
+          data_js = Path('rates-data.js').read_text(encoding='utf-8')
+          prefix='window.KINORATES_DATA = '
+          if not data_js.startswith(prefix) or not data_js.rstrip().endswith(';'):
+              raise SystemExit('rates-data.js has unexpected wrapper')
+          data=json.loads(data_js[len(prefix):].strip()[:-1])
+          ids=[row['id'] for row in data]
+          assert len(data) >= 300
+          assert len(ids) == len(set(ids))
+          assert '<script src="rates-data.js"></script>' in index
+          assert 'const DATA = window.KINORATES_DATA' in index
+          assert 'FilmRate' not in index and 'filmrate.ru' not in index
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', index, flags=re.S|re.I)
+          js_blocks=[block for block in blocks if block.strip() and not block.lstrip().startswith('{')]
+          if len(js_blocks) != 1:
+              raise SystemExit(f'Expected one executable inline JS block, found {len(js_blocks)}')
+          Path('/tmp/main-inline.js').write_text(js_blocks[0],encoding='utf-8')
+          print(f'Validated {len(data)} rate records')
+          PY
+          node --check rates-data.js
+          node --check /tmp/main-inline.js
+          git diff --check
