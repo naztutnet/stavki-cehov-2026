@@ -72,7 +72,15 @@ jobs:
 
           const compact=`/* Canonical KinoRates dataset: 420 runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(fields)},D=${JSON.stringify(dicts)},R=${JSON.stringify(rows)};return R.map(r=>{const o={};for(let i=0;i<K.length;i++){const d=D[i],v=r[i];o[K[i]]=d===null?v:(v===null?null:d[v])}return o})})();\n`;
           const testContext={window:{}};vm.createContext(testContext);vm.runInContext(compact,testContext);
-          if(JSON.stringify(testContext.window.KINORATES_DATA)!==JSON.stringify(canonicalData))throw new Error('Компактная база не восстанавливается побайтно в тот же JSON');
+          const restored=testContext.window.KINORATES_DATA;
+          if(!Array.isArray(restored)||restored.length!==canonicalData.length)throw new Error('Компактная база восстановила неверное число записей');
+          for(let rowIndex=0;rowIndex<canonicalData.length;rowIndex++){
+            for(const field of fields){
+              if(!Object.is(restored[rowIndex][field],canonicalData[rowIndex][field])){
+                throw new Error(`Несовпадение после упаковки: id=${canonicalData[rowIndex].id}, field=${field}`);
+              }
+            }
+          }
 
           const canonicalSourcesJs=`window.KINORATES_SOURCES = ${JSON.stringify(canonicalSources)};\n`;
           const writerUrl='https://unikino.ru/%D0%B3%D0%B8%D0%BB%D1%8C%D0%B4%D0%B8%D1%8F-%D0%BA%D0%B8%D0%BD%D0%BE%D0%B4%D1%80%D0%B0%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B3%D0%BE%D0%B2-%D1%81%D0%BE%D1%8E%D0%B7%D0%B0-%D0%BA%D0%B8%D0%BD%D0%B5%D0%BC-10/#more-97531';
