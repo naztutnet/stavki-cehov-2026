@@ -7,6 +7,7 @@ on:
       - 'app.js'
       - 'app.css'
       - 'rates-data.js'
+      - 'sources-data.js'
       - 'updates.js'
       - 'check-log.js'
       - 'scripts/**'
@@ -38,41 +39,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Проверить структуру сайта и базу ставок
+      - name: Проверить структуру сайта и данные
         run: |
           node --check app.js
           node --check rates-data.js
+          node --check sources-data.js
           python3 - <<'PY'
           import json
           from pathlib import Path
 
           index = Path('index.html').read_text(encoding='utf-8')
+
           data_js = Path('rates-data.js').read_text(encoding='utf-8')
-          prefix = 'window.KINORATES_DATA = '
-          if not data_js.startswith(prefix) or not data_js.rstrip().endswith(';'):
+          data_prefix = 'window.KINORATES_DATA = '
+          if not data_js.startswith(data_prefix) or not data_js.rstrip().endswith(';'):
               raise SystemExit('Некорректная оболочка rates-data.js')
-          data = json.loads(data_js[len(prefix):].strip()[:-1])
+          data = json.loads(data_js[len(data_prefix):].strip()[:-1])
           if not isinstance(data, list) or len(data) < 300:
               raise SystemExit(f'Подозрительный размер базы: {len(data) if isinstance(data, list) else "not-list"}')
           ids = [row.get('id') for row in data if isinstance(row, dict)]
           if len(ids) != len(data) or len(ids) != len(set(ids)):
               raise SystemExit('В базе отсутствуют ID или найдены дубли ID')
 
+          sources_js = Path('sources-data.js').read_text(encoding='utf-8')
+          sources_prefix = 'window.KINORATES_SOURCES = '
+          if not sources_js.startswith(sources_prefix) or not sources_js.rstrip().endswith(';'):
+              raise SystemExit('Некорректная оболочка sources-data.js')
+          sources = json.loads(sources_js[len(sources_prefix):].strip()[:-1])
+          if not isinstance(sources, list) or len(sources) < 20:
+              raise SystemExit(f'Подозрительный размер реестра источников: {len(sources) if isinstance(sources, list) else "not-list"}')
+          if any(not isinstance(source, dict) or not source.get('name') or not source.get('date') for source in sources):
+              raise SystemExit('В реестре источников есть некорректная запись')
+
           required = [
               '<link rel="stylesheet" href="app.css">',
               '<script src="rates-data.js"></script>',
+              '<script src="sources-data.js"></script>',
               '<script src="app.js"></script>',
           ]
           for marker in required:
               if marker not in index:
                   raise SystemExit(f'В index.html отсутствует {marker}')
-          if index.index('<script src="rates-data.js"></script>') > index.index('<script src="app.js"></script>'):
-              raise SystemExit('app.js загружается раньше rates-data.js')
+          rate_pos = index.index('<script src="rates-data.js"></script>')
+          source_pos = index.index('<script src="sources-data.js"></script>')
+          app_pos = index.index('<script src="app.js"></script>')
+          if not rate_pos < source_pos < app_pos:
+              raise SystemExit('Нарушен порядок загрузки данных и app.js')
           if '<style>' in index:
               raise SystemExit('CSS снова встроен в index.html')
-          print(f'KinoRates validation OK: {len(data)} rate records')
+          print(f'KinoRates validation OK: {len(data)} rate records, {len(sources)} sources')
           PY
-          ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js
+          ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js sources-data.js
 
   check:
     if: github.event_name != 'push'
