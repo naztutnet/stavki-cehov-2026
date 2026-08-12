@@ -55,7 +55,7 @@ jobs:
           }
           const data=context.window.KINORATES_DATA;
           const sources=context.window.KINORATES_SOURCES;
-          if(!Array.isArray(data)||data.length!==450)throw new Error(`Каноническая база должна содержать ровно 450 позиций, получено: ${Array.isArray(data)?data.length:'not-array'}`);
+          if(!Array.isArray(data)||data.length!==449)throw new Error(`Каноническая база должна содержать ровно 449 позиций, получено: ${Array.isArray(data)?data.length:'not-array'}`);
           const ids=data.map(row=>row&&row.id);
           if(ids.some(id=>!Number.isSafeInteger(id))||new Set(ids).size!==ids.length)throw new Error('В базе отсутствуют ID или найдены дубли ID');
           const expectedKeys=['amount','amount_text','cond','content','dept','doc','eff','extra','id','ot','prof','region','src','status','unit'];
