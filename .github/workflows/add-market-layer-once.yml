@@ -1,0 +1,35 @@
+name: Add Market Layer Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-market-layer-once.yml'
+      - 'scripts/add-market-layer-once.js'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Integrate market layer
+        run: node scripts/add-market-layer-once.js
+      - name: Validate
+        run: |
+          node --check app.js
+          node --check market-data.js
+          node --check updates.js
+          grep -q 'market-data.js' index.html
+          grep -q 'marketEvidenceHtml' app.js
+          grep -q 'market evidence in profession detail' app.css
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js app.css index.html updates.js
+          git commit -m "Show dated market research in profession cards"
+          git push
