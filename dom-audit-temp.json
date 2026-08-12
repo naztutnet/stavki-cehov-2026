@@ -1,0 +1,31 @@
+{
+  "static_id_count": 59,
+  "getElementById_refs": 64,
+  "missing_getElementById": [
+    "builderFeedback",
+    "customOpen",
+    "esthint",
+    "estlines",
+    "estn",
+    "estsubtotal",
+    "esttotal",
+    "feedbackClose",
+    "feedbackDialog",
+    "feedbackEmail",
+    "feedbackForm",
+    "feedbackOpen",
+    "feedbackStatus",
+    "feedbackText",
+    "feedbackType",
+    "feedbackWebsite",
+    "updatesCount",
+    "updatesOpen"
+  ],
+  "query_selectors": [
+    ".controls",
+    ".est",
+    ".feedback-submit",
+    ".nav-head span",
+    "footer [data-open-privacy]"
+  ]
+}
