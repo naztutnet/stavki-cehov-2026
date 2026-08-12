@@ -64,107 +64,161 @@
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
-<div class="app-shell">
-<header class="app-header">
-  <a class="brand" href="/" aria-label="KinoRates — главная">KINORATES</a>
-  <div class="header-search">
-    <span class="search-icon" aria-hidden="true">⌕</span>
-    <input id="q" type="search" placeholder="Поиск по профессии, цеху, условию…" autocomplete="off" aria-label="Поиск по базе ставок">
-    <kbd>⌘ K</kbd>
-  </div>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Межрегиональный профсоюз кинематографистов · реестр «Точно продюсер» · сверка 30.07.2026</p>
   <div class="header-actions">
-    <button class="header-btn" id="openBuilder" type="button"><span>Смета</span><b id="builderCount">0</b></button>
-    <button class="header-btn icon-btn" id="openUpdates" type="button" aria-label="Обновления"><span aria-hidden="true">↻</span></button>
-    <button class="header-btn icon-btn" id="openHelp" type="button" aria-label="Помощь"><span aria-hidden="true">?</span></button>
+    <button class="feedback-action header-feedback" id="feedbackOpen">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
   </div>
+  <div class="title-block"><div class="title-meta"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><button class="updates-action" id="updatesOpen">Обновления <span class="updates-count" id="updatesCount">4</span></button></div><h1><a class="home-title" href="/" aria-label="Справочник ставок — на главную"><span>Справочник ставок</span></a></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p></div>
+  <p class="lede">Данные из двух источников объединены в единую базу: справочника МПК и реестра сообщества «Точно продюсер». Ставки шести цехов актуализированы по цеховым письмам 2026 года и отмечены зелёным. Позиции, отмеченные жёлтым или синим, требуют дополнительной проверки.</p>
+  <aside class="regional-note header-regional" aria-labelledby="regionalTitle">
+    <div class="regional-kicker">Регионы</div>
+    <div class="regional-copy">
+      <h3 id="regionalTitle">Как применять ставки в регионах</h3>
+      <p>KinoRates не уменьшает ставки автоматически по региональному признаку. В исследовании МПК 79% участников высказались за одинаковую стоимость работы в Москве и регионах, а все респонденты — за обязательную оплату переработок. Это ориентир для переговоров, а не обязательный тариф.</p>
+    </div>
+    <div class="regional-figure"><b>172</b><span>специалиста участвовали в исследовании</span></div>
+    <a href="https://ktr.su/content/news/detail.php?ELEMENT_ID=57863" target="_blank" rel="noopener">Исследование КТР →</a>
+  </aside>
+  <div class="stats" id="stats"></div>
 </header>
 
 <div class="workspace">
-  <aside class="nav-rail" aria-label="Фильтр по цехам">
-    <div class="nav-head">Цеха <span></span></div>
-    <div class="nav-list" id="chips"></div>
-    <div class="nav-foot">
-      <a href="/stavki-kinotsekhov/">О справочнике</a>
-      <a href="#sourceLetters">Цеховые письма</a>
+<aside class="dept-nav" aria-label="Навигация по цехам">
+  <div class="nav-head"><h2>Цеха</h2><span>23</span></div>
+  <div class="chips" id="chips"></div>
+</aside>
+<main class="registry">
+<div class="controls">
+  <div class="row1">
+    <input type="search" id="q" placeholder="Профессия, цех, условие — например «администратор» или «смена 12»" aria-label="Поиск по базе ставок">
+    <select id="unit" aria-label="Единица измерения"><option value="">Все единицы</option></select>
+    <select id="content" aria-label="Тип проекта"><option value="">Все типы проектов</option></select>
+    <select id="sort" aria-label="Сортировка">
+      <option value="dept">По цехам</option>
+      <option value="hi">Ставка ↓</option>
+      <option value="lo">Ставка ↑</option>
+      <option value="date">Дата письма ↓</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="only26">Только сверенные 2026</label>
+    <a class="header-letters" href="#sourceLetters">Цеховые письма</a>
+    <button class="header-estimate" id="openBuilder">Открыть смету · 0</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="table-shell">
+    <div class="result-meta"><span id="resultCount">340 позиций</span><span>Выберите строку для подробностей</span></div>
+    <aside class="calculator-note" id="calculatorNote" hidden aria-label="Калькулятор стоимости цветокоррекции">
+      <span class="calc-icon" aria-hidden="true">∑</span>
+      <div><b>Рассчитайте актуальную стоимость цветокоррекции</b><span>Ставки в таблице взяты из письма ICG 2022 года. Калькулятор учитывает хронометраж, жанр, HDR, сложность материала и уровень колориста.</span></div>
+      <a href="https://icguild.org/calculator" target="_blank" rel="noopener">Открыть калькулятор ICG →</a>
+    </aside>
+    <table>
+      <thead><tr>
+        <th class="sortable" data-s="dept">Цех</th>
+        <th>Профессия</th>
+        <th>Условие</th>
+        <th>Ед.</th>
+        <th class="num sortable" data-s="hi">Мин. ставка, ₽</th>
+        <th>Статус</th>
+        <th>Добавить<br>/ убрать</th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden>Ничего не нашлось. Сбросьте фильтры или измените запрос.</div>
+    <button class="custom-add" id="customOpen">+ Добавить свою статью в смету</button>
+  </div>
+
+  <aside class="est" aria-label="Инспектор позиции и смета">
+    <div class="inspector-pane" id="detailPane"><div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div></div>
+    <div class="inspector-pane" id="budgetPane" hidden aria-hidden="true">
+      <p class="hint" id="esthint">Добавляйте позиции кнопкой «+». Ставка и единица подтянутся из справочника; даты, количество и процент можно изменить.</p>
+      <div id="estlines"></div>
+      <span id="estn">0 позиций</span><div class="totals"><div class="total"><i>Без налога</i><b id="estsubtotal">0 ₽</b></div><div class="total"><i>С налогом</i><b id="esttotal">0 ₽</b></div></div>
+      <div class="acts"><button id="xlsx">Экспорт Excel</button><button id="pdf">Экспорт PDF</button><button id="clear">Очистить</button></div>
     </div>
   </aside>
-
-  <main class="main-panel">
-    <section class="hero-intro">
-      <div class="intro-copy">
-        <div class="eyebrow">Россия · 2026</div>
-        <h1>Ставки специалистов<br><span>кинопроизводства</span></h1>
-        <p class="lede">Рекомендованные ставки и условия работы по данным отраслевых справочников и цеховых писем.</p>
-      </div>
-      <div class="stats" id="stats"></div>
-    </section>
-
-    <div class="controls">
-      <div class="row1">
-        <select id="unit" aria-label="Единица расчёта"><option value="">Все единицы</option></select>
-        <select id="content" aria-label="Тип контента"><option value="">Весь контент</option></select>
-        <label class="chk"><input id="only26" type="checkbox"> Только подтверждённые 2026</label>
-        <select id="sort" aria-label="Сортировка">
-          <option value="dept">По цехам</option>
-          <option value="hi">Ставка ↓</option>
-          <option value="lo">Ставка ↑</option>
-          <option value="date">По дате письма</option>
-        </select>
-        <button class="reset-btn" id="reset" type="button">Сбросить</button>
-      </div>
-    </div>
-
-    <div class="content-layout">
-      <section class="registry-card">
-        <div class="registry-toolbar">
-          <div><b id="resultCount">0 позиций</b><span>Нажмите строку, чтобы увидеть подробности</span></div>
-          <div class="toolbar-legend"><i class="dot fresh"></i> подтверждено 2026 <i class="dot check"></i> требует сверки</div>
-        </div>
-        <div class="calculator-note" id="calculatorNote" hidden>Для цветокоррекции итог зависит от хронометража, количества смен и сложности материала — используйте ставку как ориентир.</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>Цех</th><th>Позиция</th><th>Условия</th><th>Ед.</th><th class="num">Ставка</th><th>Статус</th><th></th>
-            </tr></thead>
-            <tbody id="tb"></tbody>
-          </table>
-          <div class="empty" id="empty" hidden>По выбранным фильтрам ничего не найдено.</div>
-        </div>
-      </section>
-
-      <aside class="est inspector" aria-label="Детали позиции и смета">
-        <div class="inspector-tabs" role="tablist">
-          <button type="button" data-inspector-tab="detail" class="active" role="tab" aria-selected="true">Детали</button>
-          <button type="button" data-inspector-tab="budget" role="tab" aria-selected="false">Смета <span id="estCount">0</span></button>
-        </div>
-        <div class="inspector-pane" id="detailPane"></div>
-        <div class="inspector-pane" id="budgetPane" hidden>
-          <div id="estLines"></div>
-          <p class="hint" id="estHint">Добавьте позиции из таблицы — здесь появится предварительный расчёт.</p>
-          <div class="total" id="estTotal" hidden><i>Итого</i><b id="estSum">0 ₽</b></div>
-          <div class="acts" id="estActions" hidden>
-            <button id="xlsx" type="button">Excel</button>
-            <button id="pdf" type="button">PDF</button>
-            <button id="clear" type="button">Очистить</button>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <section class="sources">
-      <h2 id="sourceLetters">Цеховые письма</h2>
-      <p class="sub">Первоисточники, на которых стоит база. Ставки — это нижняя планка, а не рынок: цеха отдельно подчёркивают, что для опытных специалистов сумма выше.</p>
-      <div class="slist" id="slist"></div>
-    </section>
-
-    <footer>
-      Сведено 30 июля 2026 года из справочника МПК (<a href="https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/edit">обновлён 25.04.2026</a>)
-      и реестра «Точно продюсер» (<a href="https://docs.google.com/spreadsheets/d/1BCgusuck7uhHvDZ2d-nUVyjZHlzrf05286fwpahlwdE/edit">обновлён 07.02.2025</a>).
-      Свежие письма проверены на <a href="https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/">kinoprofsoyuz.ru</a>.
-      <button class="privacy-link" type="button" data-open-privacy>Конфиденциальность и cookie</button>.
-    </footer>
-  </main>
 </div>
+</main>
+</div>
+
+<section class="builder" id="builder" hidden aria-label="Конструктор предварительной сметы">
+  <div class="builder-head">
+    <div><small class="beta-mark">Beta version</small><h2>Предварительная смета</h2><p>Позиции сохраняются на этом устройстве автоматически</p></div>
+    <button class="feedback-action" id="builderFeedback">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
+    <button class="builder-close" id="closeBuilder">Вернуться к справочнику</button>
+  </div>
+  <div class="builder-body">
+    <aside class="quick-catalog">
+      <h3>Добавить позицию</h3>
+      <input type="search" id="quickSearch" placeholder="Профессия или цех" aria-label="Поиск позиции для сметы">
+      <div class="quick-results" id="quickResults"></div>
+    </aside>
+    <main class="budget-canvas">
+      <div id="builderRows"></div>
+    </main>
+    <aside class="budget-summary">
+      <h3>Итого по смете</h3>
+      <div class="summary-line"><span>Позиций</span><b id="builderCount">0</b></div>
+      <div class="summary-line"><span>Без налога</span><b id="builderNet">0 ₽</b></div>
+      <div class="summary-line grand"><span>С налогом</span><b id="builderGross">0 ₽</b></div>
+      <div class="summary-actions"><button class="primary" id="builderXlsx">Экспорт Excel</button><button id="builderPdf">Экспорт PDF</button><button id="builderClear">Очистить смету</button></div>
+    </aside>
+  </div>
+</section>
+
+<dialog class="feedback-dialog" id="customDialog">
+  <div class="feedback-inner">
+    <div class="feedback-top"><div><h2>Добавить свою статью</h2><p>Укажите, за что платим, к какому цеху относится расход и как его считать.</p></div><button class="dialog-x" id="customClose" aria-label="Закрыть">×</button></div>
+    <form class="feedback-form" id="customForm" autocomplete="off">
+      <div class="custom-grid">
+        <label class="wide">Название позиции<input id="customName" name="budget_item_title" maxlength="120" autocomplete="off" placeholder="Например, координатор постпродакшна" required></label>
+        <label>Цех / категория<input id="customDept" name="budget_item_department" maxlength="80" autocomplete="off" placeholder="Например, Постпродакшн" required></label>
+        <label>Проект / этап работы<input id="customCond" name="budget_item_scope" maxlength="160" autocomplete="off" placeholder="Например, весь проект или одна серия"></label>
+        <label>Единица расчёта<select id="customUnit"><option selected>проект</option><option>месяц</option><option>смена</option><option>час</option><option>аккорд</option><option>серия</option><option>минута</option><option>человек</option><option>единоразово</option></select></label>
+        <label>Ставка, ₽<input type="number" id="customRate" min="0" max="1000000000" step="100" value="0" required></label>
+        <label>Количество<input type="number" id="customQty" min="1" max="100000" step="1" value="1" required></label>
+      </div>
+      <button class="feedback-submit" type="submit">Добавить в смету →</button>
+    </form>
+  </div>
+</dialog>
+<dialog class="feedback-dialog" id="feedbackDialog">
+  <div class="feedback-inner">
+    <div class="feedback-top"><div><h2>Помогите сделать справочник точнее</h2><p>Сообщите об ошибке или поделитесь актуальными ставками и письмом цеха.</p></div><button class="dialog-x" id="feedbackClose" aria-label="Закрыть">×</button></div>
+    <form class="feedback-form" id="feedbackForm">
+      <input type="text" id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" value="">
+      <label>Тема<select id="feedbackType"><option>Нашёл ошибку</option><option>Хочу поделиться актуальными ставками</option><option>Есть новое письмо цеха</option><option>Другое предложение</option></select></label>
+      <label>Ваш email<input type="email" id="feedbackEmail" maxlength="254" autocomplete="email" placeholder="name@example.com" required></label>
+      <label>Что нужно исправить или добавить<textarea id="feedbackText" maxlength="5000" placeholder="Укажите цех, профессию, ставку и, если есть, ссылку на первоисточник" required></textarea></label>
+      <label class="consent-check"><input type="checkbox" required><span>Я согласен на обработку указанных данных для ответа на обращение и ознакомился с <button type="button" data-open-privacy>политикой конфиденциальности</button>.</span></label>
+      <p class="feedback-note">Сообщение будет отправлено владельцу справочника через сервис FormSubmit. Ему передаются указанные email, текст сообщения и адрес этой страницы.</p>
+      <p class="feedback-status" id="feedbackStatus" role="status" aria-live="polite"></p>
+      <button class="feedback-submit" type="submit">Отправить →</button>
+    </form>
+  </div>
+</dialog>
+<dialog class="feedback-dialog updates-dialog" id="updatesDialog">
+  <div class="feedback-inner">
+    <div class="feedback-top"><div><h2>Обновления KinoRates</h2><p>Что изменилось в базе ставок и в самом сервисе.</p></div><button class="dialog-x" id="updatesClose" aria-label="Закрыть">×</button></div>
+    <div class="updates-list" id="updatesList"></div>
+  </div>
+</dialog>
+
+<section class="sources">
+  <h2 id="sourceLetters">Цеховые письма</h2>
+  <p class="sub">Первоисточники, на которых стоит база. Ставки — это нижняя планка, а не рынок: цеха отдельно подчёркивают, что для опытных специалистов сумма выше.</p>
+  <div class="slist" id="slist"></div>
+</section>
+
+<footer>
+  Сведено 30 июля 2026 года из справочника МПК (<a href="https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/edit">обновлён 25.04.2026</a>)
+  и реестра «Точно продюсер» (<a href="https://docs.google.com/spreadsheets/d/1BCgusuck7uhHvDZ2d-nUVyjZHlzrf05286fwpahlwdE/edit">обновлён 07.02.2025</a>).
+  Свежие письма проверены на <a href="https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/">kinoprofsoyuz.ru</a>.
+  <button class="privacy-link" type="button" data-open-privacy>Конфиденциальность и cookie</button>.
+</footer>
 </div>
 
 <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Настройки аналитики" aria-live="polite" hidden>
@@ -180,68 +234,6 @@
     <h3>Кому могут передаваться данные</h3><ul><li>ООО «Яндекс» — при разрешённой аналитике;</li><li>FormSubmit — при отправке формы обратной связи;</li><li>GitHub Pages — как техническая площадка размещения сайта.</li></ul>
     <h3>Ваш выбор</h3><p>Вы можете отказаться от аналитики без ограничения функций сайта. Чтобы изменить выбор, нажмите «Конфиденциальность и cookie» внизу страницы. Связаться с владельцем сайта: <a href="mailto:snegproduction@gmail.com">snegproduction@gmail.com</a>.</p>
   </div>
-</dialog>
-
-<dialog class="updates-dialog" id="updatesDialog">
-  <div class="updates-content">
-    <div class="updates-top"><div><h2>Обновления KinoRates</h2><p>Изменения базы, источников и сервиса.</p></div><button class="dialog-x" id="updatesClose" aria-label="Закрыть">×</button></div>
-    <div class="updates-list" id="updatesList"></div>
-  </div>
-</dialog>
-
-<dialog class="help-dialog" id="helpDialog">
-  <div class="help-content">
-    <div class="help-top"><div><h2>Как читать KinoRates</h2><p>Коротко о статусах и расчёте.</p></div><button class="dialog-x" id="helpClose" aria-label="Закрыть">×</button></div>
-    <div class="help-grid">
-      <div><b>Подтверждено 2026</b><p>Ставка сверена по письму, действующему в 2026 году.</p></div>
-      <div><b>Требует сверки</b><p>Есть более старый ориентир или новое письмо, которое ещё нужно сверить с цифрами.</p></div>
-      <div><b>Смета</b><p>Добавляйте позиции кнопкой «+», уточняйте объём и процент, затем экспортируйте расчёт.</p></div>
-      <div><b>Важно</b><p>Финальная ставка всегда определяется договорённостью с конкретным специалистом или подрядчиком.</p></div>
-    </div>
-  </div>
-</dialog>
-
-<div class="builder" id="builder" hidden>
-  <div class="builder-shell">
-    <header class="builder-head">
-      <div><span class="builder-brand">KINORATES</span><h2>Предварительная смета</h2></div>
-      <div class="builder-head-actions">
-        <button id="builderXlsx" type="button">Excel</button>
-        <button id="builderPdf" type="button">PDF</button>
-        <button id="builderClear" type="button">Очистить</button>
-        <button class="builder-close" id="closeBuilder" type="button" aria-label="Закрыть">×</button>
-      </div>
-    </header>
-    <div class="builder-body">
-      <aside class="quick-catalog">
-        <div class="quick-search"><input id="quickSearch" type="search" placeholder="Найти позицию…" aria-label="Поиск позиции для сметы"></div>
-        <div class="quick-results" id="quickResults"></div>
-      </aside>
-      <main class="builder-main">
-        <div class="builder-summary">
-          <div><span>Позиций</span><b id="builderTotalCount">0</b></div>
-          <div><span>Без налога</span><b id="builderNet">0 ₽</b></div>
-          <div><span>С налогом</span><b id="builderGross">0 ₽</b></div>
-        </div>
-        <div id="builderRows"></div>
-      </main>
-    </div>
-  </div>
-</div>
-
-<dialog class="custom-dialog" id="customDialog">
-  <form method="dialog" id="customForm" class="custom-form">
-    <div class="custom-top"><div><h2>Своя статья</h2><p>Добавьте позицию, которой нет в справочнике.</p></div><button class="dialog-x" id="customClose" value="cancel" aria-label="Закрыть">×</button></div>
-    <label>Цех / раздел<input id="customDept" maxlength="80" required placeholder="Например: Постпродакшн"></label>
-    <label>Позиция<input id="customName" maxlength="120" required placeholder="Название статьи"></label>
-    <label>Условие<input id="customCond" maxlength="160" placeholder="Комментарий или условие"></label>
-    <div class="custom-grid">
-      <label>Единица<select id="customUnit"><option>проект</option><option>месяц</option><option>смена</option><option>полсмены</option><option>час</option><option>аккорд</option><option>серия</option><option>минута</option><option>человек</option><option>единоразово</option></select></label>
-      <label>Ставка, ₽<input id="customRate" type="number" min="0" max="1000000000" step="100" required></label>
-      <label>Количество<input id="customQty" type="number" min="1" max="100000" step="1" value="1"></label>
-    </div>
-    <div class="custom-actions"><button value="cancel">Отмена</button><button class="primary" type="submit" value="default">Добавить</button></div>
-  </form>
 </dialog>
 
 <script src="updates.js"></script>
