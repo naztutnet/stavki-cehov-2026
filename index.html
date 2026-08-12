@@ -539,12 +539,32 @@ header .eyebrow{padding-right:390px}
   </div>
 </dialog>
 
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" integrity="sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js" integrity="sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js" integrity="sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15" crossorigin="anonymous"></script>
 <script src="updates.js"></script>
 <script src="check-log.js"></script>
 <script>
+const lazyScriptLoads=new Map();
+function loadScriptOnce(src,integrity){
+  if(lazyScriptLoads.has(src))return lazyScriptLoads.get(src);
+  const promise=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=src;script.crossOrigin='anonymous';script.integrity=integrity;
+    script.onload=()=>resolve();
+    script.onerror=()=>{lazyScriptLoads.delete(src);reject(new Error(`Не удалось загрузить ${src}`))};
+    document.head.appendChild(script);
+  });
+  lazyScriptLoads.set(src,promise);return promise;
+}
+async function ensureExcelJS(){
+  if(window.ExcelJS)return;
+  await loadScriptOnce('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js','sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz');
+  if(!window.ExcelJS)throw new Error('ExcelJS unavailable');
+}
+async function ensurePdfMake(){
+  if(window.pdfMake&&window.pdfMake.vfs)return;
+  await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js','sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs');
+  await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js','sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15');
+  if(!window.pdfMake)throw new Error('pdfMake unavailable');
+}
 // Аналитика загружается только после явного согласия посетителя.
 const METRIKA_ID=111489870,CONSENT_KEY='kinorates_analytics_consent';
 let metrikaStarted=false;
@@ -900,7 +920,7 @@ document.getElementById('xlsx').addEventListener('click',async()=>{
   if(!est.size){const done=setActionState(btn,'смета пуста');setTimeout(done,1400);return}
   const done=setActionState(btn,'создаю…');
   try{
-    if(!window.ExcelJS)throw new Error('ExcelJS unavailable');
+    await ensureExcelJS();
     const rows=budgetRows(),workbook=new ExcelJS.Workbook(),sheet=workbook.addWorksheet('Смета');
     workbook.creator='KinoRates';workbook.title='KinoRates — Предварительная смета';workbook.subject='Предварительный расчёт ставок кинопроизводства';workbook.company='KinoRates';workbook.created=new Date();
     sheet.mergeCells('A1:N1');sheet.getCell('A1').value='KinoRates · Предварительная смета';
@@ -923,12 +943,12 @@ document.getElementById('xlsx').addEventListener('click',async()=>{
     btn.textContent='готово ✓';setTimeout(done,1400);
   }catch(err){console.error(err);btn.textContent='ошибка';setTimeout(done,1800)}
 });
-document.getElementById('pdf').addEventListener('click',()=>{
+document.getElementById('pdf').addEventListener('click',async()=>{
   const btn=document.getElementById('pdf');
   if(!est.size){const done=setActionState(btn,'смета пуста');setTimeout(done,1400);return}
   const done=setActionState(btn,'создаю…');
   try{
-    if(!window.pdfMake)throw new Error('pdfMake unavailable');
+    await ensurePdfMake();
     const rows=budgetRows(),money=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
     const body=[['№','Цех / позиция','Даты','Ед.','Ставка','Объём / период','Спец.','%','Без налога','С налогом'].map(text=>({text,bold:true,color:'#ffffff'}))];
     rows.forEach(r=>body.push([String(r.index),`${r.dept}\n${r.prof}`,`${r.start||'—'} - ${r.end||'—'}`,r.unit,money(r.rate),`${r.qty} / ${r.period.toLocaleString('ru-RU',{maximumFractionDigits:2})}`,String(r.people),`${(r.tax*100).toLocaleString('ru-RU',{maximumFractionDigits:2})}%`,money(r.net),money(r.gross)]));
