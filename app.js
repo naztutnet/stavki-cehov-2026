@@ -106,7 +106,8 @@ document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>
   <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
   <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
-  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>`;
+  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>
+  <div class="stat"><b>${cnt('archive')}</b><i>архивные ориентиры</i></div>`;
 
 // фильтры
 const uSel = document.getElementById('unit'), cSel = document.getElementById('content');

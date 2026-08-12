@@ -1,0 +1,679 @@
+{
+  "total": 424,
+  "status_counts": {
+    "fresh2026": 179,
+    "verified2023": 24,
+    "newdoc": 13,
+    "verified2024": 14,
+    "check": 24,
+    "verified2025": 38,
+    "expired": 51,
+    "archive": 81
+  },
+  "verified_total": 255,
+  "review_total": 37,
+  "expired_total": 51,
+  "archive_total": 81,
+  "partition_total": 424,
+  "verified_source_groups": [
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/02/pismo-departamenta-kostyuma-2026.pdf",
+      "count": 31,
+      "statuses": {
+        "fresh2026": 31
+      },
+      "departments": [
+        "Департамент костюма"
+      ],
+      "professions": [
+        "Ассистент художника по костюмам",
+        "Военный консультант",
+        "Дополнительный костюмер",
+        "Костюмер",
+        "Костюмер-стажер",
+        "Художник по костюмам"
+      ],
+      "ids": [
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/03/grim-2026-draft-7.pdf",
+      "count": 29,
+      "statuses": {
+        "fresh2026": 29
+      },
+      "departments": [
+        "Гримерно-постижерский цех"
+      ],
+      "professions": [
+        "Ассистент художника по гриму",
+        "Гример",
+        "Дополнительный гример",
+        "Художник по гриму"
+      ],
+      "ids": [
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        108,
+        109
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/otkrytoe_pismo_2026_zvukovoj_departament_ot_15_10_25.pdf",
+      "count": 26,
+      "statuses": {
+        "fresh2026": 26
+      },
+      "departments": [
+        "Аренда звукового оборудования",
+        "Звуковой цех"
+      ],
+      "professions": [
+        "Ассистент звукорежиссера",
+        "Аудиосуфлер Phonak Invisity, комплект",
+        "Аудиосуфлер Phonak Roger Digital, комплект",
+        "Звукорежиссер",
+        "Комплект радионаушников (2 пары)",
+        "Микрофон петличный (Sennheiser MKE-2 Gold, Sanken COS11)",
+        "Микрофон стерео",
+        "Микрофон-пушка (Sennheiser MKH60)",
+        "Подвес с ветрозащитой (Rycote)",
+        "Радиоканал Class A, петличный или plug-on (Lectro, Audio LTD, Zaxcom, Wisycom)",
+        "Радиоканал Class B (Sennheiser EW)",
+        "Расходники звукового департамента",
+        "Рекордер Class A 12 ch (SD 688)",
+        "Рекордер Class A 8 ch (SD 788T, DEVA5, NOVA)",
+        "Рекордер Class A+ (SD 888, 8 ch)",
+        "Рекордер Class A++ (Scorpio, Cantar X3, 16 ch)",
+        "Рекордер Class B (MixPre10T-II, 8 ch)",
+        "Рекордер Class C (DR60-II, 2 ch)",
+        "Система радиоканалов Class A (Sound Devices Nexus, 8–16 ch)",
+        "Таймкод (Ambient Nano Lockit)",
+        "Тонваген",
+        "Удочка (Ambient, K-Tek)"
+      ],
+      "ids": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/01/obedinenie_transportnogo_czeha_sankt_peterburga_2025g_.pdf",
+      "count": 26,
+      "statuses": {
+        "verified2025": 26
+      },
+      "departments": [
+        "Транспортный цех"
+      ],
+      "professions": [
+        "Будка с лопатой 4.5 м",
+        "Генераторы",
+        "Грим или костюм большой на базе КАМАЗ AJOKKI",
+        "Грим/костюм",
+        "Игровое ретро-авто",
+        "Караванный туалет",
+        "Кемпер-прицеп (актерские/штаб)",
+        "Кемпер-самоходка",
+        "Легковая машина",
+        "Пассажирский автобус",
+        "Пассажирский микроавтобус",
+        "Светобаза",
+        "Цельнометаллические грузовики"
+      ],
+      "ids": [
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/10/stavki-1st-ad-2026-1.pdf",
+      "count": 25,
+      "statuses": {
+        "fresh2026": 25
+      },
+      "departments": [
+        "Режиссерская группа"
+      ],
+      "professions": [
+        "Ассистент второго режиссера (2nd AD)",
+        "Ассистент второго режиссера (2nd AD) — посменно",
+        "Второй режиссер (1st AD)",
+        "Второй режиссер (1st AD) — планирование или площадка",
+        "Второй режиссер (1st AD) — посменно / второй план",
+        "Второй режиссер (1st AD) — совмещение план + площадка",
+        "Предварительный КПП (дрим-КПП)"
+      ],
+      "ids": [
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        252,
+        254,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        273,
+        275
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/03/2026_direktora_zamy_administratory_semochnyh_grupp.pdf",
+      "count": 23,
+      "statuses": {
+        "fresh2026": 23
+      },
+      "departments": [
+        "Административный цех"
+      ],
+      "professions": [
+        "Администратор площадки (второй администратор)",
+        "Администратор съемочной группы",
+        "Директор",
+        "Директор картины / съемочной группы",
+        "Заместитель директора",
+        "Заместитель директора по объектам",
+        "Заместитель директора по подготовке и обеспечению",
+        "Заместитель директора по транспорту (транспортный капитан)",
+        "Координатор",
+        "Рабочий площадки"
+      ],
+      "ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/01/oficzialnye-tarify-akterskogo-czeha-01112023_.pdf",
+      "count": 16,
+      "statuses": {
+        "verified2023": 16
+      },
+      "departments": [
+        "Актёры"
+      ],
+      "professions": [
+        "АМС",
+        "Актер эпизодической роли",
+        "Групповка",
+        "Дети АМС",
+        "Дублеры",
+        "Линейная роль",
+        "Роль первого плана",
+        "Статисты"
+      ],
+      "ids": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/12/price_2026_for_print.pdf",
+      "count": 12,
+      "statuses": {
+        "fresh2026": 12
+      },
+      "departments": [
+        "Режиссёр монтажа"
+      ],
+      "professions": [
+        "Режиссер монтажа — черновой и предчистовой монтаж",
+        "Режиссер монтажа — черновой монтаж на площадке",
+        "Режиссер монтажа — чистовой монтаж",
+        "Сборка дейлизов"
+      ],
+      "ids": [
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        211,
+        212,
+        214
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/04/pismo_assistent_po_akteram_2025.pdf",
+      "count": 10,
+      "statuses": {
+        "verified2025": 10
+      },
+      "departments": [
+        "Кастинг и ассистенты по актерам"
+      ],
+      "professions": [
+        "Ассистент кастинг-директора (занятость)",
+        "Ассистент по актерам (площадка)",
+        "Ассистент по актерам/гостям (площадка)",
+        "Доп. ассистент по актерам (площадка)",
+        "Доп. ассистент по актерам/гостям (площадка)",
+        "Дополнительный ассистент по актерам/Работа на втором юните (2nd Unit)"
+      ],
+      "ids": [
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        1083,
+        1084,
+        1085
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/02/usloviya_raboty_rekvizitorskogo_departamenta_2026.pdf",
+      "count": 10,
+      "statuses": {
+        "fresh2026": 10
+      },
+      "departments": [
+        "Реквизиторский цех"
+      ],
+      "professions": [
+        "Ассистент художника по реквизиту",
+        "Дополнительный реквизитор",
+        "Реквизиторы (2 человека)",
+        "Художник по реквизиту (ассистент режиссера по реквизиту)"
+      ],
+      "ids": [
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2023/10/oficzialnye-tarify-brigadirov-ams-01112023-1.pdf",
+      "count": 8,
+      "statuses": {
+        "verified2023": 8
+      },
+      "departments": [
+        "Бригадиры АМС"
+      ],
+      "professions": [
+        "Бригадир на документах",
+        "Бригадиры по набору АМС",
+        "Главный бригадир проекта",
+        "Дополнительный бригадир"
+      ],
+      "ids": [
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/02/stavki_i_usloviya_raboty_hudpost_2026.pdf",
+      "count": 8,
+      "statuses": {
+        "fresh2026": 8
+      },
+      "departments": [
+        "Художественно-постановочный цех"
+      ],
+      "professions": [
+        "Ассистент художника",
+        "Декоратор",
+        "Постановщик кадра",
+        "Художник-постановщик"
+      ],
+      "ids": [
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/04/tehnicheskie-speczialisty-operatorskoj-gruppy-2026.pdf",
+      "count": 7,
+      "statuses": {
+        "fresh2026": 7
+      },
+      "departments": [
+        "Свет и грип"
+      ],
+      "professions": [
+        "Best Boy",
+        "Gaffer (гаффер)",
+        "Grip / осветитель",
+        "Key Grip",
+        "Programmer",
+        "Доставка грип-оборудования",
+        "Представитель техгруппы на ПРР"
+      ],
+      "ids": [
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/10/stavki_ss_15.10.2025_2026.pdf",
+      "count": 5,
+      "statuses": {
+        "fresh2026": 5
+      },
+      "departments": [
+        "Режиссерская группа"
+      ],
+      "professions": [
+        "Скрипт-супервайзер"
+      ],
+      "ids": [
+        251,
+        253,
+        256,
+        272,
+        1082
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/03/grim-departament-03.24-reklama.pdf",
+      "count": 4,
+      "statuses": {
+        "verified2024": 4
+      },
+      "departments": [
+        "Гримерно-постижерский цех"
+      ],
+      "professions": [
+        "Ассистент художника по гриму",
+        "Художник по гриму"
+      ],
+      "ids": [
+        104,
+        105,
+        106,
+        107
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/06/pismo_s_usloviyami_po_mehanikam_01_03.pdf",
+      "count": 4,
+      "statuses": {
+        "verified2024": 4
+      },
+      "departments": [
+        "Операторский цех"
+      ],
+      "professions": [
+        "Механик камеры (в т.ч. долли)"
+      ],
+      "ids": [
+        197,
+        198,
+        199,
+        200
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/04/stavki_vtoryh_operatorov_i_kamermenov_2024.pdf",
+      "count": 4,
+      "statuses": {
+        "verified2024": 4
+      },
+      "departments": [
+        "Операторский цех"
+      ],
+      "professions": [
+        "Второй оператор",
+        "Камерамэн"
+      ],
+      "ids": [
+        219,
+        222,
+        223,
+        225
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/pomoshhnik_rezhissyora_—_stavki_i_usloviya_2026.pdf",
+      "count": 3,
+      "statuses": {
+        "fresh2026": 3
+      },
+      "departments": [
+        "Режиссерская группа"
+      ],
+      "professions": [
+        "Помощник режиссера"
+      ],
+      "ids": [
+        255,
+        274,
+        276
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/12/polozhenie_o_minimalnyh_stavkah_gkd.pdf",
+      "count": 2,
+      "statuses": {
+        "verified2024": 2
+      },
+      "departments": [
+        "Кастинг и ассистенты по актерам"
+      ],
+      "professions": [
+        "Кастинг-директор"
+      ],
+      "ids": [
+        154,
+        162
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/02/stavki-fokus-pullerov-2025-3.pdf",
+      "count": 1,
+      "statuses": {
+        "verified2025": 1
+      },
+      "departments": [
+        "Операторский цех"
+      ],
+      "professions": [
+        "Фокус-пуллер"
+      ],
+      "ids": [
+        227
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/12/operatory-kamerameny-shou-01.03.25.pdf",
+      "count": 1,
+      "statuses": {
+        "verified2025": 1
+      },
+      "departments": [
+        "Операторский цех"
+      ],
+      "professions": [
+        "Оператор/камерамэн"
+      ],
+      "ids": [
+        228
+      ]
+    }
+  ]
+}
