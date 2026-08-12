@@ -8,6 +8,7 @@ on:
       - 'app.css'
       - 'rates-data.js'
       - 'sources-data.js'
+      - 'market-data.js'
       - 'updates.js'
       - 'check-log.js'
       - 'og-image.png'
@@ -45,16 +46,18 @@ jobs:
           node --check app.js
           node --check rates-data.js
           node --check sources-data.js
+          node --check market-data.js
           node --check updates.js
           node --check check-log.js
           node - <<'NODE'
           const fs=require('fs'),vm=require('vm');
           const context={window:{}};vm.createContext(context);
-          for(const file of ['rates-data.js','sources-data.js']){
+          for(const file of ['rates-data.js','sources-data.js','market-data.js']){
             vm.runInContext(fs.readFileSync(file,'utf8'),context,{filename:file});
           }
           const data=context.window.KINORATES_DATA;
           const sources=context.window.KINORATES_SOURCES;
+          const market=context.window.KINORATES_MARKET_DATA;
           if(!Array.isArray(data)||data.length!==449)throw new Error(`Каноническая база должна содержать ровно 449 позиций, получено: ${Array.isArray(data)?data.length:'not-array'}`);
           const ids=data.map(row=>row&&row.id);
           if(ids.some(id=>!Number.isSafeInteger(id))||new Set(ids).size!==ids.length)throw new Error('В базе отсутствуют ID или найдены дубли ID');
@@ -71,8 +74,11 @@ jobs:
           }
           if(!Array.isArray(sources)||sources.length<29)throw new Error(`Подозрительный размер реестра источников: ${Array.isArray(sources)?sources.length:'not-array'}`);
           if(sources.some(source=>!source||typeof source!=='object'||!source.name||!source.date))throw new Error('В реестре источников есть некорректная запись');
-          fs.writeFileSync('/tmp/kinorates-runtime-data.json',JSON.stringify({data,sources}));
-          console.log(`Runtime data OK: ${data.length} rate records, ${sources.length} sources`);
+          if(!Array.isArray(market)||market.length<10)throw new Error(`Подозрительный размер рыночного слоя: ${Array.isArray(market)?market.length:'not-array'}`);
+          if(market.some(item=>!item||typeof item!=='object'||!item.id||!item.year||!item.period||!item.kind||!item.title||!item.text||!item.source||!item.url||!item.match))throw new Error('В рыночном слое есть некорректная запись');
+          if(new Set(market.map(item=>item.id)).size!==market.length)throw new Error('В рыночном слое найдены дубли ID');
+          fs.writeFileSync('/tmp/kinorates-runtime-data.json',JSON.stringify({data,sources,market}));
+          console.log(`Runtime data OK: ${data.length} rate records, ${sources.length} sources, ${market.length} market research records`);
           NODE
           python3 - <<'PY'
           import json
@@ -85,6 +91,7 @@ jobs:
           runtime = json.loads(Path('/tmp/kinorates-runtime-data.json').read_text(encoding='utf-8'))
           data = runtime['data']
           sources = runtime['sources']
+          market = runtime['market']
 
           legacy_data_tokens = [
               'CG_RATES_2023',
@@ -149,6 +156,7 @@ jobs:
               '<link rel="stylesheet" href="app.css">',
               '<script src="rates-data.js"></script>',
               '<script src="sources-data.js"></script>',
+              '<script src="market-data.js"></script>',
               '<script src="app.js"></script>',
           ]
           for marker in required:
@@ -156,14 +164,15 @@ jobs:
                   raise SystemExit(f'В index.html отсутствует {marker}')
           rate_pos = index.index('<script src="rates-data.js"></script>')
           source_pos = index.index('<script src="sources-data.js"></script>')
+          market_pos = index.index('<script src="market-data.js"></script>')
           app_pos = index.index('<script src="app.js"></script>')
-          if not rate_pos < source_pos < app_pos:
-              raise SystemExit('Нарушен порядок загрузки данных и app.js')
+          if not rate_pos < source_pos < market_pos < app_pos:
+              raise SystemExit('Нарушен порядок загрузки данных, рыночного слоя и app.js')
           if '<style>' in index:
               raise SystemExit('CSS снова встроен в index.html')
-          print(f'KinoRates validation OK: {len(data)} canonical rate records, {len(sources)} sources, {len(dom_refs)} DOM refs, OG {image_width}x{image_height}')
+          print(f'KinoRates validation OK: {len(data)} canonical rate records, {len(sources)} sources, {len(market)} market records, {len(dom_refs)} DOM refs, OG {image_width}x{image_height}')
           PY
-          ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js sources-data.js
+          ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js sources-data.js market-data.js
 
   check:
     if: github.event_name != 'push'
