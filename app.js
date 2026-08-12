@@ -51,11 +51,11 @@ DATA.forEach(r=>{
   MAIN_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase());
   QUICK_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase());
 });
-const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"есть письмо 2026", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};
+const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"сверить PDF", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"срок истёк"};
 const TIP = {
   fresh2026:"Ставка подтверждена опубликованным цеховым письмом на сезон 2026 года.",
   check:"Ставка требует дополнительной проверки: нет актуального первоисточника, однозначно подтверждающего эту позицию.",
-  newdoc:"Цех выпустил письмо, вступившее в силу в 2026 году, но эту цифру ещё нужно сверить с текстом первоисточника.",
+  newdoc:"Первичный документ найден, но конкретную цифру или категорию ещё нужно сверить с его содержанием.",
   verified2025:"Ставка подтверждена опубликованным коллективным письмом 2025 года. Более свежего письма на странице цеха не опубликовано.",
   verified2024:"Ставка подтверждена опубликованным коллективным письмом 2024 года. Более свежего письма по этой категории на странице цеха не опубликовано.",
   verified2023:"Ставка подтверждена опубликованным коллективным письмом 2023 года. Более свежего письма по этой категории на странице цеха не опубликовано.",
@@ -99,12 +99,14 @@ const conts = [...new Set(DATA.map(r=>r.content))].sort((a,b)=>a.localeCompare(b
 
 // счётчики
 const cnt = s => STATUS_COUNTS.get(s)||0;
+const verifiedCount=cnt('fresh2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');
+const reviewCount=cnt('check')+cnt('newdoc');
 document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
   <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>
-  <div class="stat ok"><b>${cnt('fresh2026')}</b><i>сверено по письмам 2026</i></div>
-  <div class="stat"><b>${cnt('newdoc')}</b><i>ждут сверки с письмом 2026</i></div>
-  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему письму</i></div>`;
+  <div class="stat ok"><b>${verifiedCount}</b><i>сверено по первоисточникам</i></div>
+  <div class="stat"><b>${reviewCount}</b><i>требуют проверки</i></div>
+  <div class="stat bad"><b>${cnt('expired')}</b><i>по истёкшему документу</i></div>`;
 
 // фильтры
 const uSel = document.getElementById('unit'), cSel = document.getElementById('content');
