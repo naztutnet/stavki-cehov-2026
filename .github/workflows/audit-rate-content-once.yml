@@ -1,4 +1,4 @@
-name: One-shot semantic rate audit
+name: One-shot rate provenance fix
 
 on:
   push:
@@ -9,29 +9,56 @@ permissions:
   contents: write
 
 jobs:
-  audit:
+  fix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Trace suspicious rows before canonical migration
+      - name: Correct four false document attributions
         run: |
           node - <<'NODE'
-          const fs=require('fs'),vm=require('vm'),cp=require('child_process');
-          const ids=new Set([148,149,210,213]);
-          function load(text){const c={window:{}};vm.createContext(c);vm.runInContext(text,c);return c.window.KINORATES_DATA}
-          const current=load(fs.readFileSync('rates-data.js','utf8')).filter(r=>ids.has(r.id));
-          const oldText=cp.execFileSync('git',['show','3653c52d906966caa272dd8c46e5116da2f36c13:rates-data.js'],{encoding:'utf8',maxBuffer:10*1024*1024});
-          const old=load(oldText).filter(r=>ids.has(r.id));
-          const report={current,pre_migration:old};
-          fs.writeFileSync('provenance-trace-temp.json',JSON.stringify(report,null,2)+'\n');
-          console.log(JSON.stringify(report,null,2));
+          const fs=require('fs'),vm=require('vm');
+          const ctx={window:{}};vm.createContext(ctx);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
+          const data=ctx.window.KINORATES_DATA;
+          if(!Array.isArray(data)||data.length!==420)throw new Error(`expected 420, got ${data?.length}`);
+          const byId=new Map(data.map(r=>[r.id,r]));
+          const soundDoc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/otkrytoe_pismo_2026_zvukovoj_departament_ot_15_10_25.pdf';
+          const editDoc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/12/price_2026_for_print.pdf';
+          const registry='Реестр «Точно продюсер» (07.02.2025)';
+          const registryDate='07.02.2025';
+
+          for(const id of [148,149]){
+            const r=byId.get(id);if(!r||r.doc!==soundDoc||r.status!=='newdoc')throw new Error(`unexpected precondition for ${id}`);
+            r.src=registry;r.eff=registryDate;r.status='check';r.doc='';
+            const note='Первичный документ для этой постпродакшн-ставки требует дополнительной проверки; письмо звукового департамента 2026 относится к съёмочному периоду и не содержит этой позиции.';
+            r.extra=[r.extra,note].filter(Boolean).join(' ');
+          }
+          for(const id of [210,213]){
+            const r=byId.get(id);if(!r||r.doc!==editDoc||r.src!==registry||r.status!=='check')throw new Error(`unexpected precondition for ${id}`);
+            r.doc='';
+            const note='Первичный документ для этой ставки логгера требует дополнительной проверки; ссылка на письмо Ассоциации режиссёров монтажа 2026 удалена как нерелевантная этой позиции.';
+            r.extra=[r.extra,note].filter(Boolean).join(' ');
+          }
+
+          const fields=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
+          const rawFields=new Set(['amount','id']);
+          const dicts=fields.map(f=>rawFields.has(f)?null:[]),maps=fields.map(f=>rawFields.has(f)?null:new Map());
+          const rows=data.map(row=>fields.map((field,i)=>{const v=row[field];if(rawFields.has(field))return v;if(v===null)return null;if(typeof v!=='string')throw new Error(`bad ${field} id=${row.id}`);const m=maps[i],d=dicts[i];if(!m.has(v)){m.set(v,d.length);d.push(v)}return m.get(v)}));
+          const compact=`/* Canonical KinoRates dataset: 420 runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(fields)},D=${JSON.stringify(dicts)},R=${JSON.stringify(rows)};return R.map(r=>{const o={};for(let i=0;i<K.length;i++){const d=D[i],v=r[i];o[K[i]]=d===null?v:(v===null?null:d[v])}return o})})();\n`;
+          const test={window:{}};vm.createContext(test);vm.runInContext(compact,test);
+          const out=test.window.KINORATES_DATA;
+          if(out.length!==420||new Set(out.map(r=>r.id)).size!==420)throw new Error('packing changed dataset cardinality');
+          for(const id of [148,149]){const r=out.find(x=>x.id===id);if(r.doc||r.status!=='check'||r.src!==registry||r.eff!==registryDate)throw new Error(`sound fix failed ${id}`)}
+          for(const id of [210,213]){const r=out.find(x=>x.id===id);if(r.doc||r.status!=='check'||r.src!==registry)throw new Error(`logger fix failed ${id}`)}
+          fs.writeFileSync('rates-data.js',compact);
+          console.log('Corrected provenance for IDs 148,149,210,213; record count remains',out.length);
           NODE
-      - name: Commit temporary trace
+          node --check rates-data.js
+      - name: Commit corrected canonical data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add provenance-trace-temp.json
-          git commit -m "Trace KinoRates suspicious provenance [skip ci]"
+          git add rates-data.js
+          git commit -m "Correct KinoRates source attribution for four rates"
+          git pull --rebase origin main
           git push
