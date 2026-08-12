@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Audit stale overlaps and provenance consistency
+      - name: Inspect inconsistent document groups
         run: |
           node - <<'NODE'
           const fs=require('fs'),vm=require('vm');
@@ -21,51 +21,21 @@ jobs:
           vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
           const data=ctx.window.KINORATES_DATA;
           if(!Array.isArray(data)||data.length!==420)throw new Error(`expected 420, got ${data?.length}`);
-
-          const norm=s=>String(s??'').toLowerCase().replace(/ё/g,'е').replace(/[—–−]/g,'-').replace(/[«»„“”"']/g,'').replace(/\s*\/\s*/g,'/').replace(/\s*-\s*/g,'-').replace(/[(),.:;]+/g,' ').replace(/\s+/g,' ').trim();
-          const tokens=s=>new Set(norm(s).split(/\s+/).filter(Boolean));
-          const sim=(a,b)=>{const A=tokens(a),B=tokens(b);if(!A.size&&!B.size)return 1;let inter=0;for(const x of A)if(B.has(x))inter++;const jac=inter/(A.size+B.size-inter||1);const na=norm(a),nb=norm(b);const contain=na&&nb&&(na.includes(nb)||nb.includes(na))?Math.min(na.length,nb.length)/Math.max(na.length,nb.length):0;return Math.max(jac,contain)};
-          const current=new Set(['fresh2026','newdoc','verified2025']);
-          const stale=new Set(['check','expired','archive']);
-          const key=r=>[norm(r.dept),norm(r.prof),norm(r.content),norm(r.unit)].join('|');
-          const pick=r=>({id:r.id,dept:r.dept,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,region:r.region,eff:r.eff,status:r.status,src:r.src,doc:r.doc});
-          const groups=new Map();for(const r of data){const k=key(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
-          const candidates=[];
-          for(const rows of groups.values()){
-            if(rows.length<2)continue;
-            for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length;j++){
-              const a=rows[i],b=rows[j],s=sim(a.cond,b.cond);
-              const currentStale=(current.has(a.status)&&stale.has(b.status))||(current.has(b.status)&&stale.has(a.status));
-              const provenanceDiff=a.src!==b.src||a.doc!==b.doc||a.eff!==b.eff||a.status!==b.status;
-              const sameAmount=a.amount===b.amount;
-              const sameDoc=a.doc&&a.doc===b.doc;
-              if((currentStale&&s>=0.45)||(provenanceDiff&&sameAmount&&s>=0.60)||(sameDoc&&a.status!==b.status&&s>=0.45)){
-                candidates.push({similarity:+s.toFixed(3),reason:currentStale?'current-vs-stale':sameDoc?'same-doc-status-diff':'same-amount-provenance-diff',a:pick(a),b:pick(b)});
-              }
-            }
+          const docs=[
+            'https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/otkrytoe_pismo_2026_zvukovoj_departament_ot_15_10_25.pdf',
+            'https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/12/price_2026_for_print.pdf'
+          ];
+          const groups=docs.map(doc=>({doc,rows:data.filter(r=>r.doc===doc).map(r=>({id:r.id,dept:r.dept,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,ot:r.ot,extra:r.extra,region:r.region,eff:r.eff,status:r.status,src:r.src}))}));
+          fs.writeFileSync('document-issue-details-temp.json',JSON.stringify(groups,null,2)+'\n');
+          for(const g of groups){
+            console.log('\nDOC',g.doc,'ROWS',g.rows.length);
+            for(const r of g.rows)console.log(JSON.stringify({id:r.id,prof:r.prof,cond:r.cond,unit:r.unit,amount:r.amount,eff:r.eff,status:r.status,src:r.src}));
           }
-          candidates.sort((x,y)=>y.similarity-x.similarity||x.a.id-y.a.id);
-
-          const groupBy=(fn)=>{const m=new Map();for(const r of data){const k=fn(r);if(!k)continue;if(!m.has(k))m.set(k,[]);m.get(k).push(r)}return m};
-          const docIssues=[];
-          for(const [doc,rows] of groupBy(r=>r.doc).entries()){
-            const statuses=[...new Set(rows.map(r=>r.status))],effs=[...new Set(rows.map(r=>r.eff))],srcs=[...new Set(rows.map(r=>r.src))];
-            if(statuses.length>1||effs.length>1||srcs.length>1)docIssues.push({doc,count:rows.length,statuses,effs,srcs,ids:rows.map(r=>r.id)});
-          }
-          const sourceIssues=[];
-          for(const [src,rows] of groupBy(r=>r.src).entries()){
-            const docs=[...new Set(rows.map(r=>r.doc))],statuses=[...new Set(rows.map(r=>r.status))],effs=[...new Set(rows.map(r=>r.eff))];
-            if(docs.length>1||statuses.length>1||effs.length>1)sourceIssues.push({src,count:rows.length,docs,statuses,effs,ids:rows.map(r=>r.id)});
-          }
-          const statusCounts={};for(const r of data)statusCounts[r.status]=(statusCounts[r.status]||0)+1;
-          const report={records:data.length,status_counts:statusCounts,overlap_candidates:candidates,document_consistency_issues:docIssues,source_consistency_issues:sourceIssues};
-          fs.writeFileSync('data-overlap-audit-temp.json',JSON.stringify(report,null,2)+'\n');
-          console.log(JSON.stringify({records:data.length,status_counts:statusCounts,overlap_candidates:candidates.length,top_candidates:candidates.slice(0,12).map(x=>({similarity:x.similarity,reason:x.reason,ids:[x.a.id,x.b.id],prof:x.a.prof,conditions:[x.a.cond,x.b.cond],amounts:[x.a.amount,x.b.amount],statuses:[x.a.status,x.b.status],dates:[x.a.eff,x.b.eff]})),document_consistency_issues:docIssues.length,source_consistency_issues:sourceIssues.length},null,2));
           NODE
-      - name: Commit temporary audit
+      - name: Commit temporary details
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data-overlap-audit-temp.json
-          git commit -m "Audit KinoRates stale overlaps [skip ci]"
+          git add document-issue-details-temp.json
+          git commit -m "Inspect KinoRates document inconsistencies [skip ci]"
           git push
