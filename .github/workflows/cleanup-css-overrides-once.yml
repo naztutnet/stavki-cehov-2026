@@ -1,0 +1,140 @@
+name: One-shot safe CSS property cleanup
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cleanup-css-overrides-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove root declarations overridden by identical later selectors
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path=Path('app.css')
+          css=path.read_text(encoding='utf-8')
+
+          # Parse only root-level simple rules. @media/@supports blocks are left byte-for-byte intact.
+          blocks=[]
+          i=0
+          n=len(css)
+          while i<n:
+              brace=css.find('{',i)
+              if brace<0: break
+              header=css[i:brace]
+              # Header may include comments/whitespace. Find logical selector after last closing brace/newline segment.
+              logical=header.strip()
+              depth=1;j=brace+1
+              quote=None
+              while j<n and depth:
+                  ch=css[j]
+                  if quote:
+                      if ch=='\\': j+=2; continue
+                      if ch==quote: quote=None
+                  else:
+                      if ch in "'\"": quote=ch
+                      elif ch=='{': depth+=1
+                      elif ch=='}': depth-=1
+                  j+=1
+              if depth: raise SystemExit('Unbalanced CSS braces')
+              # Only top-level blocks are found by advancing past each full block.
+              blocks.append({'start':i,'brace':brace,'end':j,'header_raw':header,'selector':logical,'body':css[brace+1:j-1]})
+              i=j
+
+          # The scanner above sees each root block, including @media as a whole; skip at-rules.
+          simple=[b for b in blocks if b['selector'] and not b['selector'].lstrip().startswith('@')]
+
+          def parse_decls(body):
+              parts=[]
+              buf=''
+              quote=None
+              paren=0
+              for ch in body:
+                  if quote:
+                      buf+=ch
+                      if ch=='\\':
+                          # Escape handling is conservative; encoded CSS data does not rely on raw semicolons here.
+                          continue
+                      if ch==quote: quote=None
+                  else:
+                      if ch in "'\"": quote=ch;buf+=ch
+                      elif ch=='(': paren+=1;buf+=ch
+                      elif ch==')': paren=max(0,paren-1);buf+=ch
+                      elif ch==';' and paren==0:
+                          parts.append(buf);buf=''
+                      else: buf+=ch
+              if buf.strip(): parts.append(buf)
+              out=[]
+              for raw in parts:
+                  if ':' not in raw: continue
+                  prop,val=raw.split(':',1)
+                  prop=prop.strip();val=val.strip()
+                  if prop and val: out.append((prop,val))
+              return out
+
+          groups={}
+          for b in simple:
+              b['decls']=parse_decls(b['body'])
+              groups.setdefault(b['selector'],[]).append(b)
+
+          edits=[]
+          removed=0
+          touched=0
+          for selector,items in groups.items():
+              if len(items)<2: continue
+              for pos,b in enumerate(items[:-1]):
+                  later_props=set()
+                  for later in items[pos+1:]:
+                      later_props.update(prop for prop,_ in later['decls'])
+                  keep=[(prop,val) for prop,val in b['decls'] if prop not in later_props]
+                  drop=[(prop,val) for prop,val in b['decls'] if prop in later_props]
+                  if not drop: continue
+                  if not keep:
+                      # Fully empty rules are intentionally left alone; prior audit found none.
+                      continue
+                  indent='\n  ' if '\n' in b['body'] else ''
+                  if indent:
+                      body=indent + (';'.join(f'{p}:{v}' for p,v in keep)) + '\n'
+                  else:
+                      body=';'.join(f'{p}:{v}' for p,v in keep)
+                  replacement=b['header_raw']+'{'+body+'}'
+                  edits.append((b['start'],b['end'],replacement))
+                  removed+=len(drop);touched+=1
+
+          for start,end,replacement in sorted(edits,reverse=True):
+              css=css[:start]+replacement+css[end:]
+
+          # Basic safety checks.
+          depth=0;quote=None
+          for ch in css:
+              if quote:
+                  if ch==quote: quote=None
+                  continue
+              if ch in "'\"": quote=ch
+              elif ch=='{': depth+=1
+              elif ch=='}': depth-=1
+              if depth<0: raise SystemExit('CSS brace underflow after cleanup')
+          if depth: raise SystemExit('CSS braces unbalanced after cleanup')
+          if removed<10:
+              raise SystemExit(f'Unexpectedly small cleanup: {removed} declarations')
+          path.write_text(css,encoding='utf-8')
+          print(f'Removed {removed} overridden declarations from {touched} root rules')
+          PY
+
+      - name: Validate and commit
+        run: |
+          git diff --check
+          test -s app.css
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.css
+          git commit -m "Remove safely overridden CSS declarations [skip ci]"
+          git push
