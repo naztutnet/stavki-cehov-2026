@@ -1,0 +1,57 @@
+name: One-shot semantic rate audit
+
+on:
+  push:
+    paths:
+      - '.github/workflows/audit-rate-content-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit semantic duplicates and conflicts
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const ctx={window:{}};vm.createContext(ctx);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
+          const data=ctx.window.KINORATES_DATA;
+          if(!Array.isArray(data)||data.length!==420)throw new Error(`expected 420, got ${data?.length}`);
+
+          const norm=s=>String(s??'').toLowerCase().replace(/ё/g,'е').replace(/[—–−]/g,'-').replace(/[«»„“”"']/g,'').replace(/\s*\/\s*/g,'/').replace(/\s*-\s*/g,'-').replace(/[(),.:;]+/g,' ').replace(/\s+/g,' ').trim();
+          const pick=r=>({id:r.id,dept:r.dept,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,region:r.region,eff:r.eff,status:r.status,src:r.src,doc:r.doc});
+          const groupBy=(keyFn)=>{const m=new Map();for(const r of data){const k=keyFn(r);if(!m.has(k))m.set(k,[]);m.get(k).push(r)}return [...m.entries()].filter(([,rows])=>rows.length>1)};
+
+          const exact=groupBy(r=>JSON.stringify(Object.fromEntries(Object.entries(r).filter(([k])=>k!=='id')))).map(([,rows])=>rows.map(pick));
+          const semantic=groupBy(r=>[r.dept,r.prof,r.cond,r.content,r.unit,r.amount,r.region,r.eff,r.src,r.status,r.doc].map(norm).join('|'))
+            .filter(([,rows])=>new Set(rows.map(r=>r.id)).size>1)
+            .map(([,rows])=>rows.map(pick));
+          const normalizedSameAmount=groupBy(r=>[r.dept,r.prof,r.cond,r.content,r.unit,r.amount,r.region].map(norm).join('|'))
+            .filter(([,rows])=>new Set(rows.map(r=>r.eff+'|'+r.src+'|'+r.doc+'|'+r.status)).size>1)
+            .map(([,rows])=>rows.map(pick));
+          const identityConflicts=groupBy(r=>[r.dept,r.prof,r.cond,r.content,r.unit,r.region].map(norm).join('|'))
+            .filter(([,rows])=>new Set(rows.map(r=>r.amount)).size>1)
+            .map(([,rows])=>rows.map(pick));
+          const normalizedIdentityConflicts=groupBy(r=>[norm(r.dept),norm(r.prof),norm(r.cond),norm(r.content),norm(r.unit),norm(r.region)].join('|'))
+            .filter(([,rows])=>new Set(rows.map(r=>r.amount)).size>1)
+            .map(([,rows])=>rows.map(pick));
+          const sameRoleUnit=groupBy(r=>[norm(r.dept),norm(r.prof),norm(r.content),norm(r.unit)].join('|'))
+            .filter(([,rows])=>rows.length>1)
+            .map(([,rows])=>({rows:rows.map(pick),unique_conditions:new Set(rows.map(r=>norm(r.cond))).size,unique_amounts:new Set(rows.map(r=>r.amount)).size,unique_sources:new Set(rows.map(r=>r.src)).size}));
+
+          const statusCounts={};for(const r of data)statusCounts[r.status]=(statusCounts[r.status]||0)+1;
+          const report={records:data.length,status_counts:statusCounts,exact_duplicates:exact,semantic_duplicates:semantic,same_amount_different_provenance:normalizedSameAmount,identity_amount_conflicts:identityConflicts,normalized_identity_amount_conflicts:normalizedIdentityConflicts,same_role_unit_groups:sameRoleUnit};
+          fs.writeFileSync('data-content-audit-temp.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify({records:data.length,status_counts:statusCounts,exact_duplicates:exact.length,semantic_duplicates:semantic.length,same_amount_different_provenance:normalizedSameAmount.length,identity_amount_conflicts:identityConflicts.length,normalized_identity_amount_conflicts:normalizedIdentityConflicts.length,same_role_unit_groups:sameRoleUnit.length},null,2));
+          NODE
+      - name: Commit temporary audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data-content-audit-temp.json
+          git commit -m "Audit KinoRates semantic duplicates [skip ci]"
+          git push
