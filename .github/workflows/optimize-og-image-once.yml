@@ -1,0 +1,42 @@
+name: One-shot lossless OG image optimization
+
+on:
+  push:
+    paths:
+      - '.github/workflows/optimize-og-image-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Losslessly optimize social preview PNG
+        run: |
+          before=$(stat -c%s og-image.png)
+          file og-image.png | grep -q 'PNG image data, 1200 x 630'
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq optipng
+          optipng -o7 -strip all og-image.png
+          after=$(stat -c%s og-image.png)
+          file og-image.png | grep -q 'PNG image data, 1200 x 630'
+          echo "OG image: ${before} -> ${after} bytes"
+          if [ "$after" -gt "$before" ]; then
+            echo 'Optimizer made file larger' >&2
+            exit 1
+          fi
+
+      - name: Commit only when smaller
+        run: |
+          if git diff --quiet -- og-image.png; then
+            echo 'Image already optimal enough; nothing to commit.'
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add og-image.png
+          git commit -m "Losslessly optimize KinoRates OG image [skip ci]"
+          git push
