@@ -1,0 +1,92 @@
+{
+  "records": 420,
+  "status_counts": {
+    "fresh2026": 174,
+    "check": 106,
+    "newdoc": 15,
+    "expired": 42,
+    "verified2025": 2,
+    "archive": 81
+  },
+  "overlap_candidates": [],
+  "document_consistency_issues": [
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/otkrytoe_pismo_2026_zvukovoj_departament_ot_15_10_25.pdf",
+      "count": 28,
+      "statuses": [
+        "fresh2026",
+        "newdoc"
+      ],
+      "effs": [
+        "01.01.2026"
+      ],
+      "srcs": [
+        "Звукорежиссеры и ассистенты звукорежиссеров — письмо от 01.01.2026",
+        "Звукорежиссеры и ассистенты — письмо от 01.01.2026"
+      ],
+      "ids": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149
+      ]
+    },
+    {
+      "doc": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/12/price_2026_for_print.pdf",
+      "count": 14,
+      "statuses": [
+        "fresh2026",
+        "check"
+      ],
+      "effs": [
+        "01.01.2026",
+        "07.02.2025"
+      ],
+      "srcs": [
+        "Ассоциация режиссеров монтажа — письмо от 01.01.2026",
+        "Реестр «Точно продюсер» (07.02.2025)"
+      ],
+      "ids": [
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214
+      ]
+    }
+  ],
+  "source_consistency_issues": []
+}
