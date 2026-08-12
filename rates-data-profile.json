@@ -1,0 +1,915 @@
+{
+  "records": 340,
+  "file_bytes": 422151,
+  "fields": {
+    "dept": {
+      "non_null": 340,
+      "unique_values": 22,
+      "total_string_bytes": 13389,
+      "unique_string_bytes": 835,
+      "repeat_waste_bytes": 12554,
+      "top": [
+        {
+          "value": "Локации и подготовка объектов",
+          "count": 34,
+          "bytes_each": 55,
+          "repeat_waste_bytes": 1815
+        },
+        {
+          "value": "Гримерно-постижерский цех",
+          "count": 33,
+          "bytes_each": 48,
+          "repeat_waste_bytes": 1536
+        },
+        {
+          "value": "Режиссерская группа",
+          "count": 32,
+          "bytes_each": 37,
+          "repeat_waste_bytes": 1147
+        },
+        {
+          "value": "Департамент костюма",
+          "count": 31,
+          "bytes_each": 37,
+          "repeat_waste_bytes": 1110
+        },
+        {
+          "value": "Транспортный цех",
+          "count": 26,
+          "bytes_each": 31,
+          "repeat_waste_bytes": 775
+        },
+        {
+          "value": "Административный цех",
+          "count": 23,
+          "bytes_each": 39,
+          "repeat_waste_bytes": 858
+        },
+        {
+          "value": "Операторский цех",
+          "count": 21,
+          "bytes_each": 31,
+          "repeat_waste_bytes": 620
+        },
+        {
+          "value": "Аренда звукового оборудования",
+          "count": 19,
+          "bytes_each": 56,
+          "repeat_waste_bytes": 1008
+        },
+        {
+          "value": "Актерский цех",
+          "count": 16,
+          "bytes_each": 25,
+          "repeat_waste_bytes": 375
+        },
+        {
+          "value": "Продюсерский департамент",
+          "count": 15,
+          "bytes_each": 47,
+          "repeat_waste_bytes": 658
+        },
+        {
+          "value": "Режиссёр монтажа",
+          "count": 12,
+          "bytes_each": 31,
+          "repeat_waste_bytes": 341
+        },
+        {
+          "value": "Аэросъёмка",
+          "count": 10,
+          "bytes_each": 20,
+          "repeat_waste_bytes": 180
+        }
+      ]
+    },
+    "prof": {
+      "non_null": 340,
+      "unique_values": 137,
+      "total_string_bytes": 17087,
+      "unique_string_bytes": 7019,
+      "repeat_waste_bytes": 10068,
+      "top": [
+        {
+          "value": "Художник по гриму",
+          "count": 11,
+          "bytes_each": 32,
+          "repeat_waste_bytes": 320
+        },
+        {
+          "value": "Ассистент художника по гриму",
+          "count": 11,
+          "bytes_each": 53,
+          "repeat_waste_bytes": 530
+        },
+        {
+          "value": "Гример",
+          "count": 9,
+          "bytes_each": 12,
+          "repeat_waste_bytes": 96
+        },
+        {
+          "value": "Художник по костюмам",
+          "count": 9,
+          "bytes_each": 38,
+          "repeat_waste_bytes": 304
+        },
+        {
+          "value": "Ассистент художника по костюмам",
+          "count": 9,
+          "bytes_each": 59,
+          "repeat_waste_bytes": 472
+        },
+        {
+          "value": "Костюмер",
+          "count": 9,
+          "bytes_each": 16,
+          "repeat_waste_bytes": 128
+        },
+        {
+          "value": "Колорист",
+          "count": 9,
+          "bytes_each": 16,
+          "repeat_waste_bytes": 128
+        },
+        {
+          "value": "Режиссер монтажа — чистовой монтаж",
+          "count": 7,
+          "bytes_each": 65,
+          "repeat_waste_bytes": 390
+        },
+        {
+          "value": "Администратор съемочной группы",
+          "count": 6,
+          "bytes_each": 58,
+          "repeat_waste_bytes": 290
+        },
+        {
+          "value": "Продюсер кинолокации стаж 10+ лет, 20+ проектов",
+          "count": 6,
+          "bytes_each": 81,
+          "repeat_waste_bytes": 405
+        },
+        {
+          "value": "1-й ассистент продюсера кинолокаций, директор стаж 7+ лет, 12+ проектов",
+          "count": 6,
+          "bytes_each": 124,
+          "repeat_waste_bytes": 620
+        },
+        {
+          "value": "2-й ассистент продюсера кинолокации, заместитель директора стаж 4+ лет, 6+ проектов",
+          "count": 6,
+          "bytes_each": 148,
+          "repeat_waste_bytes": 740
+        }
+      ]
+    },
+    "cond": {
+      "non_null": 340,
+      "unique_values": 177,
+      "total_string_bytes": 17821,
+      "unique_string_bytes": 10300,
+      "repeat_waste_bytes": 7521,
+      "top": [
+        {
+          "value": "аренда за 1 смену",
+          "count": 19,
+          "bytes_each": 30,
+          "repeat_waste_bytes": 540
+        },
+        {
+          "value": "смена",
+          "count": 17,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 160
+        },
+        {
+          "value": "ночная смена",
+          "count": 11,
+          "bytes_each": 23,
+          "repeat_waste_bytes": 230
+        },
+        {
+          "value": "дневная смена",
+          "count": 11,
+          "bytes_each": 25,
+          "repeat_waste_bytes": 250
+        },
+        {
+          "value": "смена (8 часов)",
+          "count": 10,
+          "bytes_each": 25,
+          "repeat_waste_bytes": 225
+        },
+        {
+          "value": "подготовка",
+          "count": 6,
+          "bytes_each": 20,
+          "repeat_waste_bytes": 100
+        },
+        {
+          "value": "полный метр / к-м / многосерийный, оклад",
+          "count": 5,
+          "bytes_each": 70,
+          "repeat_waste_bytes": 280
+        },
+        {
+          "value": "Реклама/клипы, смена",
+          "count": 5,
+          "bytes_each": 37,
+          "repeat_waste_bytes": 148
+        },
+        {
+          "value": "смена 10 часов (день) / 9 часов (ночь), вкл. обед — в т.ч. реклама",
+          "count": 5,
+          "bytes_each": 108,
+          "repeat_waste_bytes": 432
+        },
+        {
+          "value": "Полный метр, месяц",
+          "count": 4,
+          "bytes_each": 33,
+          "repeat_waste_bytes": 99
+        },
+        {
+          "value": "Сериалы, месяц",
+          "count": 4,
+          "bytes_each": 26,
+          "repeat_waste_bytes": 78
+        },
+        {
+          "value": "Реклама/клипы, подготовка",
+          "count": 4,
+          "bytes_each": 47,
+          "repeat_waste_bytes": 141
+        }
+      ]
+    },
+    "content": {
+      "non_null": 340,
+      "unique_values": 4,
+      "total_string_bytes": 7850,
+      "unique_string_bytes": 84,
+      "repeat_waste_bytes": 7766,
+      "top": [
+        {
+          "value": "Кино / сериал",
+          "count": 182,
+          "bytes_each": 23,
+          "repeat_waste_bytes": 4163
+        },
+        {
+          "value": "Любой проект",
+          "count": 119,
+          "bytes_each": 23,
+          "repeat_waste_bytes": 2714
+        },
+        {
+          "value": "Реклама / клип",
+          "count": 35,
+          "bytes_each": 25,
+          "repeat_waste_bytes": 850
+        },
+        {
+          "value": "Шоу / ТВ",
+          "count": 4,
+          "bytes_each": 13,
+          "repeat_waste_bytes": 39
+        }
+      ]
+    },
+    "unit": {
+      "non_null": 340,
+      "unique_values": 10,
+      "total_string_bytes": 3512,
+      "unique_string_bytes": 124,
+      "repeat_waste_bytes": 3388,
+      "top": [
+        {
+          "value": "смена",
+          "count": 158,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 1570
+        },
+        {
+          "value": "месяц",
+          "count": 126,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 1250
+        },
+        {
+          "value": "проект",
+          "count": 34,
+          "bytes_each": 12,
+          "repeat_waste_bytes": 396
+        },
+        {
+          "value": "час",
+          "count": 5,
+          "bytes_each": 6,
+          "repeat_waste_bytes": 24
+        },
+        {
+          "value": "минута",
+          "count": 4,
+          "bytes_each": 12,
+          "repeat_waste_bytes": 36
+        },
+        {
+          "value": "полсмены",
+          "count": 3,
+          "bytes_each": 16,
+          "repeat_waste_bytes": 32
+        },
+        {
+          "value": "аккорд",
+          "count": 3,
+          "bytes_each": 12,
+          "repeat_waste_bytes": 24
+        },
+        {
+          "value": "серия",
+          "count": 3,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 20
+        },
+        {
+          "value": "человек",
+          "count": 2,
+          "bytes_each": 14,
+          "repeat_waste_bytes": 14
+        },
+        {
+          "value": "единоразово",
+          "count": 2,
+          "bytes_each": 22,
+          "repeat_waste_bytes": 22
+        }
+      ]
+    },
+    "amount_text": {
+      "non_null": 340,
+      "unique_values": 144,
+      "total_string_bytes": 2687,
+      "unique_string_bytes": 1240,
+      "repeat_waste_bytes": 1447,
+      "top": [
+        {
+          "value": "25 000",
+          "count": 13,
+          "bytes_each": 6,
+          "repeat_waste_bytes": 72
+        },
+        {
+          "value": "15 000",
+          "count": 11,
+          "bytes_each": 6,
+          "repeat_waste_bytes": 60
+        },
+        {
+          "value": "230 000",
+          "count": 10,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 63
+        },
+        {
+          "value": "120 000",
+          "count": 9,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 56
+        },
+        {
+          "value": "150 000",
+          "count": 8,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 49
+        },
+        {
+          "value": "10 000",
+          "count": 8,
+          "bytes_each": 6,
+          "repeat_waste_bytes": 42
+        },
+        {
+          "value": "200 000",
+          "count": 7,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 42
+        },
+        {
+          "value": "30 000",
+          "count": 7,
+          "bytes_each": 6,
+          "repeat_waste_bytes": 36
+        },
+        {
+          "value": "300 000",
+          "count": 6,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 35
+        },
+        {
+          "value": "100 000",
+          "count": 6,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 35
+        },
+        {
+          "value": "5 000",
+          "count": 6,
+          "bytes_each": 5,
+          "repeat_waste_bytes": 25
+        },
+        {
+          "value": "7000",
+          "count": 6,
+          "bytes_each": 4,
+          "repeat_waste_bytes": 20
+        }
+      ]
+    },
+    "ot": {
+      "non_null": 340,
+      "unique_values": 58,
+      "total_string_bytes": 29831,
+      "unique_string_bytes": 4024,
+      "repeat_waste_bytes": 25807,
+      "top": [
+        {
+          "value": "",
+          "count": 128,
+          "bytes_each": 0,
+          "repeat_waste_bytes": 0
+        },
+        {
+          "value": "от 1 500 ₽/ч; после 4-го часа переработки добавляется стоимость смены (оклад ÷ 26). Текущий обед и обед позже 8-го часа = 1 час переработки. Разрыв менее 10 ч — 40% от часовой оплаты смены.",
+          "count": 29,
+          "bytes_each": 322,
+          "repeat_waste_bytes": 9016
+        },
+        {
+          "value": "Ассистент художника и костюмер: с 13-го по 16-й час — 10% стоимости смены за час, с 17-го — 20%. Стоимость смены = оклад ÷ 26. Разрыв менее 10 ч — 40% часовой оплаты смены. Перекостюм в обед = 1 час переработки.",
+          "count": 29,
+          "bytes_each": 354,
+          "repeat_waste_bytes": 9912
+        },
+        {
+          "value": "10% от гонорара",
+          "count": 24,
+          "bytes_each": 25,
+          "repeat_waste_bytes": 575
+        },
+        {
+          "value": "с 9-го ч: 10% с 11-го ч: 15% с 13-го ч: 20%",
+          "count": 10,
+          "bytes_each": 55,
+          "repeat_waste_bytes": 495
+        },
+        {
+          "value": "с 13-го часа смены 3 000 ₽/ч, с 15-го часа — плюс полная смена (от индивидуальной ставки)",
+          "count": 9,
+          "bytes_each": 150,
+          "repeat_waste_bytes": 1200
+        },
+        {
+          "value": "Площадка — 2 000 ₽/ч. Текущий обед и обед позже 8-го часа = переработка. Переработка свыше 4 часов — оплата дополнительной смены.",
+          "count": 9,
+          "bytes_each": 228,
+          "repeat_waste_bytes": 1824
+        },
+        {
+          "value": "без учета переработок",
+          "count": 7,
+          "bytes_each": 40,
+          "repeat_waste_bytes": 240
+        },
+        {
+          "value": "с 13-го часа смены 1 500 ₽/ч, с 15-го часа — плюс полная смена (от индивидуальной ставки)",
+          "count": 6,
+          "bytes_each": 150,
+          "repeat_waste_bytes": 750
+        },
+        {
+          "value": "1 км за КАД - 35 р.",
+          "count": 6,
+          "bytes_each": 27,
+          "repeat_waste_bytes": 135
+        },
+        {
+          "value": "1 км за КАД - 30р.",
+          "count": 5,
+          "bytes_each": 26,
+          "repeat_waste_bytes": 104
+        },
+        {
+          "value": "после 100 км 1 км - 35 р.",
+          "count": 5,
+          "bytes_each": 35,
+          "repeat_waste_bytes": 140
+        }
+      ]
+    },
+    "extra": {
+      "non_null": 340,
+      "unique_values": 56,
+      "total_string_bytes": 195181,
+      "unique_string_bytes": 33375,
+      "repeat_waste_bytes": 161806,
+      "top": [
+        {
+          "value": "",
+          "count": 60,
+          "bytes_each": 0,
+          "repeat_waste_bytes": 0
+        },
+        {
+          "value": "Все ставки повышены на 10% относительно 2025 года. Обязательное такси при смене от 14 часов, а также при старте до 6:30 или финале после 23:30. Максимум 6 смен подряд, смена в выходной — двойной тариф. Костюмваген не делится с гримерным цехом. Стирка вне костюмвагена — 10 000 ₽/мес на сотрудника.",
+          "count": 30,
+          "bytes_each": 516,
+          "repeat_waste_bytes": 14964
+        },
+        {
+          "value": "Градация — по числу проектов в категории, а не по общему стажу. Смена 12 часов вкл. обед, перерыв 11 часов. 7-я смена подряд (6-я при ночных) — двойной тариф. Обязательна аренда грима, инструментов и постижа: инструменты 15% закупочной стоимости (проект до 1 мес) / 25% (свыше). Суточные в экспедиции 1 500 ₽/день. Гримваген не делится с костюмерным цехом.",
+          "count": 28,
+          "bytes_each": 620,
+          "repeat_waste_bytes": 16740
+        },
+        {
+          "value": "Перепробег будет зависеть от цены на топливо. По каждой позиции есть множество нюансов, связанные с перепробегом/километражом/оплатой ГСМ/размером ставки и тд. Смена – 12 часов на всех позициях. У каждой позиции переработка стоит 10% от ставки за смену – 1 час.",
+          "count": 26,
+          "bytes_each": 471,
+          "repeat_waste_bytes": 11775
+        },
+        {
+          "value": "Коэффициент 1,2 к окладу: работа Директора без Зама / без Координатора / без инженера по ОТ при группе 40+; Администратора — без Зама, без Администратора площадки и Транспортного капитана при группе 80+. Коэффициенты суммируются. Компенсация обеда 500 ₽, связи от 250 ₽/нед, личного авто 1 000 ₽/сутки. Такси при финале смены 23:30–06:30, ночной смене, разрыве менее 8 ч и смене свыше 16 ч (реклама — 20 ч). Все ставки указаны «чистыми».",
+          "count": 21,
+          "bytes_each": 758,
+          "repeat_waste_bytes": 15160
+        },
+        {
+          "value": "Проекты длительностью более 30 смен обговариваются индивидуально. В экстремальных условиях к аренде применяется коэффициент +25%.",
+          "count": 19,
+          "bytes_each": 236,
+          "repeat_waste_bytes": 4248
+        },
+        {
+          "value": "взято из бота @Tochnop_bot",
+          "count": 15,
+          "bytes_each": 37,
+          "repeat_waste_bytes": 518
+        },
+        {
+          "value": "Процентные надбавки для минимальной ставки на работу в случае: 1. Полет на локациях, где по закону РФ никакие согласования не требуются, а также отсутствуют средства радиоэлектронного подавления (СРП):--------------0% 2. В случае проведения съемок в местах, где возможно наличие средств радиоэлектронного подавления (СРП или \"глушилки\"), включая, но не ограничиваясь городами Москва/Санкт-Петербург/Сочи, в сопровождении ФСО и при наличии необходимых разрешений на осуществление фото и/или видеосъемки с воздуха, с работающими средствами радиоэлектронного радиоподавления, устанавливается надбавка в размере:---------------------------25% 3. При необходимости осуществления опасных маневров над водяными участками устанавливается надбавка в размере:------------------------------------------------------25% 4. Полет в темное время суток на неподготовленной и неизученной локации (не проводился первичный осмотр территории/объекта Исполнителем) устанавливается надбавка в размере: -----------------------------------------------------15% 5. Опасные/высокорисковые полеты при ветре более 10 м/с (примерно 35 км/ч) и/или порывы ветра 12,5м/с (45км/ч) устанавливается надбавка в размере: -----------------------------------------------------------------------------------------------------------10% 6. Выполнение полетов в сложных/опасных условиях, которые создают дополнительную степень риска для оборудования Исполнителя и имущества третьих лиц: пиротехнические и/или настоящие взрывы, полеты в затуманенной/задымленной области, равно как и полеты в холодную погоду (Ниже -20С) устанавливается надбавка в размере:----------------------------------------------------------------------------------------------10% 7. Выполнение полетов в замкнутом пространстве, полеты с переходом с открытого (уличного) пространства в замкнутое или узкое пространство (в т.ч. здания), равно как и наоборот, устанавливается надбавка в размере: -----------------------------------------------------------------------------------------------------------20% 8. Полет в непосредственной близости (от 3 до 1.5 метров) от людей и/или над большим скоплением людей устанавливается надбавка в размере: -----------------------------------------------------------------------------------------------------------20% 9. Проведение полетов при влажности воздуха более 80%, а также полеты в дождь и мокрый снег устанавливается надбавка в размере: -----------------------------------------------------------------------------------------------------------10% 10. При вызове Исполнителя на съемки менее чем за 12 часов (не считая подменных смен) устанавливается надбавка в размере:----------------------------50% При наличии нескольких усложняющих факторов процентные надбавки суммируются. -Погрузка/разгрузка техники - Бесплатно. -Выезд коптервагена за пределы МКАД/КАД/Города проживания - 25р/км. Письмо АПАК от 01.04.2025 опубликовано сканом без текстового слоя — цифры здесь из сводного реестра, сверьте по PDF.",
+          "count": 10,
+          "bytes_each": 4791,
+          "repeat_waste_bytes": 43119
+        },
+        {
+          "value": "Отдельная оплата: ГСМ, связь, парковки, суточные от 1000 р по России",
+          "count": 10,
+          "bytes_each": 118,
+          "repeat_waste_bytes": 1062
+        },
+        {
+          "value": "Минимальный состав департамента — 4 человека. Правки в список реквизита — письменно не позднее 72 часов (96 в экспедиции). Смена: день 12 ч, ночь 11 ч, перерыв 10/12 ч. 7-я смена подряд — двойная ставка: художник 16 500 ₽, ассистент 14 000 ₽, реквизитор 12 000 ₽. Транспорт: топливо до 40 000 ₽/мес + амортизация от 30 000 ₽/мес или закрепленная машина. Суточные от 1 300 ₽. Условия распространяются только на подписантов письма.",
+          "count": 10,
+          "bytes_each": 731,
+          "repeat_waste_bytes": 6579
+        },
+        {
+          "value": "Доплата за фактуру одежды /натурные съемки в холодное время года /курение в кадре и др. не имитированные действия пагубного характера/ношения каблуков выше 3 см/переодевание в исторический костюм составит + 1000 руб. к гонорару. Доплата за текст + 1000 руб. к гонорару. Доплата за самостоятельный макияж + 500 руб. к гонорару. Доплата за дополнительные варианты одежды + 500 руб. к гонорару за каждый вариант одежды. Доплата за обнажение + 8000 руб. к гонорару. - Оплачивается отмена смены или перенос минимум 10% гонорара (переработка начинается с первой минуты часа).",
+          "count": 8,
+          "bytes_each": 1006,
+          "repeat_waste_bytes": 7042
+        },
+        {
+          "value": "Ставки проиндексированы в среднем на 10–12%. Смена: день 12 часов (реклама и диджитал — 10), ночь 11 часов (реклама — 9), включая час обеда; разрыв не менее 10 часов. Обед позже 7-го часа = 1 час переработки, отсутствие обеда после 8-го = 2 часа. 7-я смена подряд — двойной тариф. Такси при старте до 6:30 или финале после 23:30. Отмена менее чем за 12 часов — 100% смены, за 12–24 часа — 50%. Суточные от 1 700 ₽. Экстремальные условия (ниже −15 °C, выше +35 °C, вода, высота, пыль, соль) — коэффициент +25% к персоналу и оборудованию. Продакшн предоставляет SSD под ежедневный бэкап звука.",
+          "count": 6,
+          "bytes_each": 999,
+          "repeat_waste_bytes": 4995
+        }
+      ]
+    },
+    "region": {
+      "non_null": 340,
+      "unique_values": 3,
+      "total_string_bytes": 9368,
+      "unique_string_bytes": 100,
+      "repeat_waste_bytes": 9268,
+      "top": [
+        {
+          "value": "Москва / Россия",
+          "count": 306,
+          "bytes_each": 27,
+          "repeat_waste_bytes": 8235
+        },
+        {
+          "value": "Санкт-Петербург",
+          "count": 26,
+          "bytes_each": 29,
+          "repeat_waste_bytes": 725
+        },
+        {
+          "value": "Москва / Санкт-Петербург",
+          "count": 8,
+          "bytes_each": 44,
+          "repeat_waste_bytes": 308
+        }
+      ]
+    },
+    "eff": {
+      "non_null": 340,
+      "unique_values": 17,
+      "total_string_bytes": 3400,
+      "unique_string_bytes": 170,
+      "repeat_waste_bytes": 3230,
+      "top": [
+        {
+          "value": "01.01.2026",
+          "count": 78,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 770
+        },
+        {
+          "value": "01.01.2024",
+          "count": 34,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 330
+        },
+        {
+          "value": "01.02.2026",
+          "count": 31,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 300
+        },
+        {
+          "value": "08.03.2026",
+          "count": 29,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 280
+        },
+        {
+          "value": "01.01.2025",
+          "count": 27,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 260
+        },
+        {
+          "value": "01.11.2023",
+          "count": 24,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 230
+        },
+        {
+          "value": "15.03.2026",
+          "count": 23,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 220
+        },
+        {
+          "value": "07.02.2025",
+          "count": 21,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 200
+        },
+        {
+          "value": "01.03.2024",
+          "count": 14,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 130
+        },
+        {
+          "value": "01.04.2025",
+          "count": 10,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 90
+        },
+        {
+          "value": "01.05.2025",
+          "count": 9,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 80
+        },
+        {
+          "value": "01.01.2022",
+          "count": 9,
+          "bytes_each": 10,
+          "repeat_waste_bytes": 80
+        }
+      ]
+    },
+    "src": {
+      "non_null": 340,
+      "unique_values": 27,
+      "total_string_bytes": 33233,
+      "unique_string_bytes": 2557,
+      "repeat_waste_bytes": 30676,
+      "top": [
+        {
+          "value": "Гильдия продюсеров и локейшен-менеджеров — письмо от 01.01.2024",
+          "count": 34,
+          "bytes_each": 109,
+          "repeat_waste_bytes": 3597
+        },
+        {
+          "value": "Объединение департамента костюма — письмо от 01.02.2026",
+          "count": 31,
+          "bytes_each": 95,
+          "repeat_waste_bytes": 2850
+        },
+        {
+          "value": "Гримерный департамент — письмо от 08.03.2026",
+          "count": 29,
+          "bytes_each": 74,
+          "repeat_waste_bytes": 2072
+        },
+        {
+          "value": "Звукорежиссеры и ассистенты звукорежиссеров — письмо от 01.01.2026",
+          "count": 26,
+          "bytes_each": 116,
+          "repeat_waste_bytes": 2900
+        },
+        {
+          "value": "Объединение транспортного цеха Санкт-Петербурга — письмо от 01.01.2025",
+          "count": 26,
+          "bytes_each": 123,
+          "repeat_waste_bytes": 3075
+        },
+        {
+          "value": "Объединение вторых режиссеров — письмо от 01.01.2026",
+          "count": 25,
+          "bytes_each": 89,
+          "repeat_waste_bytes": 2136
+        },
+        {
+          "value": "Сообщество директоров, замов и администраторов — письмо от 15.03.2026",
+          "count": 23,
+          "bytes_each": 120,
+          "repeat_waste_bytes": 2640
+        },
+        {
+          "value": "Актерский цех — письмо от 01.11.2023",
+          "count": 16,
+          "bytes_each": 58,
+          "repeat_waste_bytes": 870
+        },
+        {
+          "value": "Реестр «Точно продюсер» — письмо от 07.02.2025",
+          "count": 15,
+          "bytes_each": 77,
+          "repeat_waste_bytes": 1078
+        },
+        {
+          "value": "Реестр «Точно продюсер» — первоисточник письма не подтверждён",
+          "count": 14,
+          "bytes_each": 116,
+          "repeat_waste_bytes": 1508
+        },
+        {
+          "value": "Ассоциация режиссеров монтажа — письмо от 01.01.2026",
+          "count": 12,
+          "bytes_each": 89,
+          "repeat_waste_bytes": 979
+        },
+        {
+          "value": "Ассоциация профессионалов аэрокинематографии — письмо от 01.04.2025",
+          "count": 10,
+          "bytes_each": 119,
+          "repeat_waste_bytes": 1071
+        }
+      ]
+    },
+    "status": {
+      "non_null": 340,
+      "unique_values": 4,
+      "total_string_bytes": 2487,
+      "unique_string_bytes": 27,
+      "repeat_waste_bytes": 2460,
+      "top": [
+        {
+          "value": "fresh2026",
+          "count": 176,
+          "bytes_each": 9,
+          "repeat_waste_bytes": 1575
+        },
+        {
+          "value": "check",
+          "count": 115,
+          "bytes_each": 5,
+          "repeat_waste_bytes": 570
+        },
+        {
+          "value": "expired",
+          "count": 34,
+          "bytes_each": 7,
+          "repeat_waste_bytes": 231
+        },
+        {
+          "value": "newdoc",
+          "count": 15,
+          "bytes_each": 6,
+          "repeat_waste_bytes": 84
+        }
+      ]
+    },
+    "doc": {
+      "non_null": 326,
+      "unique_values": 23,
+      "total_string_bytes": 29988,
+      "unique_string_bytes": 2121,
+      "repeat_waste_bytes": 27867,
+      "top": [
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/07/gildiya-lokejshen-menedzherov-2024-2025.pdf",
+          "count": 34,
+          "bytes_each": 99,
+          "repeat_waste_bytes": 3267
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/02/pismo-departamenta-kostyuma-2026.pdf",
+          "count": 31,
+          "bytes_each": 92,
+          "repeat_waste_bytes": 2760
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/03/grim-2026-draft-7.pdf",
+          "count": 29,
+          "bytes_each": 77,
+          "repeat_waste_bytes": 2156
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/otkrytoe_pismo_2026_zvukovoj_departament_ot_15_10_25.pdf",
+          "count": 28,
+          "bytes_each": 112,
+          "repeat_waste_bytes": 3024
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/01/obedinenie_transportnogo_czeha_sankt_peterburga_2025g_.pdf",
+          "count": 26,
+          "bytes_each": 114,
+          "repeat_waste_bytes": 2850
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/10/stavki-1st-ad-2026-1.pdf",
+          "count": 25,
+          "bytes_each": 80,
+          "repeat_waste_bytes": 1920
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/03/2026_direktora_zamy_administratory_semochnyh_grupp.pdf",
+          "count": 23,
+          "bytes_each": 110,
+          "repeat_waste_bytes": 2420
+        },
+        {
+          "value": "",
+          "count": 19,
+          "bytes_each": 0,
+          "repeat_waste_bytes": 0
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/01/oficzialnye-tarify-akterskogo-czeha-01112023_.pdf",
+          "count": 16,
+          "bytes_each": 105,
+          "repeat_waste_bytes": 1575
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/12/price_2026_for_print.pdf",
+          "count": 14,
+          "bytes_each": 80,
+          "repeat_waste_bytes": 1040
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/03/apak-obrashhenie-k-prodyuseram-2025.pdf",
+          "count": 10,
+          "bytes_each": 95,
+          "repeat_waste_bytes": 855
+        },
+        {
+          "value": "https://kinoprofsoyuz.ru/pip/wp-content/uploads/2026/02/usloviya_raboty_rekvizitorskogo_departamenta_2026.pdf",
+          "count": 10,
+          "bytes_each": 109,
+          "repeat_waste_bytes": 981
+        }
+      ]
+    }
+  },
+  "candidate_dictionary_fields": [
+    "dept",
+    "prof",
+    "cond",
+    "content",
+    "unit",
+    "amount_text",
+    "ot",
+    "extra",
+    "region",
+    "eff",
+    "src",
+    "status",
+    "doc"
+  ],
+  "string_payload_bytes": 365834,
+  "estimated_dictionary_string_payload_bytes": 75236,
+  "estimated_string_savings_bytes": 290598
+}
