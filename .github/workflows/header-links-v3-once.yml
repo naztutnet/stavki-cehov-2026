@@ -1,0 +1,33 @@
+name: Header Links V3 Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/header-links-v3-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply compact header links
+        run: node scripts/header-links-v3-once.js
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q 'first screen compact resources v3' app.css
+          grep -q 'header-resources' index.html
+          grep -q 'app.css?v=20260813-0247' index.html
+          ! grep -q '<p class="lede">' index.html
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html app.css
+          git commit -m "Compact first-screen resource links"
+          git push
