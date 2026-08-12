@@ -126,6 +126,14 @@ SRC.push({name:'Операторы-постановщики — архивное
 SRC.push({name:'Операторы стедикам — архивное письмо 2024–2025',date:'01.01.2024',url:STEADICAM_DOC});
 const breakRateIndex=DATA.findIndex(r=>r.prof==='Ставка «разрыва» (все специальности)');if(breakRateIndex>=0)DATA.splice(breakRateIndex,1);
 const writerSource=SRC.find(s=>s.name.includes('Гильдия кинодраматургов'));if(writerSource)writerSource.url=SCREENWRITER_RATES;
+const RATE_BY_ID=new Map(DATA.map(r=>[r.id,r]));
+const DEPT_COUNTS=new Map(),STATUS_COUNTS=new Map(),MAIN_SEARCH_BY_ID=new Map(),QUICK_SEARCH_BY_ID=new Map();
+DATA.forEach(r=>{
+  DEPT_COUNTS.set(r.dept,(DEPT_COUNTS.get(r.dept)||0)+1);
+  STATUS_COUNTS.set(r.status,(STATUS_COUNTS.get(r.status)||0)+1);
+  MAIN_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase());
+  QUICK_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase());
+});
 const LBL = {fresh2026:"письмо 2026 ✓", check:"сверить", newdoc:"есть письмо 2026", verified2025:"письмо 2025", archive:"данные 2023", expired:"срок истёк"};
 const TIP = {
   fresh2026:"Цифра взята из цехового письма 2026 года и сверена 30.07.2026.",
@@ -148,7 +156,7 @@ function sanitizeCustomRecord(source){
   return {id,custom:true,dept,prof,cond:cleanText(source.cond,160)||'Пользовательская статья',content:'Своя статья',unit,amount,amount_text:String(amount),ot:'',extra:'Добавлено пользователем',region:'',eff:'',src:'Пользовательская статья',status:'check',doc:''};
 }
 const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
-const state = {q:'', unit:'', content:'', dept:'', only26:false, sort:'dept', open:new Set()};
+const state = {q:'', words:[], unit:'', content:'', dept:'', only26:false, sort:'dept', open:new Set()};
 const est = new Map();
 const STORAGE_KEY='kinorates-budget-v3',LEGACY_STORAGE_KEYS=['stavki-cehov-budget-v2'];
 function saveEstimate(){
@@ -159,7 +167,7 @@ function restoreEstimate(){
     let sourceKey=STORAGE_KEY,raw=localStorage.getItem(STORAGE_KEY);
     if(raw==null){const legacyKey=LEGACY_STORAGE_KEYS.find(key=>localStorage.getItem(key)!=null);if(legacyKey){sourceKey=legacyKey;raw=localStorage.getItem(legacyKey)}}
     const parsed=JSON.parse(raw||'[]');if(!Array.isArray(parsed))return;
-    parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):DATA.find(x=>x.id===Number(saved.id));if(r){const legacyMonthly=saved.people==null&&r.unit==='месяц';est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:r.unit==='месяц'?1:clampNumber(saved.qty,0,1e5,1),people:legacyMonthly?clampNumber(saved.qty,0,1e5,1):clampNumber(saved.people,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})}});
+    parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):RATE_BY_ID.get(Number(saved.id));if(r){const legacyMonthly=saved.people==null&&r.unit==='месяц';est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:r.unit==='месяц'?1:clampNumber(saved.qty,0,1e5,1),people:legacyMonthly?clampNumber(saved.qty,0,1e5,1):clampNumber(saved.people,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})}});
     if(sourceKey!==STORAGE_KEY){saveEstimate();localStorage.removeItem(sourceKey)}
   }catch(_e){}
 }
@@ -171,7 +179,7 @@ const units = SAFE_UNITS;
 const conts = [...new Set(DATA.map(r=>r.content))].sort((a,b)=>a.localeCompare(b,'ru'));
 
 // счётчики
-const cnt = s => DATA.filter(r=>r.status===s).length;
+const cnt = s => STATUS_COUNTS.get(s)||0;
 document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
   <div class="stat"><b>${depts.length}</b><i>цехов и департаментов</i></div>
@@ -185,16 +193,16 @@ units.filter(u=>DATA.some(r=>r.unit===u)).forEach(u=>uSel.insertAdjacentHTML('be
 conts.forEach(c=>cSel.insertAdjacentHTML('beforeend',`<option value="${c}">${c}</option>`));
 const chips = document.getElementById('chips');
 chips.innerHTML = `<button class="chip" data-d="" aria-pressed="true">Все цеха<span class="n">${DATA.length}</span></button>`+
-  depts.map(d=>`<button class="chip" data-d="${d}" aria-pressed="false">${d}<span class="n">${DATA.filter(r=>r.dept===d).length}</span></button>`).join('');
+  depts.map(d=>`<button class="chip" data-d="${d}" aria-pressed="false">${d}<span class="n">${DEPT_COUNTS.get(d)||0}</span></button>`).join('');
 
 function match(r){
   if(state.unit && r.unit!==state.unit) return false;
   if(state.content && r.content!==state.content) return false;
   if(state.dept && r.dept!==state.dept) return false;
   if(state.only26 && r.status!=='fresh2026') return false;
-  if(state.q){
-    const h=(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase();
-    if(!state.q.split(/\s+/).every(w=>h.includes(w))) return false;
+  if(state.words.length){
+    const h=MAIN_SEARCH_BY_ID.get(r.id)||'';
+    if(!state.words.every(w=>h.includes(w))) return false;
   }
   return true;
 }
@@ -325,7 +333,7 @@ function renderEst(){
   document.getElementById('openBuilder').textContent=`Открыть смету · ${est.size}`;
 }
 // события
-document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();render()});
+document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();state.words=state.q.split(/\s+/).filter(Boolean);render()});
 uSel.addEventListener('change',e=>{state.unit=e.target.value;render()});
 cSel.addEventListener('change',e=>{state.content=e.target.value;render()});
 document.getElementById('sort').addEventListener('change',e=>{state.sort=e.target.value;render()});
@@ -338,16 +346,16 @@ chips.addEventListener('click',e=>{
 });
 document.getElementById('tb').addEventListener('click',e=>{
   const add=e.target.closest('[data-add]'),remove=e.target.closest('[data-remove]');
-  if(add||remove){const id=+(add?.dataset.add||remove?.dataset.remove),r=DATA.find(x=>x.id===id);
+  if(add||remove){const id=+(add?.dataset.add||remove?.dataset.remove),r=RATE_BY_ID.get(id);
     if(remove)est.delete(id);else if(!est.has(r.id))est.set(r.id,newEstimate(r));
     renderEst();saveEstimate();render();return}
   const tr=e.target.closest('tr.r'); if(!tr) return;
-  const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(DATA.find(x=>x.id===id));setInspectorTab('detail');revealMobileDetail();
+  const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(RATE_BY_ID.get(id));setInspectorTab('detail');revealMobileDetail();
 });
 document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
 document.getElementById('detailPane').addEventListener('click',e=>{
   const add=e.target.closest('[data-add]'),remove=e.target.closest('[data-remove]');if(!add&&!remove)return;
-  const id=+(add?.dataset.add||remove?.dataset.remove),r=DATA.find(x=>x.id===id);
+  const id=+(add?.dataset.add||remove?.dataset.remove),r=RATE_BY_ID.get(id);
   if(remove)est.delete(id);else if(!est.has(id))est.set(id,newEstimate(r));
   renderEst();saveEstimate();render();renderDetail(r);
 });
@@ -431,8 +439,11 @@ document.getElementById('pdf').addEventListener('click',async()=>{
 // Полноэкранный конструктор: плотная сметная таблица и быстрый каталог.
 const builder=document.getElementById('builder');
 function renderQuickCatalog(query=''){
-  const words=query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const rows=DATA.filter(r=>!isScreenwriter(r)&&r.amount!=null&&words.every(w=>(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase().includes(w))).slice(0,80);
+  const words=query.trim().toLowerCase().split(/\s+/).filter(Boolean),rows=[];
+  for(const r of DATA){
+    if(rows.length>=80)break;
+    if(!isScreenwriter(r)&&r.amount!=null&&words.every(w=>(QUICK_SEARCH_BY_ID.get(r.id)||'').includes(w)))rows.push(r);
+  }
   document.getElementById('quickResults').innerHTML=rows.length?rows.map(r=>`<button class="quick-item" data-quick-add="${r.id}"><span><b>${r.prof}</b><small>${r.dept} · ${r.content} · ${r.unit}</small><small class="quick-condition">${r.cond||'Условие не указано'}</small></span><span>${Math.round(r.amount).toLocaleString('ru-RU')} ₽</span></button>`).join(''):'<div class="detail-empty">Ничего не найдено</div>';
 }
 function inputFor(e){
@@ -455,7 +466,7 @@ document.getElementById('openBuilder').addEventListener('click',openBuilder);
 document.getElementById('closeBuilder').addEventListener('click',closeBuilder);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!builder.hidden)closeBuilder()});
 document.getElementById('quickSearch').addEventListener('input',e=>renderQuickCatalog(e.target.value));
-document.getElementById('quickResults').addEventListener('click',e=>{const b=e.target.closest('[data-quick-add]');if(!b)return;const r=DATA.find(x=>x.id==b.dataset.quickAdd);if(!est.has(r.id))est.set(r.id,newEstimate(r));saveEstimate();renderBuilder();renderEst()});
+document.getElementById('quickResults').addEventListener('click',e=>{const b=e.target.closest('[data-quick-add]');if(!b)return;const r=RATE_BY_ID.get(Number(b.dataset.quickAdd));if(!est.has(r.id))est.set(r.id,newEstimate(r));saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderRows').addEventListener('change',e=>{const f=e.target.closest('[data-builder-field]');if(!f)return;const row=est.get(+f.dataset.id);if(!row)return;if(f.dataset.builderField==='taxPercent')row.tax=clampNumber(f.value,0,99.99,0)/100;else if(f.dataset.builderField==='rate')row.rate=clampNumber(f.value,0,1e9,0);else if(f.dataset.builderField==='qty')row.qty=clampNumber(f.value,0,1e5,0);else if(f.dataset.builderField==='people')row.people=clampNumber(f.value,0,1e5,0);else row[f.dataset.builderField]=safeDate(f.value);saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderRows').addEventListener('click',e=>{const custom=e.target.closest('[data-builder-custom]');if(custom){openCustom();return}const b=e.target.closest('[data-builder-del]');if(!b)return;est.delete(+b.dataset.builderDel);saveEstimate();renderBuilder();renderEst()});
 document.getElementById('builderClear').addEventListener('click',()=>{if(!est.size||confirm('Очистить все позиции сметы?')){est.clear();saveEstimate();renderBuilder();renderEst()}});
