@@ -71,6 +71,31 @@ jobs:
           if any(not isinstance(source, dict) or not source.get('name') or not source.get('date') for source in sources):
               raise SystemExit('В реестре источников есть некорректная запись')
 
+          css = Path('app.css').read_text(encoding='utf-8')
+          depth = 0
+          quote = None
+          comment = False
+          i = 0
+          while i < len(css):
+              pair = css[i:i+2]
+              if comment:
+                  if pair == '*/': comment = False; i += 2; continue
+                  i += 1; continue
+              if not quote and pair == '/*': comment = True; i += 2; continue
+              ch = css[i]
+              if quote:
+                  if ch == '\\': i += 2; continue
+                  if ch == quote: quote = None
+              else:
+                  if ch in "'\"": quote = ch
+                  elif ch == '{': depth += 1
+                  elif ch == '}':
+                      depth -= 1
+                      if depth < 0: raise SystemExit('Лишняя закрывающая скобка в app.css')
+              i += 1
+          if comment or quote or depth:
+              raise SystemExit('Незакрытая конструкция в app.css')
+
           required = [
               '<link rel="stylesheet" href="app.css">',
               '<script src="rates-data.js"></script>',
