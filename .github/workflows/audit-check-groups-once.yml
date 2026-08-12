@@ -1,4 +1,4 @@
-name: One-shot priority rate verification audit
+name: One-shot script supervisor overlap audit
 
 on:
   push:
@@ -13,51 +13,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect priority records and official pages
+      - name: Inspect all script supervisor records
         run: |
           node - <<'NODE'
           const fs=require('fs'),vm=require('vm');
           const ctx={window:{}};vm.createContext(ctx);
           vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
           const data=ctx.window.KINORATES_DATA;
-          const ids=[24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,148,149,210,213,251,253,256,272,...Array.from({length:26},(_,i)=>298+i)];
-          const selected=data.filter(r=>ids.includes(r.id));
-          fs.writeFileSync('/tmp/selected.json',JSON.stringify(selected,null,2));
+          const rows=data.filter(r=>String(r.prof).toLowerCase().includes('скрипт-супервайзер'));
+          fs.writeFileSync('script-all-temp.json',JSON.stringify(rows,null,2)+'\n');
+          console.log(JSON.stringify(rows.map(r=>({id:r.id,cond:r.cond,amount:r.amount,ot:r.ot,status:r.status,eff:r.eff,src:r.src})),null,2));
           NODE
-          python3 - <<'PY'
-          import json, re, html, urllib.request
-          from pathlib import Path
-          selected=json.loads(Path('/tmp/selected.json').read_text())
-          pages={
-            'actors':'https://kinoprofsoyuz.ru/actors/',
-            'transport':'https://kinoprofsoyuz.ru/transport/',
-            'continuity':'https://kinoprofsoyuz.ru/continuity/',
-            'editors':'https://kinoprofsoyuz.ru/editors/'
-          }
-          out={'records':selected,'pages':{}}
-          for name,url in pages.items():
-            req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 KinoRates verification'})
-            try:
-              with urllib.request.urlopen(req,timeout=25) as resp:
-                raw=resp.read().decode('utf-8','replace')
-                text=re.sub(r'<script.*?</script>|<style.*?</style>',' ',raw,flags=re.S|re.I)
-                links=re.findall(r'href=["\']([^"\']+)["\']',raw,flags=re.I)
-                text=html.unescape(re.sub(r'<[^>]+>',' ',text))
-                text=re.sub(r'\s+',' ',text).strip()
-                keyparts=[]
-                for keyword in ['Письмо по ставкам','ставкам','тариф','2026','2025','2024','2023']:
-                  for m in re.finditer(keyword,text,re.I):
-                    keyparts.append(text[max(0,m.start()-180):min(len(text),m.end()+280)])
-                out['pages'][name]={'url':url,'status':getattr(resp,'status',200),'final_url':resp.geturl(),'snippets':keyparts[:18],'pdf_links':[x for x in links if '.pdf' in x.lower()]}
-            except Exception as e:
-              out['pages'][name]={'url':url,'error':repr(e)}
-          Path('priority-check-temp.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
-          print(json.dumps({'records':len(selected),'pages':{k:{'status':v.get('status'),'error':v.get('error'),'pdf_links':v.get('pdf_links',[])[:8]} for k,v in out['pages'].items()}},ensure_ascii=False,indent=2))
-          PY
-      - name: Commit temporary priority audit
+      - name: Commit temporary script audit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add priority-check-temp.json
-          git commit -m "Inspect priority KinoRates verification targets [skip ci]"
+          git add script-all-temp.json
+          git commit -m "Inspect KinoRates script supervisor records [skip ci]"
           git push
