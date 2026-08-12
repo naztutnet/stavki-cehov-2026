@@ -1,0 +1,82 @@
+name: Add Research Sources Block Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-research-strip-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add compact research block
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index_path = Path('index.html')
+          index = index_path.read_text(encoding='utf-8')
+          marker = '  <div class="stats" id="stats"></div>\n</header>'
+          block = '''  <div class="stats" id="stats"></div>
+  <section class="research-strip" aria-labelledby="researchTitle">
+    <div class="research-intro">
+      <div><span class="research-kicker">Источники и исследования</span><h2 id="researchTitle">Как читать цифры KinoRates</h2></div>
+      <p><b>Первоисточник</b> — официальное письмо или рекомендация профсообщества. <b>Рыночный ориентир</b> — исследование реальных гонораров. <b>Наблюдение рынка</b> — открытые вакансии, прайсы и предложения.</p>
+    </div>
+    <div class="research-links">
+      <a href="https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/" target="_blank" rel="noopener"><small>Первоисточники</small><b>МПК и профессиональные объединения</b><span>Коллективные письма и рекомендации цехов</span></a>
+      <a href="https://t.me/s/filmres?after=7421" target="_blank" rel="noopener"><small>Рыночный ориентир</small><b>Новости кинопроизводства × StarDust</b><span>Гонорары сценаристов, режиссёров и операторов</span></a>
+      <a href="https://www.kinopoisk.ru/media/article/4009452/" target="_blank" rel="noopener"><small>Исследование</small><b>Кинопоиск × Московская школа кино</b><span>Доходы и гонорары десяти кинопрофессий</span></a>
+      <a href="https://www.kommersant.ru/doc/8553189" target="_blank" rel="noopener"><small>Динамика рынка</small><b>Данные ИРИ о стоимости специалистов</b><span>Как менялись расходы на ключевые профессии</span></a>
+    </div>
+  </section>
+</header>'''
+          if 'class="research-strip"' not in index:
+              if marker not in index:
+                  raise SystemExit('index marker not found')
+              index = index.replace(marker, block, 1)
+              index_path.write_text(index, encoding='utf-8')
+
+          css_path = Path('app.css')
+          css = css_path.read_text(encoding='utf-8')
+          styles = r'''
+
+/* compact source methodology block */
+.research-strip{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(0,3.1fr);gap:0;border:1px solid var(--rule);border-radius:10px;background:#fff;overflow:hidden}
+.research-intro{display:grid;align-content:center;gap:7px;padding:15px 16px;border-right:1px solid var(--rule)}
+.research-intro h2{margin:2px 0 0;font-size:15px;letter-spacing:-.025em}
+.research-kicker{font:700 8px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+.research-intro p{margin:0;color:var(--ink-2);font-size:9.5px;line-height:1.5}
+.research-intro p b{color:var(--ink);font-weight:650}
+.research-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.research-links a{display:grid;align-content:start;gap:4px;min-width:0;padding:14px 13px;border-right:1px solid var(--rule);color:var(--ink);text-decoration:none;background:#fff}
+.research-links a:last-child{border-right:0}
+.research-links a:hover{background:var(--blue-soft)}
+.research-links small{font:700 7.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.research-links b{font-size:10.5px;line-height:1.25;letter-spacing:-.01em}
+.research-links span{color:var(--ink-3);font-size:8.5px;line-height:1.4}
+@media(max-width:1100px){.research-strip{grid-template-columns:1fr}.research-intro{border-right:0;border-bottom:1px solid var(--rule)}.research-links{grid-template-columns:repeat(2,minmax(0,1fr))}.research-links a:nth-child(2){border-right:0}.research-links a:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
+@media(max-width:620px){.research-links{grid-template-columns:1fr}.research-links a,.research-links a:nth-child(2){border-right:0;border-bottom:1px solid var(--rule)}.research-links a:last-child{border-bottom:0}}
+'''
+          if '/* compact source methodology block */' not in css:
+              css_path.write_text(css + styles, encoding='utf-8')
+          PY
+
+      - name: Validate and commit
+        run: |
+          node --check app.js
+          node --check rates-data.js
+          grep -q 'research-strip' index.html
+          grep -q 'compact source methodology block' app.css
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html app.css
+          git commit -m "Add compact research sources block"
+          git push
