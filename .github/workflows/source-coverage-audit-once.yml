@@ -1,0 +1,53 @@
+name: One-shot source coverage audit
+
+on:
+  push:
+    paths:
+      - '.github/workflows/source-coverage-audit-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build source coverage report and fix counters
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const ctx={window:{}};vm.createContext(ctx);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
+          const data=ctx.window.KINORATES_DATA;
+          if(!Array.isArray(data)||data.length!==424)throw new Error(`Expected 424 records, got ${data?.length}`);
+          const statuses={};for(const r of data)statuses[r.status]=(statuses[r.status]||0)+1;
+          const verified=new Set(['fresh2026','verified2025','verified2024','verified2023']);
+          const grouped=new Map();
+          for(const r of data){
+            if(!verified.has(r.status))continue;
+            const key=r.doc||'(NO DOCUMENT)';
+            if(!grouped.has(key))grouped.set(key,{doc:key,count:0,statuses:{},departments:new Set(),professions:new Set(),ids:[]});
+            const g=grouped.get(key);g.count++;g.statuses[r.status]=(g.statuses[r.status]||0)+1;g.departments.add(r.dept);g.professions.add(r.prof);g.ids.push(r.id);
+          }
+          const groups=[...grouped.values()].map(g=>({...g,departments:[...g.departments].sort(),professions:[...g.professions].sort(),ids:g.ids.sort((a,b)=>a-b)})).sort((a,b)=>b.count-a.count);
+          const report={total:data.length,status_counts:statuses,verified_total:[...verified].reduce((n,s)=>n+(statuses[s]||0),0),review_total:(statuses.check||0)+(statuses.newdoc||0),expired_total:statuses.expired||0,archive_total:statuses.archive||0,partition_total:[...verified].reduce((n,s)=>n+(statuses[s]||0),0)+(statuses.check||0)+(statuses.newdoc||0)+(statuses.expired||0)+(statuses.archive||0),verified_source_groups:groups};
+          if(report.partition_total!==data.length)throw new Error(`Status partition mismatch ${report.partition_total} != ${data.length}`);
+          fs.writeFileSync('source-coverage-temp.json',JSON.stringify(report,null,2));
+
+          let app=fs.readFileSync('app.js','utf8');
+          const oldBlock=`document.getElementById('stats').innerHTML = \`\n  <div class="stat"><b>\${DATA.length}</b><i>позиций в базе</i></div>\n  <div class="stat"><b>\${depts.length}</b><i>цехов и департаментов</i></div>\n  <div class="stat ok"><b>\${verifiedCount}</b><i>сверено по первоисточникам</i></div>\n  <div class="stat"><b>\${reviewCount}</b><i>требуют проверки</i></div>\n  <div class="stat bad"><b>\${cnt('expired')}</b><i>по истёкшему документу</i></div>\`;`;
+          const newBlock=`document.getElementById('stats').innerHTML = \`\n  <div class="stat"><b>\${DATA.length}</b><i>позиций в базе</i></div>\n  <div class="stat"><b>\${depts.length}</b><i>цехов и департаментов</i></div>\n  <div class="stat ok"><b>\${verifiedCount}</b><i>сверено по первоисточникам</i></div>\n  <div class="stat"><b>\${reviewCount}</b><i>требуют проверки</i></div>\n  <div class="stat bad"><b>\${cnt('expired')}</b><i>по истёкшему документу</i></div>\n  <div class="stat"><b>\${cnt('archive')}</b><i>архивные ориентиры</i></div>\`;`;
+          if(!app.includes(oldBlock))throw new Error('Stats block not found');
+          app=app.replace(oldBlock,newBlock);
+          fs.writeFileSync('app.js',app);
+          NODE
+          node --check app.js
+      - name: Commit audit report and counter fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js source-coverage-temp.json
+          git commit -m "Show archived rates and audit verified source coverage"
+          git pull --rebase origin main
+          git push
