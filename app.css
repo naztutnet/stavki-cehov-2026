@@ -305,3 +305,20 @@ header .eyebrow{padding-right:390px}
 @media(max-width:520px){.custom-grid{grid-template-columns:1fr}.custom-grid .wide{grid-column:auto}}
 @media(max-width:560px){.update-item{grid-template-columns:1fr;gap:7px}.update-type{margin-top:4px}}
 @media(max-width:620px){.cookie-banner{left:10px;right:10px;bottom:10px;grid-template-columns:1fr;gap:12px;padding:14px}.cookie-actions{display:grid;grid-template-columns:1fr 1fr}.cookie-actions button{width:100%;min-width:0;min-height:42px}}
+
+/* compact source methodology block */
+.research-strip{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(0,3.1fr);gap:0;border:1px solid var(--rule);border-radius:10px;background:#fff;overflow:hidden}
+.research-intro{display:grid;align-content:center;gap:7px;padding:15px 16px;border-right:1px solid var(--rule)}
+.research-intro h2{margin:2px 0 0;font-size:15px;letter-spacing:-.025em}
+.research-kicker{font:700 8px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+.research-intro p{margin:0;color:var(--ink-2);font-size:9.5px;line-height:1.5}
+.research-intro p b{color:var(--ink);font-weight:650}
+.research-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.research-links a{display:grid;align-content:start;gap:4px;min-width:0;padding:14px 13px;border-right:1px solid var(--rule);color:var(--ink);text-decoration:none;background:#fff}
+.research-links a:last-child{border-right:0}
+.research-links a:hover{background:var(--blue-soft)}
+.research-links small{font:700 7.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.research-links b{font-size:10.5px;line-height:1.25;letter-spacing:-.01em}
+.research-links span{color:var(--ink-3);font-size:8.5px;line-height:1.4}
+@media(max-width:1100px){.research-strip{grid-template-columns:1fr}.research-intro{border-right:0;border-bottom:1px solid var(--rule)}.research-links{grid-template-columns:repeat(2,minmax(0,1fr))}.research-links a:nth-child(2){border-right:0}.research-links a:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
+@media(max-width:620px){.research-links{grid-template-columns:1fr}.research-links a,.research-links a:nth-child(2){border-right:0;border-bottom:1px solid var(--rule)}.research-links a:last-child{border-bottom:0}}
