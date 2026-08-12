@@ -62,7 +62,7 @@ jobs:
           const ids=data.map(row=>row&&row.id);
           if(ids.some(id=>!Number.isSafeInteger(id))||new Set(ids).size!==ids.length)throw new Error('В базе отсутствуют ID или найдены дубли ID');
           const expectedKeys=['amount','amount_text','cond','content','dept','doc','eff','extra','id','ot','prof','region','src','status','unit'];
-          const allowedStatuses=new Set(['fresh2026','official2026','market2025','check','newdoc','verified2025','verified2024','verified2023','archive','expired']);
+          const allowedStatuses=new Set(['fresh2026','official2026','market2025','no_public_rate','check','newdoc','verified2025','verified2024','verified2023','archive','expired']);
           const verifiedStatuses=new Set(['fresh2026','official2026','verified2025','verified2024','verified2023']);
           for(const row of data){
             if(!row||typeof row!=='object')throw new Error('В базе есть некорректная запись');
@@ -72,6 +72,10 @@ jobs:
             if(!allowedStatuses.has(row.status))throw new Error(`Неизвестный статус id=${row.id}: ${row.status}`);
             if(verifiedStatuses.has(row.status)&&!row.doc)throw new Error(`Подтвержденная ставка id=${row.id} не имеет ссылки на первоисточник`);
           }
+          if(data.some(row=>['check','newdoc'].includes(row.status)))throw new Error('Каноническая база не должна содержать незавершённые статусы check/newdoc');
+          const noPublicRate=data.filter(row=>row.status==='no_public_rate');
+          if(noPublicRate.length!==6)throw new Error(`Ожидалось 6 позиций без публичного тарифа, получено: ${noPublicRate.length}`);
+          if(noPublicRate.some(row=>row.amount!==null||!row.doc))throw new Error('У позиций без публичного тарифа amount должен быть null и должна быть ссылка на профильный источник');
           if(!Array.isArray(sources)||sources.length<29)throw new Error(`Подозрительный размер реестра источников: ${Array.isArray(sources)?sources.length:'not-array'}`);
           if(sources.some(source=>!source||typeof source!=='object'||!source.name||!source.date))throw new Error('В реестре источников есть некорректная запись');
           if(!Array.isArray(market)||market.length<10)throw new Error(`Подозрительный размер рыночного слоя: ${Array.isArray(market)?market.length:'not-array'}`);
