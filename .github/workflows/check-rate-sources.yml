@@ -55,11 +55,17 @@ jobs:
           }
           const data=context.window.KINORATES_DATA;
           const sources=context.window.KINORATES_SOURCES;
-          if(!Array.isArray(data)||data.length<300)throw new Error(`Подозрительный размер базы: ${Array.isArray(data)?data.length:'not-array'}`);
+          if(!Array.isArray(data)||data.length!==420)throw new Error(`Каноническая база должна содержать ровно 420 позиций, получено: ${Array.isArray(data)?data.length:'not-array'}`);
           const ids=data.map(row=>row&&row.id);
           if(ids.some(id=>!Number.isSafeInteger(id))||new Set(ids).size!==ids.length)throw new Error('В базе отсутствуют ID или найдены дубли ID');
-          if(data.some(row=>!row||typeof row!=='object'||!row.dept||!row.prof||!row.unit||!row.status))throw new Error('В базе есть некорректная запись');
-          if(!Array.isArray(sources)||sources.length<20)throw new Error(`Подозрительный размер реестра источников: ${Array.isArray(sources)?sources.length:'not-array'}`);
+          const expectedKeys=['amount','amount_text','cond','content','dept','doc','eff','extra','id','ot','prof','region','src','status','unit'];
+          for(const row of data){
+            if(!row||typeof row!=='object')throw new Error('В базе есть некорректная запись');
+            const keys=Object.keys(row).sort();
+            if(keys.length!==expectedKeys.length||keys.some((key,index)=>key!==expectedKeys[index]))throw new Error(`Нарушена схема ставки id=${row.id}`);
+            if(!row.dept||!row.prof||!row.unit||!row.status)throw new Error(`В ставке id=${row.id} отсутствует обязательное поле`);
+          }
+          if(!Array.isArray(sources)||sources.length<29)throw new Error(`Подозрительный размер реестра источников: ${Array.isArray(sources)?sources.length:'not-array'}`);
           if(sources.some(source=>!source||typeof source!=='object'||!source.name||!source.date))throw new Error('В реестре источников есть некорректная запись');
           fs.writeFileSync('/tmp/kinorates-runtime-data.json',JSON.stringify({data,sources}));
           console.log(`Runtime data OK: ${data.length} rate records, ${sources.length} sources`);
@@ -75,6 +81,22 @@ jobs:
           runtime = json.loads(Path('/tmp/kinorates-runtime-data.json').read_text(encoding='utf-8'))
           data = runtime['data']
           sources = runtime['sources']
+
+          legacy_data_tokens = [
+              'CG_RATES_2023',
+              'COLOR_CORRECTION_FIXES',
+              'OPERATOR_POST_DOC',
+              'STEADICAM_DOC',
+              'SECOND_CAMERA_DOC',
+              'SHOW_CAMERA_DOC',
+              'FOCUS_PULLER_DOC',
+              'DATA.push(',
+              'DATA.splice(',
+              'SRC.push(',
+          ]
+          stale_tokens = [token for token in legacy_data_tokens if token in app_js]
+          if stale_tokens:
+              raise SystemExit(f'В app.js снова появилась runtime-мутация канонической базы: {stale_tokens}')
 
           static_ids = set(re.findall(r'\bid=["\']([^"\']+)["\']', index))
           dom_refs = set(re.findall(r'getElementById\(["\']([^"\']+)["\']\)', app_js))
@@ -135,7 +157,7 @@ jobs:
               raise SystemExit('Нарушен порядок загрузки данных и app.js')
           if '<style>' in index:
               raise SystemExit('CSS снова встроен в index.html')
-          print(f'KinoRates validation OK: {len(data)} rate records, {len(sources)} sources, {len(dom_refs)} DOM refs, OG {image_width}x{image_height}')
+          print(f'KinoRates validation OK: {len(data)} canonical rate records, {len(sources)} sources, {len(dom_refs)} DOM refs, OG {image_width}x{image_height}')
           PY
           ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js sources-data.js
 
