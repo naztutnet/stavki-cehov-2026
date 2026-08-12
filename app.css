@@ -343,3 +343,10 @@ header .eyebrow,.title-block,.header-resources,.stats{grid-column:1}
 @media(max-width:1050px){.header-resources{grid-template-columns:repeat(3,minmax(160px,200px))}}
 @media(max-width:700px){header{padding:18px 16px;gap:12px}.header-resources{grid-template-columns:1fr 1fr}.resource-link{min-height:68px}.stats{grid-template-columns:1fr 1fr}}
 @media(max-width:430px){.header-resources{grid-template-columns:1fr}}
+
+/* secondary stats row fix */
+.stats-secondary{grid-column:1/-1;display:flex;align-items:center;gap:22px;min-width:0;padding:8px 13px;border-top:1px solid var(--rule);background:#fff;color:var(--ink-3);font-size:8.5px;line-height:1.25}
+.stats-secondary span{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap}
+.stats-secondary b{color:var(--ink-2);font:700 10px var(--mono)}
+@media(max-width:700px){.stats-secondary{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;padding:8px 12px}.stats-secondary span:last-child{grid-column:1/-1}}
+@media(max-width:430px){.stats-secondary{grid-template-columns:1fr}.stats-secondary span:last-child{grid-column:auto}}
