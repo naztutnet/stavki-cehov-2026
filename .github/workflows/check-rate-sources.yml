@@ -55,15 +55,19 @@ jobs:
           }
           const data=context.window.KINORATES_DATA;
           const sources=context.window.KINORATES_SOURCES;
-          if(!Array.isArray(data)||data.length!==422)throw new Error(`Каноническая база должна содержать ровно 422 позиции, получено: ${Array.isArray(data)?data.length:'not-array'}`);
+          if(!Array.isArray(data)||data.length!==451)throw new Error(`Каноническая база должна содержать ровно 451 позицию, получено: ${Array.isArray(data)?data.length:'not-array'}`);
           const ids=data.map(row=>row&&row.id);
           if(ids.some(id=>!Number.isSafeInteger(id))||new Set(ids).size!==ids.length)throw new Error('В базе отсутствуют ID или найдены дубли ID');
           const expectedKeys=['amount','amount_text','cond','content','dept','doc','eff','extra','id','ot','prof','region','src','status','unit'];
+          const allowedStatuses=new Set(['fresh2026','official2026','market2025','check','newdoc','verified2025','verified2024','verified2023','archive','expired']);
+          const verifiedStatuses=new Set(['fresh2026','official2026','verified2025','verified2024','verified2023']);
           for(const row of data){
             if(!row||typeof row!=='object')throw new Error('В базе есть некорректная запись');
             const keys=Object.keys(row).sort();
             if(keys.length!==expectedKeys.length||keys.some((key,index)=>key!==expectedKeys[index]))throw new Error(`Нарушена схема ставки id=${row.id}`);
             if(!row.dept||!row.prof||!row.unit||!row.status)throw new Error(`В ставке id=${row.id} отсутствует обязательное поле`);
+            if(!allowedStatuses.has(row.status))throw new Error(`Неизвестный статус id=${row.id}: ${row.status}`);
+            if(verifiedStatuses.has(row.status)&&!row.doc)throw new Error(`Подтвержденная ставка id=${row.id} не имеет ссылки на первоисточник`);
           }
           if(!Array.isArray(sources)||sources.length<29)throw new Error(`Подозрительный размер реестра источников: ${Array.isArray(sources)?sources.length:'not-array'}`);
           if(sources.some(source=>!source||typeof source!=='object'||!source.name||!source.date))throw new Error('В реестре источников есть некорректная запись');
