@@ -54,6 +54,13 @@ jobs:
           from pathlib import Path
 
           index = Path('index.html').read_text(encoding='utf-8')
+          app_js = Path('app.js').read_text(encoding='utf-8')
+
+          static_ids = set(re.findall(r'\bid=["\']([^"\']+)["\']', index))
+          dom_refs = set(re.findall(r'getElementById\(["\']([^"\']+)["\']\)', app_js))
+          missing_dom_ids = sorted(dom_refs - static_ids)
+          if missing_dom_ids:
+              raise SystemExit(f'app.js ссылается на отсутствующие ID: {missing_dom_ids}')
 
           data_js = Path('rates-data.js').read_text(encoding='utf-8')
           data_prefix = 'window.KINORATES_DATA = '
@@ -129,7 +136,7 @@ jobs:
               raise SystemExit('Нарушен порядок загрузки данных и app.js')
           if '<style>' in index:
               raise SystemExit('CSS снова встроен в index.html')
-          print(f'KinoRates validation OK: {len(data)} rate records, {len(sources)} sources, OG {image_width}x{image_height}')
+          print(f'KinoRates validation OK: {len(data)} rate records, {len(sources)} sources, {len(dom_refs)} DOM refs, OG {image_width}x{image_height}')
           PY
           ! grep -R -E 'FilmRate|FILMRATE_CHECKS|filmrate\.ru' -- app.js index.html scripts rates-data.js sources-data.js
 
