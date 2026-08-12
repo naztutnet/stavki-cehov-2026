@@ -1,0 +1,40 @@
+name: One-shot unchecked rate groups audit
+
+on:
+  push:
+    paths:
+      - '.github/workflows/audit-check-groups-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Group unchecked rates
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const ctx={window:{}};vm.createContext(ctx);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
+          const data=ctx.window.KINORATES_DATA;
+          const rows=data.filter(r=>r.status==='check');
+          const bySrc=new Map(),byDept=new Map();
+          for(const r of rows){
+            if(!bySrc.has(r.src))bySrc.set(r.src,[]);bySrc.get(r.src).push(r);
+            if(!byDept.has(r.dept))byDept.set(r.dept,[]);byDept.get(r.dept).push(r);
+          }
+          const summarize=(m)=>[...m.entries()].map(([name,items])=>({name,count:items.length,ids:items.map(r=>r.id),dates:[...new Set(items.map(r=>r.eff))],docs:[...new Set(items.map(r=>r.doc).filter(Boolean))],professions:[...new Set(items.map(r=>r.prof))]})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ru'));
+          const report={total_check:rows.length,by_source:summarize(bySrc),by_department:summarize(byDept),rows:rows.map(r=>({id:r.id,dept:r.dept,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,eff:r.eff,src:r.src,doc:r.doc,extra:r.extra}))};
+          fs.writeFileSync('check-groups-temp.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify({total_check:report.total_check,top_sources:report.by_source.slice(0,12).map(x=>({name:x.name,count:x.count,dates:x.dates,docs:x.docs})),top_departments:report.by_department.slice(0,12).map(x=>({name:x.name,count:x.count}))},null,2));
+          NODE
+      - name: Commit temporary audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add check-groups-temp.json
+          git commit -m "Audit KinoRates unchecked rate groups [skip ci]"
+          git push
