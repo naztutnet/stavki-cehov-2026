@@ -13,29 +13,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect inconsistent document groups
+        with:
+          fetch-depth: 0
+      - name: Trace suspicious rows before canonical migration
         run: |
           node - <<'NODE'
-          const fs=require('fs'),vm=require('vm');
-          const ctx={window:{}};vm.createContext(ctx);
-          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
-          const data=ctx.window.KINORATES_DATA;
-          if(!Array.isArray(data)||data.length!==420)throw new Error(`expected 420, got ${data?.length}`);
-          const docs=[
-            'https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/11/otkrytoe_pismo_2026_zvukovoj_departament_ot_15_10_25.pdf',
-            'https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/12/price_2026_for_print.pdf'
-          ];
-          const groups=docs.map(doc=>({doc,rows:data.filter(r=>r.doc===doc).map(r=>({id:r.id,dept:r.dept,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,ot:r.ot,extra:r.extra,region:r.region,eff:r.eff,status:r.status,src:r.src}))}));
-          fs.writeFileSync('document-issue-details-temp.json',JSON.stringify(groups,null,2)+'\n');
-          for(const g of groups){
-            console.log('\nDOC',g.doc,'ROWS',g.rows.length);
-            for(const r of g.rows)console.log(JSON.stringify({id:r.id,prof:r.prof,cond:r.cond,unit:r.unit,amount:r.amount,eff:r.eff,status:r.status,src:r.src}));
-          }
+          const fs=require('fs'),vm=require('vm'),cp=require('child_process');
+          const ids=new Set([148,149,210,213]);
+          function load(text){const c={window:{}};vm.createContext(c);vm.runInContext(text,c);return c.window.KINORATES_DATA}
+          const current=load(fs.readFileSync('rates-data.js','utf8')).filter(r=>ids.has(r.id));
+          const oldText=cp.execFileSync('git',['show','3653c52d906966caa272dd8c46e5116da2f36c13:rates-data.js'],{encoding:'utf8',maxBuffer:10*1024*1024});
+          const old=load(oldText).filter(r=>ids.has(r.id));
+          const report={current,pre_migration:old};
+          fs.writeFileSync('provenance-trace-temp.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify(report,null,2));
           NODE
-      - name: Commit temporary details
+      - name: Commit temporary trace
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add document-issue-details-temp.json
-          git commit -m "Inspect KinoRates document inconsistencies [skip ci]"
+          git add provenance-trace-temp.json
+          git commit -m "Trace KinoRates suspicious provenance [skip ci]"
           git push
