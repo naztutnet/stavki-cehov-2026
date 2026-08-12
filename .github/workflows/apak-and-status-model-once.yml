@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/apak-and-status-model-once.yml'
+      - 'scripts/apak-status-migrate-once.js'
 
 permissions:
   contents: write
@@ -15,124 +16,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Update APAC data and user-facing source semantics
-        run: |
-          node - <<'NODE'
-          const fs=require('fs'),vm=require('vm');
-          const c={window:{}};vm.createContext(c);vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);
-          const data=c.window.KINORATES_DATA;
-          const old=data.filter(r=>r.dept==='Аэросъёмка');
-          if(old.length!==10)throw new Error(`Expected 10 old APAC rows, got ${old.length}`);
-          const first=data.findIndex(r=>r.dept==='Аэросъёмка');
-          const doc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/03/apak-obrashhenie-k-prodyuseram-2025.pdf';
-          const common={dept:'Аэросъёмка',content:'Кино / сериал / реклама / клип / ТВ',unit:'смена',ot:'Каждый первый и последующие часы переработки — 15% от стоимости рабочей смены. До 15 минут включительно не считается переработкой; от 16 минут считается как полный час.',extra:'Минимальная ставка. Смена — 8 часов, не включая 1 час обеденного перерыва. Погрузка/разгрузка техники не оплачивается. Выезд коптервагена за пределы МКАД/КАД/города проживания — 50 ₽/км. Дополнительные проценты могут применяться при повышенных рисках, но конкретные размеры надбавок в письме не установлены. Отмена более чем за 24 часа — без оплаты; менее чем за 24 часа — 50% смены; при отмене после своевременного прибытия аэросъёмочного цеха на площадку — 100%. Тревел-день, день перемещения и день простоя в командировке — 50% смены.',region:'Москва / Россия',eff:'01.04.2025',src:'НКО АПАК — минимальные ставки и обязательные условия труда, с 01.04.2025',status:'verified2025',doc};
-          const specs=[
-            ['Оператор с коптером DJI Mavic 3 Cine / Mavic 3 Pro / Mavic 3 Pro Cine','Классический дрон · смена 8 часов',60000],
-            ['Пилот и оператор с коптером DJI Inspire 2, камерой X5S с лицензиями ProRes/CinemaDNG','Классический дрон · смена 8 часов',80000],
-            ['Пилот и оператор с коптером DJI Inspire 2, камерой X7 с лицензиями ProRes/CinemaDNG','Классический дрон · смена 8 часов',90000],
-            ['Пилот и оператор с коптером DJI Inspire 3, камерой X9 с лицензиями ProRes/CinemaDNG','Классический дрон · смена 8 часов',140000],
-            ['Пилот и оператор с тяжёлым гекса-/октокоптером и кинокамерой RED / ARRI / Sony','Классический дрон · смена 8 часов',200000],
-            ['Пилот с FPV-коптером и камерой класса GoPro','FPV · смена 8 часов',60000],
-            ['Пилот с FPV-коптером и камерой класса BlackMagic','FPV · смена 8 часов',120000],
-            ['Пилот с FPV-коптером и камерой класса RED Komodo / Sony FX6','FPV · смена 8 часов',160000],
-            ['Пилот с коптером FPV Gimbal','FPV · смена 8 часов',200000]
-          ];
-          const fresh=specs.map(([prof,cond,amount],i)=>({...common,prof,cond,amount,amount_text:amount.toLocaleString('ru-RU').replace(/\u00a0/g,' '),id:59+i}));
-          const next=[...data.slice(0,first),...fresh,...data.slice(first+old.length)];
-          if(next.length!==449)throw new Error(`Expected 449 rows, got ${next.length}`);
-          if(next.filter(r=>r.dept==='Аэросъёмка').length!==9)throw new Error('APAC replacement failed');
-          if(next.filter(r=>['check','newdoc'].includes(r.status)).length!==6)throw new Error('Expected 6 unresolved rows');
-          if(next.filter(r=>['fresh2026','official2026','verified2025','verified2024','verified2023'].includes(r.status)).length!==294)throw new Error('Expected 294 verified rows');
-          const K=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
-          const D=K.map(()=>[]),M=K.map(()=>new Map());
-          const R=next.map(row=>K.map((k,i)=>{const v=row[k]??(k==='amount'?null:'');const key=JSON.stringify(v);let idx=M[i].get(key);if(idx===undefined){idx=D[i].length;M[i].set(key,idx);D[i].push(v)}return idx}));
-          const out=`/* Canonical KinoRates dataset: ${next.length} runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(K)},D=${JSON.stringify(D)},R=${JSON.stringify(R)};return R.map(a=>Object.fromEntries(K.map((k,i)=>[k,D[i][a[i]]])));})();\n`;
-          fs.writeFileSync('rates-data.js',out);
-          NODE
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('app.js'); s=p.read_text(encoding='utf-8')
-          s=re.sub(r'const LBL = \{[^\n]+\};', 'const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", check:"источник не найден", newdoc:"цифра не сверена", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"архивный документ"};', s, count=1)
-          tip_start=s.index('const TIP = {')
-          tip_end=s.index('const SAFE_UNITS',tip_start)
-          replacement='''const TIP = {
-  fresh2026:"Конкретная ставка подтверждена опубликованным цеховым письмом 2026 года.",
-  official2026:"Конкретная ставка подтверждена официальной публикацией профессионального объединения 2026 года.",
-  market2025:"Рыночный ориентир 2025 года. Это не обязательный тариф и не цеховое письмо.",
-  check:"Первичный источник, однозначно подтверждающий эту конкретную ставку, пока не найден.",
-  newdoc:"Первичный документ найден, но конкретная цифра в нём ещё не подтверждена.",
-  verified2025:"Конкретная ставка подтверждена опубликованным документом 2025 года. Более свежий соответствующий документ пока не найден.",
-  verified2024:"Конкретная ставка подтверждена опубликованным документом 2024 года. Более свежий соответствующий документ пока не найден.",
-  verified2023:"Конкретная ставка подтверждена опубликованным документом 2023 года. Более свежий соответствующий документ пока не найден.",
-  archive:"Архивный рыночный ориентир. Не используйте его как подтверждённую текущую ставку.",
-  expired:"Документ относится к прошлому периоду. Актуальность этой ставки на 2026 год не подтверждена."
-};
-const SOURCE_KIND={fresh2026:'Цеховое письмо',official2026:'Официальные рекомендации',market2025:'Рыночное исследование / ориентир',check:'Источник требует проверки',newdoc:'Первичный документ',verified2025:'Профессиональный первоисточник',verified2024:'Профессиональный первоисточник',verified2023:'Профессиональный первоисточник',archive:'Архивный рыночный ориентир',expired:'Исторический документ'};
-const CONFIRMATION={fresh2026:'Цифра подтверждена ✓',official2026:'Цифра подтверждена ✓',market2025:'Рыночный ориентир — не официальный минимум',check:'Первичный источник цифры не найден',newdoc:'Документ найден, конкретная цифра не сверена',verified2025:'Цифра подтверждена ✓',verified2024:'Цифра подтверждена ✓',verified2023:'Цифра подтверждена ✓',archive:'Текущая актуальность не подтверждена',expired:'Текущая актуальность не подтверждена'};
-function sourceYear(r){const text=[r.eff,r.src].filter(Boolean).join(' '),m=text.match(/20\\d{2}/);return r.status==='market2025'?'2025':r.status==='archive'?'2023':(m?m[0]:'не указан')}
-function sourceMeta(r){return {kind:SOURCE_KIND[r.status]||'Источник',year:sourceYear(r),confirmation:CONFIRMATION[r.status]||TIP[r.status],periodLine:r.eff?`Дата / период источника: ${r.eff}`:'Дата / период источника не указаны'}}
-function sourceRangeText(r){const t=String(r.amount_text||'').trim();return /\\d[\\d\\s]*\\s*[–—-]\\s*\\d/.test(t)?t:''}
-function rateRangeHint(r){const t=sourceRangeText(r);return t?`<small class="rate-range-note">Рекомендация источника: ${esc(t)}${/₽/.test(t)?'':' ₽'}</small>`:''}
-'''
-          s=s[:tip_start]+replacement+s[tip_end:]
-          s=s.replace("  const sourcePeriod=r.status==='market2025'?'Рыночный ориентир: 2025':(r.eff?`Действует с ${r.eff}`:'Дата не указана');", "  const meta=sourceMeta(r);")
-          old='''    <div class="detail-section"><b>Актуальность</b><p><span class="badge b-${r.status}">${LBL[r.status]}</span><br><br>${TIP[r.status]}</p></div>'''
-          new='''    <div class="detail-section"><b>Источник и подтверждение</b><p><span class="badge b-${r.status}">${LBL[r.status]}</span><br><br><b>Тип:</b> ${meta.kind}<br><b>Год данных:</b> ${meta.year}<br><b>Подтверждение:</b> ${meta.confirmation}</p></div>'''
-          if old not in s: raise SystemExit('detail status block not found')
-          s=s.replace(old,new,1)
-          old='''    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${sourcePeriod}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>'''
-          new='''    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${meta.periodLine}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>'''
-          if old not in s: raise SystemExit('detail source block not found')
-          s=s.replace(old,new,1)
-          old='<div class="calc-field"><label>Ставка за ${esc(e.r.unit)}</label><input type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}"></div>'
-          new='<div class="calc-field"><label>Ставка за ${esc(e.r.unit)}</label><input type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}">${rateRangeHint(e.r)}</div>'
-          if old not in s: raise SystemExit('sidebar rate input not found')
-          s=s.replace(old,new,1)
-          old='<div><div class="input-stack"><label>Ставка<input class="${e.rate>0?\'\':\'needs-input\'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?\'false\':\'true\'}"></label></div></div>'
-          new='<div><div class="input-stack"><label>Ставка<input class="${e.rate>0?\'\':\'needs-input\'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?\'false\':\'true\'}"></label>${rateRangeHint(e.r)}</div></div>'
-          if old not in s: raise SystemExit('builder rate input not found')
-          s=s.replace(old,new,1)
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('index.html'); s=p.read_text(encoding='utf-8')
-          s=s.replace('<small>Первоисточники</small><b>МПК и профессиональные объединения</b><span>Коллективные письма и рекомендации цехов</span>','<small>Первоисточники · актуальные</small><b>МПК и профессиональные объединения</b><span>Коллективные письма и рекомендации цехов</span>')
-          s=s.replace('<small>Рыночный ориентир</small><b>Новости кинопроизводства × StarDust</b><span>Гонорары сценаристов, режиссёров и операторов</span>','<small>Рыночный ориентир · 2025</small><b>Новости кинопроизводства × StarDust</b><span>Данные по проектам в производстве в 2024–2025 годах</span>')
-          s=s.replace('<small>Исследование</small><b>Кинопоиск × Московская школа кино</b><span>Доходы и гонорары десяти кинопрофессий</span>','<small>Исследование · 2024</small><b>Кинопоиск × Московская школа кино</b><span>Опубликовано 20.05.2024 · данные собирались в 2023–2024 годах</span>')
-          s=s.replace('<small>Динамика рынка</small><b>Данные ИРИ о стоимости специалистов</b><span>Как менялись расходы на ключевые профессии</span>','<small>Динамика рынка · 2026</small><b>Данные ИРИ о стоимости специалистов</b><span>Публикация 02.04.2026 · сравнение заявок 2025 года с 2024</span>')
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('app.css'); s=p.read_text(encoding='utf-8')
-          marker='/* source range hint */'
-          if marker not in s:
-              s+='''\n\n/* source range hint */\n.rate-range-note{display:block;margin-top:5px;color:var(--ink-3);font-size:8px;line-height:1.35;font-weight:500}\n'''
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('updates.js'); s=p.read_text(encoding='utf-8')
-          entry='''  {\n    date: "2026-08-13",\n    dateLabel: "13 августа 2026",\n    type: "data",\n    title: "Сверены ставки аэросъёмки АПАК 2025",\n    text: "Ставки классических и FPV-дронов сверены по оригинальному письму АПАК. Уточнены модели оборудования, минимальные ставки, переработки и условия работы; неподтверждённые старые категории заменены актуальной сеткой из 9 позиций."\n  },\n'''
-          if 'Сверены ставки аэросъёмки АПАК 2025' not in s:
-              s=s.replace('window.KINORATES_UPDATES = [\n','window.KINORATES_UPDATES = [\n'+entry,1)
-          p.write_text(s,encoding='utf-8')
-          PY
-
-      - name: Validate and commit
+      - name: Run migration
+        run: node scripts/apak-status-migrate-once.js
+      - name: Validate
         run: |
           node --check app.js
           node --check rates-data.js
           node --check updates.js
-          node - <<'NODE'
-          const fs=require('fs'),vm=require('vm'),c={window:{}};vm.createContext(c);vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);
-          const d=c.window.KINORATES_DATA;
-          if(d.length!==449)throw new Error(`Expected 449, got ${d.length}`);
-          if(d.filter(r=>r.dept==='Аэросъёмка').length!==9)throw new Error('APAC count wrong');
-          if(d.filter(r=>r.dept==='Аэросъёмка'&&r.status==='verified2025').length!==9)throw new Error('APAC status wrong');
-          if(d.find(r=>r.id===59)?.amount!==60000)throw new Error('APAC first rate wrong');
-          if(d.find(r=>r.id===67)?.amount!==200000)throw new Error('APAC last rate wrong');
-          if(d.filter(r=>['check','newdoc'].includes(r.status)).length!==6)throw new Error('Unresolved count wrong');
-          NODE
+          node -e "const fs=require('fs'),vm=require('vm'),c={window:{}};vm.createContext(c);vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);const d=c.window.KINORATES_DATA;if(d.length!==449)throw new Error('bad count');if(d.filter(r=>r.dept==='Аэросъёмка'&&r.status==='verified2025').length!==9)throw new Error('bad APAC');if(d.filter(r=>['check','newdoc'].includes(r.status)).length!==6)throw new Error('bad unresolved');"
           grep -q 'Рыночный ориентир · 2025' index.html
           grep -q 'rate-range-note' app.js
+      - name: Commit
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add rates-data.js app.js app.css index.html updates.js
