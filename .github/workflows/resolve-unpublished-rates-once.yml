@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Resolve six rows
+      - name: Resolve six rows and harden CI
         run: node scripts/resolve-unpublished-rates-once.js
       - name: Validate syntax
         run: |
@@ -26,6 +26,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add rates-data.js app.js updates.js
-          git commit -m "Resolve unpublished public rates" || exit 0
+          git add rates-data.js app.js updates.js .github/workflows/check-rate-sources.yml
+          git commit -m "Finalize public-rate status model" || exit 0
           git push
