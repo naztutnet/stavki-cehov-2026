@@ -130,7 +130,7 @@ document.getElementById('stats').innerHTML = `
   <div class="stat"><b>${unpublishedCount}</b><i>без публичной ставки</i></div>
   <div class="stats-secondary">
     <span><b>${cnt('market2025')}</b> рыночных ориентиров</span>
-    <span><b>${cnt('expired')}</b> исторических ставок</span>
+    <span><b>${cnt('expired')}</b> ставок по старым документам</span>
     <span><b>${cnt('archive')}</b> архивных ориентиров</span>
   </div>`;
 
