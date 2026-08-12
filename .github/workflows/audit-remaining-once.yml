@@ -1,0 +1,30 @@
+name: Audit Remaining Rates Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/audit-remaining-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export unresolved rows
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm'),c={window:{}};vm.createContext(c);
+          vm.runInContext(fs.readFileSync('rates-data.js','utf8'),c);
+          const rows=c.window.KINORATES_DATA.filter(r=>['check','newdoc'].includes(r.status));
+          fs.writeFileSync('audit-remaining-temp.json',JSON.stringify(rows,null,2)+'\n');
+          console.log(JSON.stringify(rows,null,2));
+          if(rows.length!==17)throw new Error(`Expected 17 unresolved rows, got ${rows.length}`);
+          NODE
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audit-remaining-temp.json
+          git commit -m "Export unresolved rate rows for audit"
+          git push
