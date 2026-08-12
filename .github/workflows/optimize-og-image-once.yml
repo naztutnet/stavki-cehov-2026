@@ -14,20 +14,48 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read original PNG dimensions
+        id: original
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import struct
+          from pathlib import Path
+          raw=Path('og-image.png').read_bytes()
+          if raw[:8] != b'\x89PNG\r\n\x1a\n' or raw[12:16] != b'IHDR':
+              raise SystemExit('og-image.png is not a valid PNG')
+          width,height=struct.unpack('>II',raw[16:24])
+          print(f'width={width}')
+          print(f'height={height}')
+          print(f'bytes={len(raw)}')
+          PY
+          file og-image.png
+
       - name: Losslessly optimize social preview PNG
         run: |
-          before=$(stat -c%s og-image.png)
-          file og-image.png | grep -q 'PNG image data, 1200 x 630'
           sudo apt-get update -qq
           sudo apt-get install -y -qq optipng
           optipng -o7 -strip all og-image.png
-          after=$(stat -c%s og-image.png)
-          file og-image.png | grep -q 'PNG image data, 1200 x 630'
-          echo "OG image: ${before} -> ${after} bytes"
-          if [ "$after" -gt "$before" ]; then
-            echo 'Optimizer made file larger' >&2
-            exit 1
-          fi
+          python3 - <<'PY'
+          import struct
+          from pathlib import Path
+          import os
+          raw=Path('og-image.png').read_bytes()
+          if raw[:8] != b'\x89PNG\r\n\x1a\n' or raw[12:16] != b'IHDR':
+              raise SystemExit('Optimized file is not a valid PNG')
+          width,height=struct.unpack('>II',raw[16:24])
+          expected=(int(os.environ['ORIGINAL_WIDTH']),int(os.environ['ORIGINAL_HEIGHT']))
+          if (width,height) != expected:
+              raise SystemExit(f'Image dimensions changed: {expected} -> {(width,height)}')
+          before=int(os.environ['ORIGINAL_BYTES'])
+          after=len(raw)
+          print(f'OG image: {width}x{height}, {before} -> {after} bytes')
+          if after > before:
+              raise SystemExit('Optimizer made file larger')
+          PY
+        env:
+          ORIGINAL_WIDTH: ${{ steps.original.outputs.width }}
+          ORIGINAL_HEIGHT: ${{ steps.original.outputs.height }}
+          ORIGINAL_BYTES: ${{ steps.original.outputs.bytes }}
 
       - name: Commit only when smaller
         run: |
