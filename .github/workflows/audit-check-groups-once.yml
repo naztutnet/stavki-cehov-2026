@@ -1,4 +1,4 @@
-name: One-shot transport and casting assistant audit
+name: One-shot verified rates production migration
 
 on:
   push:
@@ -9,26 +9,130 @@ permissions:
   contents: write
 
 jobs:
-  audit:
+  migrate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect target rows
+      - name: Apply verified source updates
         run: |
           node - <<'NODE'
           const fs=require('fs'),vm=require('vm');
           const ctx={window:{}};vm.createContext(ctx);
           vm.runInContext(fs.readFileSync('rates-data.js','utf8'),ctx,{filename:'rates-data.js'});
           const data=ctx.window.KINORATES_DATA;
-          const transport=data.filter(r=>r.id>=298&&r.id<=323).map(r=>({id:r.id,prof:r.prof,cond:r.cond,amount:r.amount,amount_text:r.amount_text,ot:r.ot,eff:r.eff,status:r.status,src:r.src,doc:r.doc}));
-          const casting=data.filter(r=>r.id>=154&&r.id<=162).map(r=>({id:r.id,prof:r.prof,cond:r.cond,content:r.content,unit:r.unit,amount:r.amount,amount_text:r.amount_text,ot:r.ot,eff:r.eff,status:r.status,src:r.src,doc:r.doc}));
-          fs.writeFileSync('batch-rows-temp.json',JSON.stringify({transport,casting},null,2)+'\n');
-          console.log(JSON.stringify({transport,casting},null,2));
+          if(!Array.isArray(data)||data.length!==420)throw new Error(`Expected 420 records before migration, got ${data?.length}`);
+          const byId=new Map(data.map(r=>[r.id,r]));
+          const get=(id)=>{const r=byId.get(id);if(!r)throw new Error(`Missing id ${id}`);return r};
+          const expect=(id,field,value)=>{const actual=get(id)[field];if(actual!==value)throw new Error(`Precondition failed id=${id} ${field}: expected ${JSON.stringify(value)}, got ${JSON.stringify(actual)}`)};
+
+          // 1) Script supervisors: official 2026-season letter, effective 15.10.2025.
+          const scriptDoc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/10/stavki_ss_15.10.2025_2026.pdf';
+          const scriptSrc='Сообщество скрипт-супервайзеров — письмо от 15.10.2025';
+          const scriptExtra='Дополнительная камера: +900 ₽ за смену за каждую дополнительную камеру. Подготовка и коммуникации со вторым и другими юнитами оплачиваются отдельно по договорённости. При несоблюдении минимальных сроков подготовки либо экстренном вводе специалиста ставка проекта применяется с коэффициентом ×1,5.';
+          const scriptUpdates=new Map([[251,260000],[253,210000],[256,180000],[272,18000]]);
+          for(const [id,amount] of scriptUpdates){
+            expect(id,'status','check');
+            expect(id,'doc',scriptDoc);
+            const r=get(id);
+            r.amount=amount;r.amount_text=amount.toLocaleString('ru-RU');
+            r.ot='после стандартной смены: 1 200 ₽/ч';
+            r.extra=scriptExtra;r.status='fresh2026';r.src=scriptSrc;r.eff='15.10.2025';
+          }
+
+          // 2) Transport SPb: published 2025 collective letter remains the latest official transport letter.
+          const transportDoc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/01/obedinenie_transportnogo_czeha_sankt_peterburga_2025g_.pdf';
+          for(let id=298;id<=323;id++){
+            expect(id,'status','check');expect(id,'doc',transportDoc);
+            get(id).status='verified2025';
+          }
+
+          // 3) Casting directors: correct provenance to Guild of Casting Directors regulation.
+          const castingDoc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2024/12/polozhenie_o_minimalnyh_stavkah_gkd.pdf';
+          const castingSrc='Гильдия кастинг-директоров — положение о минимальных ставках с 01.12.2024';
+          expect(154,'amount',216000);expect(162,'amount',32400);
+          for(const id of [154,162]){
+            const r=get(id);r.src=castingSrc;r.eff='01.12.2024';r.doc=castingDoc;r.status='check';
+            r.extra='Минимальная ставка Гильдии кастинг-директоров. Положение утверждено 29.11.2024 и действует с 01.12.2024; более свежий официальный документ на странице цеха не опубликован.';
+          }
+
+          // 4) Assistants to director for actors: published letter effective 01.05.2025.
+          const actorsDoc='https://kinoprofsoyuz.ru/pip/wp-content/uploads/2025/04/pismo_assistent_po_akteram_2025.pdf';
+          const actorsSrc='Объединение ассистентов режиссера по актерам — письмо от 01.05.2025';
+          const actorsExtra='Между сменами — не менее 12 часов; обед — 1 час; минимум один выходной в неделю. 7-я смена подряд и последующие до выходного оплачиваются в двойном размере. При работе более чем с 7 артистами требуется дополнительный ассистент; для второго юнита с актёрскими или массовыми сценами — отдельный дополнительный ассистент. При ночном окончании/старте применяется трансфер или компенсация топлива по условиям письма.';
+          const filmOt='с 13-го ч.: 1 000 ₽/ч; с 14-го ч.: 1 100 ₽/ч';
+          const adOt='с 11-го ч.: 10% от ставки; текущий обед: 10% от ставки';
+          const actorUpdates={
+            155:{amount:140000,cond:'полный метр/сериал, месяц',content:'Кино / сериал',unit:'месяц',ot:filmOt},
+            156:{amount:140000,cond:'полный метр/сериал, месяц',content:'Кино / сериал',unit:'месяц',ot:filmOt},
+            157:{amount:15000,cond:'Реклама, смена',content:'Реклама',unit:'смена',ot:adOt},
+            158:{amount:15000,cond:'Реклама, смена',content:'Реклама',unit:'смена',ot:adOt},
+            159:{amount:15000,cond:'Реклама, смена',content:'Реклама',unit:'смена',ot:adOt},
+            160:{amount:9000,cond:'полный метр/сериал, смена',content:'Кино / сериал',unit:'смена',ot:filmOt},
+            161:{amount:9000,cond:'полный метр/сериал, смена',content:'Кино / сериал',unit:'смена',ot:filmOt},
+          };
+          for(const [idText,u] of Object.entries(actorUpdates)){
+            const id=Number(idText);expect(id,'status','check');expect(id,'doc',actorsDoc);
+            const r=get(id);Object.assign(r,u);r.amount_text=u.amount.toLocaleString('ru-RU');r.extra=actorsExtra;r.status='verified2025';r.src=actorsSrc;r.eff='01.05.2025';
+          }
+
+          // 5) Add four missing positions that are explicitly present in the verified letters.
+          if(data.some(r=>r.prof==='Скрипт-супервайзер'&&/сложнопостановоч/i.test(r.cond)))throw new Error('Complex script-supervisor rate already exists');
+          if(data.some(r=>/ТВ \/ интернет-шоу \/ клип/i.test(r.content)))throw new Error('TV/internet assistant rates already exist');
+          let nextId=Math.max(...data.map(r=>r.id))+1;
+          const add=(row)=>{row.id=nextId++;data.push(row);byId.set(row.id,row);return row.id};
+          const newIds=[];
+          newIds.push(add({dept:'Режиссерская группа',prof:'Скрипт-супервайзер',cond:'Сложнопостановочный проект, месяц',content:'Любой проект',unit:'месяц',amount:280000,amount_text:'280 000',ot:'после стандартной смены: 1 200 ₽/ч',extra:scriptExtra,region:'Москва / Россия',eff:'15.10.2025',src:scriptSrc,status:'fresh2026',doc:scriptDoc}));
+          newIds.push(add({dept:'Кастинг и ассистенты по актерам',prof:'Ассистент кастинг-директора (занятость)',cond:'ТВ / интернет-шоу / клип, смена',content:'ТВ / интернет-шоу / клип',unit:'смена',amount:20000,amount_text:'20 000',ot:adOt,extra:actorsExtra,region:'Москва / Россия',eff:'01.05.2025',src:actorsSrc,status:'verified2025',doc:actorsDoc}));
+          newIds.push(add({dept:'Кастинг и ассистенты по актерам',prof:'Ассистент по актерам/гостям (площадка)',cond:'ТВ / интернет-шоу / клип, смена',content:'ТВ / интернет-шоу / клип',unit:'смена',amount:20000,amount_text:'20 000',ot:adOt,extra:actorsExtra,region:'Москва / Россия',eff:'01.05.2025',src:actorsSrc,status:'verified2025',doc:actorsDoc}));
+          newIds.push(add({dept:'Кастинг и ассистенты по актерам',prof:'Доп. ассистент по актерам/гостям (площадка)',cond:'ТВ / интернет-шоу / клип, смена',content:'ТВ / интернет-шоу / клип',unit:'смена',amount:15000,amount_text:'15 000',ot:adOt,extra:actorsExtra,region:'Москва / Россия',eff:'01.05.2025',src:actorsSrc,status:'verified2025',doc:actorsDoc}));
+
+          if(data.length!==424)throw new Error(`Expected 424 records after migration, got ${data.length}`);
+          if(new Set(data.map(r=>r.id)).size!==424)throw new Error('Duplicate IDs after migration');
+
+          // Data-quality guards: no exact duplicate ignoring id; no identical normalized identity with conflicting amount.
+          const norm=s=>String(s??'').toLowerCase().replace(/ё/g,'е').replace(/[—–−]/g,'-').replace(/[«»„“”"']/g,'').replace(/\s*\/\s*/g,'/').replace(/\s*-\s*/g,'-').replace(/[(),.:;]+/g,' ').replace(/\s+/g,' ').trim();
+          const exact=new Map(),identities=new Map();
+          for(const r of data){
+            const copy={...r};delete copy.id;const ek=JSON.stringify(copy);
+            if(exact.has(ek))throw new Error(`Exact duplicate rows ${exact.get(ek)} and ${r.id}`);exact.set(ek,r.id);
+            const ik=[r.dept,r.prof,r.cond,r.content,r.unit,r.region].map(norm).join('|');
+            if(identities.has(ik)&&identities.get(ik).amount!==r.amount)throw new Error(`Identity amount conflict ${identities.get(ik).id} vs ${r.id}`);
+            if(!identities.has(ik))identities.set(ik,{id:r.id,amount:r.amount});
+          }
+
+          const fields=['dept','prof','cond','content','unit','amount','amount_text','ot','extra','region','eff','src','status','doc','id'];
+          const rawFields=new Set(['amount','id']);
+          const dicts=fields.map(f=>rawFields.has(f)?null:[]),maps=fields.map(f=>rawFields.has(f)?null:new Map());
+          const packedRows=data.map(row=>fields.map((field,i)=>{const v=row[field];if(rawFields.has(field))return v;if(v===null)return null;if(typeof v!=='string')throw new Error(`Bad ${field} id=${row.id}`);const m=maps[i],d=dicts[i];if(!m.has(v)){m.set(v,d.length);d.push(v)}return m.get(v)}));
+          const compact=`/* Canonical KinoRates dataset: 424 runtime-ready records. */\nwindow.KINORATES_DATA=(()=>{const K=${JSON.stringify(fields)},D=${JSON.stringify(dicts)},R=${JSON.stringify(packedRows)};return R.map(r=>{const o={};for(let i=0;i<K.length;i++){const d=D[i],v=r[i];o[K[i]]=d===null?v:(v===null?null:d[v])}return o})})();\n`;
+          const test={window:{}};vm.createContext(test);vm.runInContext(compact,test,{filename:'rates-data.js'});
+          const out=test.window.KINORATES_DATA;
+          if(out.length!==424||new Set(out.map(r=>r.id)).size!==424)throw new Error('Packed output failed cardinality check');
+          fs.writeFileSync('rates-data.js',compact);
+
+          const counts={};for(const r of out)counts[r.status]=(counts[r.status]||0)+1;
+          console.log(JSON.stringify({records:out.length,new_ids:newIds,status_counts:counts,updated:{script:[251,253,256,272],transport:[298,323],casting:[154,162],actor_assistants:[155,156,157,158,159,160,161]}},null,2));
           NODE
-      - name: Commit temporary batch audit
+
+          node --check rates-data.js
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/check-rate-sources.yml')
+          s=p.read_text(encoding='utf-8')
+          before=s
+          s=s.replace("data.length!==420", "data.length!==424")
+          s=s.replace("ровно 420 позиций", "ровно 424 позиции")
+          if s==before or 'data.length!==420' in s or 'ровно 420 позиций' in s:
+              raise SystemExit('Failed to update canonical record-count guard')
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Commit verified production data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add batch-rows-temp.json
-          git commit -m "Inspect transport and casting assistant rates [skip ci]"
+          git add rates-data.js .github/workflows/check-rate-sources.yml
+          git commit -m "Verify and update KinoRates source-backed rates"
+          git pull --rebase origin main
           git push
