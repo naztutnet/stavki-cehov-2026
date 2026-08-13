@@ -61,7 +61,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=20260813-1026">
+<link rel="stylesheet" href="app.css?v=20260813-1226">
 </head>
 <body>
 <div class="wrap">
@@ -70,7 +70,12 @@
   <div class="header-actions">
     <button class="feedback-action header-feedback" id="feedbackOpen">Обратная связь · Нашли ошибку или есть актуальные ставки?</button>
   </div>
-  <div class="title-block"><div class="title-meta"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small><button class="updates-action" id="updatesOpen">Обновления <span class="updates-count" id="updatesCount">4</span></button></div><h1><a class="home-title" href="/" aria-label="Справочник ставок — на главную"><span>Справочник ставок</span></a></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p><p class="source-note">Основные источники базы — справочник МПК, реестр «Точно продюсер» и цеховые письма.</p></div>
+  <div class="title-block"><div class="title-meta"><small class="beta-mark" title="Сервис развивается, расчёты и данные продолжают проверяться">Beta version</small></div><h1><a class="home-title" href="/" aria-label="Справочник ставок — на главную"><span>Справочник ставок</span></a></h1><p class="rate-warning">Все ставки в справочнике носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.</p><p class="source-note">Основные источники базы — справочник МПК, реестр «Точно продюсер» и цеховые письма.</p></div>
+  <section class="updates-inline" aria-labelledby="updatesInlineTitle">
+    <div class="updates-inline-head"><span id="updatesInlineTitle">Последние обновления</span><small><b id="updatesCount">4</b> записи</small></div>
+    <div class="updates-list" id="updatesList"></div>
+  </section>
+  <button id="updatesOpen" type="button" hidden aria-hidden="true"></button>
   <nav class="header-resources" aria-label="Полезные материалы KinoRates">
     <a class="resource-link" href="https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/" target="_blank" rel="noopener">
       <span class="resource-kicker">Первоисточник</span><strong>МПК</strong><small>актуальные документы</small><i aria-hidden="true">→</i>
@@ -212,12 +217,7 @@
     </form>
   </div>
 </dialog>
-<dialog class="feedback-dialog updates-dialog" id="updatesDialog">
-  <div class="feedback-inner">
-    <div class="feedback-top"><div><h2>Обновления KinoRates</h2><p>Что изменилось в базе ставок и в самом сервисе.</p></div><button class="dialog-x" id="updatesClose" aria-label="Закрыть">×</button></div>
-    <div class="updates-list" id="updatesList"></div>
-  </div>
-</dialog>
+<dialog id="updatesDialog" hidden aria-hidden="true"><button id="updatesClose" type="button" hidden>Закрыть</button></dialog>
 
 <section class="sources">
   <h2 id="sourceLetters">Цеховые письма</h2>
@@ -248,11 +248,11 @@
   </div>
 </dialog>
 
-<script src="updates.js?v=20260813-1026"></script>
-<script src="check-log.js?v=20260813-1026"></script>
-<script src="rates-data.js?v=20260813-1026"></script>
-<script src="sources-data.js?v=20260813-1026"></script>
-<script src="market-data.js?v=20260813-1026"></script>
-<script src="app.js?v=20260813-1026"></script>
+<script src="updates.js?v=20260813-1226"></script>
+<script src="check-log.js?v=20260813-1226"></script>
+<script src="rates-data.js?v=20260813-1226"></script>
+<script src="sources-data.js?v=20260813-1226"></script>
+<script src="market-data.js?v=20260813-1226"></script>
+<script src="app.js?v=20260813-1226"></script>
 </body>
 </html>
