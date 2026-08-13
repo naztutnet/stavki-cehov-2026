@@ -39,7 +39,7 @@
   }
 }
 
-/* Responsive inspector: keep the table wide on laptop-sized screens. */
+/* Responsive inspector: keep the table wide on laptop and Full HD screens. */
 .inspector-backdrop{display:none}
 .inspector-drawer-close{display:none}
 @media (max-width:1999px){
@@ -54,8 +54,10 @@
     max-height:100dvh;
     border:0!important;
     border-left:1px solid var(--rule)!important;
-    background:#fff;
-    box-shadow:-18px 0 48px rgba(20,25,20,.18);
+    background:#fff!important;
+    opacity:1!important;
+    filter:none!important;
+    box-shadow:-18px 0 48px rgba(20,25,20,.12);
     overflow-y:auto;
     transform:translateX(105%);
     visibility:hidden;
@@ -73,7 +75,7 @@
     border:0;
     margin:0;
     padding:0;
-    background:rgba(20,25,20,.28);
+    background:rgba(20,25,20,.10);
     cursor:pointer;
   }
   body.inspector-drawer-open .inspector-backdrop{display:block}
@@ -90,7 +92,7 @@
     padding:0;
     border:1px solid var(--rule);
     border-radius:8px;
-    background:rgba(255,255,255,.96);
+    background:#fff;
     color:var(--ink-2);
     font:400 22px/1 var(--body);
     cursor:pointer;
