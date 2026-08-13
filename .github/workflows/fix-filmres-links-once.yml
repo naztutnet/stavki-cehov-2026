@@ -1,0 +1,32 @@
+name: Fix Filmres Links Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-filmres-links-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Normalize Filmres links
+        run: node scripts/fix-filmres-links-once.js
+      - name: Validate
+        run: |
+          grep -q 'https://t.me/filmres/7441' index.html
+          ! grep -q 't.me/s/filmres' index.html
+          node --check market-data.js
+          node --check app.js
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html market-data.js app.js updates.js
+          git commit -m "Fix direct Filmres post links"
+          git push
