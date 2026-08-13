@@ -1,0 +1,51 @@
+name: Apply KinoRates audit hardening once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-audit-hardening-once.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kinorates-audit-hardening-once
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - name: Apply audited hardening patch
+        run: python3 scripts/apply_audit_hardening.py
+
+      - name: Validate patched repository
+        run: |
+          node --check app.js
+          node --check rates-data.js
+          node --check sources-data.js
+          node --check market-data.js
+          node --check updates.js
+          node --check check-log.js
+          node --check scripts/validate_data.js
+          node --check scripts/test_core.js
+          python3 -m py_compile scripts/check_sources.py scripts/validate_static.py
+          node scripts/validate_data.js
+          node scripts/test_core.js
+          python3 scripts/validate_static.py
+
+      - name: Commit and publish hardening
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Harden KinoRates after independent audits"
+          git push
