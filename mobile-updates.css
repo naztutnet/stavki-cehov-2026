@@ -43,6 +43,7 @@
 .inspector-backdrop{display:none}
 .inspector-drawer-close{display:none}
 @media (max-width:1999px){
+  body.inspector-drawer-open .wrap{z-index:auto!important}
   .layout{grid-template-columns:minmax(0,1fr)!important}
   .est{
     position:fixed!important;
