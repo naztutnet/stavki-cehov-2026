@@ -29,6 +29,33 @@ window.KINORATES_UPDATES = [
   }
 ];
 
+function applyMobileUpdatesLayout(){
+  if(!window.matchMedia('(max-width: 600px)').matches)return;
+  const list=document.querySelector('.updates-inline .updates-list');
+  if(list)list.style.gridAutoColumns='minmax(280px, 92vw)';
+  document.querySelectorAll('.updates-inline .update-item').forEach(item=>{
+    item.style.minHeight='132px';
+    item.style.padding='12px 13px 14px';
+    const title=item.querySelector('.update-content h3');
+    const text=item.querySelector('.update-content p');
+    if(title){
+      title.style.display='block';
+      title.style.fontSize='13px';
+      title.style.lineHeight='1.3';
+      title.style.webkitLineClamp='unset';
+      title.style.overflow='visible';
+    }
+    if(text){
+      text.style.display='block';
+      text.style.marginTop='6px';
+      text.style.fontSize='10.5px';
+      text.style.lineHeight='1.48';
+      text.style.webkitLineClamp='unset';
+      text.style.overflow='visible';
+    }
+  });
+}
+
 /*
  * Счётчики ниже намеренно считаются из фактически загруженных массивов.
  * Это убирает ручное дублирование цифр после очередного обновления базы.
@@ -73,6 +100,7 @@ function syncKinoRatesVisibleCounters(){
     const first=footer.firstChild;
     if(first&&first.nodeType===Node.TEXT_NODE)first.textContent=first.textContent.replace('Сведено 30 июля 2026 года','База ревизована 13 августа 2026 года');
   }
+  requestAnimationFrame(applyMobileUpdatesLayout);
 }
 
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',syncKinoRatesVisibleCounters,{once:true});
