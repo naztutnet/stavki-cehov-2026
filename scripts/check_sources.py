@@ -20,6 +20,7 @@ CONFIG = ROOT / "data" / "monitored-sources.json"
 STATE = ROOT / "data" / "source-state.json"
 REPORT = ROOT / "source-change-report.md"
 CHECK_LOG = ROOT / "check-log.js"
+MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024
 
 MONTHS_RU = (
     "января", "февраля", "марта", "апреля", "мая", "июня",
@@ -105,7 +106,12 @@ def download(source: dict[str, str]) -> bytes:
         headers={"User-Agent": "KinoRates source monitor/1.0 (+https://kinorates.ru)"},
     )
     with urllib.request.urlopen(request, timeout=45) as response:
-        payload = response.read()
+        content_length = response.headers.get("Content-Length")
+        if content_length and int(content_length) > MAX_DOWNLOAD_BYTES:
+            raise ValueError(f"response too large: {content_length} bytes")
+        payload = response.read(MAX_DOWNLOAD_BYTES + 1)
+        if len(payload) > MAX_DOWNLOAD_BYTES:
+            raise ValueError(f"response exceeds {MAX_DOWNLOAD_BYTES} bytes")
     if source["kind"] == "html":
         parser = PageDigest(source["url"])
         parser.feed(payload.decode("utf-8", "replace"))

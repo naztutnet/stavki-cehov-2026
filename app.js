@@ -82,13 +82,14 @@ function marketItemMatches(item,r){
 function marketEvidenceFor(r){return MARKET.filter(item=>marketItemMatches(item,r)).sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,3)}
 function marketEvidenceHtml(r){
   const items=marketEvidenceFor(r);if(!items.length)return '';
-  return `<div class="detail-section market-evidence"><b>Рыночные данные</b><p class="market-disclaimer">Не заменяют официальную или рекомендованную ставку выше. Год и период исследования указаны отдельно.</p><div class="market-evidence-list">${items.map(item=>`<article class="market-evidence-item"><div class="market-evidence-meta">${esc(item.kind)} · ${esc(item.year)}</div><strong>${esc(item.title)}</strong><p>${esc(item.text)}</p><small>${esc(item.period)}</small><a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.source)} →</a></article>`).join('')}</div></div>`;
+  return `<div class="detail-section market-evidence"><b>Рыночные данные</b><p class="market-disclaimer">Не заменяют официальную или рекомендованную ставку выше. Год и период исследования указаны отдельно.</p><div class="market-evidence-list">${items.map(item=>`<article class="market-evidence-item"><div class="market-evidence-meta">${esc(item.kind)} · ${esc(item.year)}</div><strong>${esc(item.title)}</strong><p>${esc(item.text)}</p><small>${esc(item.period)}</small><a href="${esc(safeExternalUrl(item.url))}" target="_blank" rel="noopener">${esc(item.source)} →</a></article>`).join('')}</div></div>`;
 }
 const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','сезон','гонорар','договор','минута','человек','единоразово'];
 const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const cleanText=(value,max=160)=>String(value??'').replace(/[\u0000-\u001F\u007F]/g,' ').trim().slice(0,max);
 const clampNumber=(value,min,max,fallback)=>{const number=Number(value);return Number.isFinite(number)?Math.min(max,Math.max(min,number)):fallback};
 const safeDate=value=>{const text=String(value||''),match=text.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!match)return'';const [,y,m,d]=match.map(Number),date=new Date(Date.UTC(y,m-1,d));return date.getUTCFullYear()===y&&date.getUTCMonth()===m-1&&date.getUTCDate()===d?text:''};
+const safeExternalUrl=value=>{if(typeof value!=='string'||!value.trim())return'';try{const url=new URL(value);return url.protocol==='https:'?url.href:''}catch(_e){return''}};
 function sanitizeCustomRecord(source){
   if(!source||typeof source!=='object')return null;
   const id=Number(source.id),unit=SAFE_UNITS.includes(source.unit)?source.unit:'проект',prof=cleanText(source.prof,120),dept=cleanText(source.dept,80);
@@ -99,9 +100,13 @@ function sanitizeCustomRecord(source){
 const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
 const state = {q:'', words:[], unit:'', content:'', dept:'', only26:false, sort:'dept', open:new Set()};
 const est = new Map();
-const STORAGE_KEY='kinorates-budget-v3',LEGACY_STORAGE_KEYS=['stavki-cehov-budget-v2'];
+const STORAGE_KEY='kinorates-budget-v3',LEGACY_STORAGE_KEYS=['stavki-cehov-budget-v2'],MAX_STORED_ESTIMATE_BYTES=1_000_000;
 function saveEstimate(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...est.values()].slice(0,200).map(e=>({id:e.r.id,custom:!!e.r.custom,r:e.r.custom?sanitizeCustomRecord(e.r):undefined,start:safeDate(e.start),end:safeDate(e.end),rate:clampNumber(e.rate,0,1e9,0),qty:clampNumber(e.qty,0,1e5,1),people:clampNumber(e.people,0,1e5,1),tax:clampNumber(e.tax,0,.9999,.08)}))))}catch(_e){}
+  try{
+    const payload=JSON.stringify([...est.values()].slice(0,200).map(e=>({id:e.r.id,custom:!!e.r.custom,r:e.r.custom?sanitizeCustomRecord(e.r):undefined,start:safeDate(e.start),end:safeDate(e.end),rate:clampNumber(e.rate,0,1e9,0),qty:clampNumber(e.qty,0,1e5,1),people:clampNumber(e.people,0,1e5,1),tax:clampNumber(e.tax,0,.9999,.08)})));
+    if(payload.length>MAX_STORED_ESTIMATE_BYTES)throw new Error('estimate-too-large');
+    localStorage.setItem(STORAGE_KEY,payload);
+  }catch(error){console.warn('Не удалось сохранить локальную смету.',error)}
 }
 function restoreEstimate(){
   try{
@@ -167,7 +172,7 @@ function amountCell(r){
   if(/[–—+%]|бесплатно|договорённости/i.test(text)) return `<td class="sum txt">${esc(text)}</td>`;
   const per = r.unit==='месяц' ? 'в месяц' : r.unit==='смена' ? 'за смену' : 'за '+r.unit;
   const extra = text.replace(/^[\d\s]+/,'').trim();
-  return `<td class="sum">${fmt(r.amount)}<small>${per}${extra?' · '+extra:''}</small></td>`;
+  return `<td class="sum">${fmt(r.amount)}<small>${esc(per)}${extra?' · '+esc(extra):''}</small></td>`;
 }
 function render(){
   const rows = sorted(DATA.filter(match));
@@ -177,12 +182,12 @@ function render(){
   document.getElementById('tb').innerHTML = rows.map(r=>{
     const selected = state.open.has(r.id);
     return `<tr class="r${selected?' selected':''}" data-id="${r.id}" tabindex="0" aria-selected="${selected}">
-      <td class="dept">${r.dept}</td>
-      <td class="prof" title="${esc(r.prof)}">${r.prof}</td>
-      <td class="cond">${r.cond||'—'}</td>
-      <td class="unit">${r.unit}</td>
+      <td class="dept">${esc(r.dept)}</td>
+      <td class="prof" title="${esc(r.prof)}">${esc(r.prof)}</td>
+      <td class="cond">${esc(r.cond||'—')}</td>
+      <td class="unit">${esc(r.unit)}</td>
       ${amountCell(r)}
-      <td><span class="badge b-${r.status}" title="${TIP[r.status]}">${LBL[r.status]}</span></td>
+      <td><span class="badge b-${r.status}" title="${esc(TIP[r.status])}">${esc(LBL[r.status])}</span></td>
       <td>${est.has(r.id)?`<button class="addbtn is-added" data-remove="${r.id}" title="Убрать из сметы" aria-label="Убрать из сметы" aria-pressed="true">−</button>`:`<button class="addbtn" data-add="${r.id}" title="Добавить в смету" aria-label="Добавить в смету" aria-pressed="false">+</button>`}</td>
     </tr>`;
   }).join('');
@@ -210,14 +215,14 @@ function renderDetail(r){
   if(!r){pane.innerHTML='<div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div>';return}
   const amountText=String(r.amount_text||'');
   const amount=amountText&&(/[–—+%]|бесплатно|договорённости/i.test(amountText))?amountText:(r.amount?fmt(r.amount):(amountText||'по договорённости'));
-  const meta=sourceMeta(r);
+  const meta=sourceMeta(r),docUrl=safeExternalUrl(r.doc);
   pane.innerHTML=`<div class="detail-card">
-    <div class="kicker">${r.dept}</div><h4>${r.prof}</h4><div class="cond">${r.cond||'Условия не указаны'}</div>
-    <div class="rate"><b>${amount}</b><span>${r.unit} · ${r.region}</span></div>
-    <div class="detail-section"><b>Источник и подтверждение</b><p><span class="badge b-${r.status}">${LBL[r.status]}</span><br><br><b>Тип:</b> ${meta.kind}<br><b>Год данных:</b> ${meta.year}<br><b>Подтверждение:</b> ${meta.confirmation}</p></div>
-    <div class="detail-section"><b>Переработка</b><p>${r.ot||'В письме не зафиксирована.'}</p></div>
-    <div class="detail-section"><b>Условия и доплаты</b><p>${r.extra||'Дополнительные условия не указаны.'}</p></div>
-    <div class="detail-section"><b>Источник</b><p>${r.src}<br>${meta.periodLine}${r.doc?`<br><a href="${r.doc}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
+    <div class="kicker">${esc(r.dept)}</div><h4>${esc(r.prof)}</h4><div class="cond">${esc(r.cond||'Условия не указаны')}</div>
+    <div class="rate"><b>${esc(amount)}</b><span>${esc(r.unit)} · ${esc(r.region)}</span></div>
+    <div class="detail-section"><b>Источник и подтверждение</b><p><span class="badge b-${r.status}">${esc(LBL[r.status])}</span><br><br><b>Тип:</b> ${esc(meta.kind)}<br><b>Год данных:</b> ${esc(meta.year)}<br><b>Подтверждение:</b> ${esc(meta.confirmation)}</p></div>
+    <div class="detail-section"><b>Переработка</b><p>${esc(r.ot||'В письме не зафиксирована.')}</p></div>
+    <div class="detail-section"><b>Условия и доплаты</b><p>${esc(r.extra||'Дополнительные условия не указаны.')}</p></div>
+    <div class="detail-section"><b>Источник</b><p>${esc(r.src)}<br>${esc(meta.periodLine)}${docUrl?`<br><a href="${esc(docUrl)}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
     ${marketEvidenceHtml(r)}
     ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
     ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:''}
@@ -254,7 +259,7 @@ function calcEstimate(e){
   const monthly=e.r.unit==='месяц';
   const quantity=monthly?1:(e.r.unit==='аккорд'?1:(e.qty||0));
   const people=e.people||0;
-  const period=monthly?elapsed/30:quantity;
+  const period=monthly?monthlyProrata(start,end,1):quantity;
   const base=monthly?monthlyProrata(start,end,e.rate):(e.rate||0);
   const net=Math.max(0,base*quantity*people);
   const gross=e.tax<1?net/(1-e.tax):net;
@@ -332,7 +337,7 @@ function budgetRows(){
     return {index:index+1,dept:e.r.dept,prof:e.r.prof,cond:e.r.cond||'',start:e.start,end:e.end,unit:e.r.unit,rate:e.rate,qty:e.r.unit==='месяц'?1:(e.r.unit==='аккорд'?1:e.qty),people:e.people,period:c.period,tax:e.tax,net:c.net,gross:c.gross};
   });
 }
-const safeSheetText=value=>/^[=+\-@]/.test(String(value??'').trimStart())?`'${String(value??'')}`:String(value??'');
+function safeSheetText(value){const text=String(value??'').replace(/[\r\n\t]+/g,' ');const trimmed=text.trimStart();return /^[=+\-@]/.test(trimmed)?`'${trimmed}`:text}
 function exportName(ext){return `Предварительная_смета_${new Date().toISOString().slice(0,10)}.${ext}`}
 function downloadBlob(blob,name){
   const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -453,7 +458,7 @@ document.getElementById('updatesOpen').addEventListener('click',()=>{if(typeof u
 document.getElementById('updatesClose').addEventListener('click',()=>updatesDialog.close());
 updatesDialog.addEventListener('click',e=>{if(e.target===updatesDialog)updatesDialog.close()});
 
-// Обратная связь без внешнего хранилища: пользователь сам отправляет подготовленное письмо.
+// Обратная связь отправляется через FormSubmit; состав передаваемых данных описан в privacy notice.
 const feedbackDialog=document.getElementById('feedbackDialog'),feedbackCooldownKey='kinorates_feedback_last_sent';
 let feedbackOpenedAt=0;
 function openFeedback(){feedbackOpenedAt=Date.now();if(typeof feedbackDialog.showModal==='function')feedbackDialog.showModal();else feedbackDialog.setAttribute('open','')}
@@ -482,6 +487,9 @@ document.getElementById('feedbackForm').addEventListener('submit',async e=>{
   }finally{clearTimeout(timeout)}
 });
 // источники
-document.getElementById('slist').innerHTML = SRC.map(s=>`<div class="sitem"><time>${s.date}</time>
-  ${s.url?`<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`:`<span class="no">${s.name}</span>`}</div>`).join('');
+document.getElementById('slist').innerHTML = SRC.map(s=>{
+  const url=safeExternalUrl(s.url);
+  return `<div class="sitem"><time>${esc(s.date)}</time>
+  ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`:`<span class="no">${esc(s.name)}</span>`}</div>`;
+}).join('');
 render();renderEst();setInspectorTab('detail');

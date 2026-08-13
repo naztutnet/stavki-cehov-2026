@@ -1,4 +1,4 @@
-/* KinoRates market/research layer. These records never replace or verify canonical rates. */
+/* KinoRates market/research layer. Market records never replace or verify canonical rates. The metadata overlay at the end may only adjust src/doc/eff/extra or append source metadata; CI verifies that no rate amount/status/unit/identity changes at runtime. */
 window.KINORATES_MARKET_DATA = [
   {
     id:'stardust-dop-2025', year:2025, period:'проекты в производстве в 2024–2025', kind:'Рыночный срез',
