@@ -21,7 +21,9 @@ jobs:
           fetch-depth: 0
 
       - name: Apply audited hardening patch
-        run: python3 scripts/apply_audit_hardening.py
+        run: |
+          python3 scripts/apply_audit_hardening.py
+          sed -i 's/const context={};vm.createContext(context);/const context={URL};vm.createContext(context);/' scripts/test_core.js
 
       - name: Validate patched repository
         run: |
