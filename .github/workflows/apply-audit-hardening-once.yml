@@ -40,7 +40,13 @@ jobs:
           node scripts/test_core.js
           python3 scripts/validate_static.py
 
-      - name: Commit and publish hardening
+      - name: Keep workflow changes for connector-managed publish
+        run: |
+          git checkout -- .github/workflows/check-rate-sources.yml .github/workflows/apply-audit-hardening-once.yml
+          rm -f .github/workflows/validate.yml
+          rm -rf scripts/__pycache__
+
+      - name: Commit and publish validated code hardening
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
