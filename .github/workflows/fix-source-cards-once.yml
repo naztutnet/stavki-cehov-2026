@@ -1,0 +1,31 @@
+name: Fix Source Cards Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-source-cards-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fix source cards
+        run: node scripts/fix-source-cards-once.js
+      - name: Validate
+        run: |
+          grep -q 'https://t.me/s/filmres/7441' index.html
+          grep -q 'StarDust × Новости кинопроизводства' index.html
+          grep -q 'Основные источники базы — справочник МПК, реестр «Точно продюсер» и цеховые письма.' index.html
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Clarify source cards and StarDust link"
+          git push
