@@ -42,7 +42,7 @@
 /* Responsive inspector: keep the table wide on laptop-sized screens. */
 .inspector-backdrop{display:none}
 .inspector-drawer-close{display:none}
-@media (max-width:1499px){
+@media (max-width:1999px){
   .layout{grid-template-columns:minmax(0,1fr)!important}
   .est{
     position:fixed!important;
