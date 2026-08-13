@@ -1,0 +1,32 @@
+name: Fix Detail CTA Gap Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-detail-cta-gap-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Add detail CTA spacing
+        run: node scripts/fix-detail-cta-gap-once.js
+      - name: Validate
+        run: |
+          grep -q 'detail CTA spacing v7' app.css
+          grep -q 'detail-source + .detail-add' app.css
+          grep -q 'app.css?v=20260813-0325' index.html
+          node --check app.js
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.css index.html
+          git commit -m "Add spacing between detail action buttons"
+          git push
