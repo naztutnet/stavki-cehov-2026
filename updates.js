@@ -56,6 +56,58 @@ function applyMobileUpdatesLayout(){
   });
 }
 
+function setupResponsiveInspector(){
+  const inspector=document.querySelector('.est');
+  const table=document.getElementById('tb');
+  if(!inspector||!table)return;
+
+  const mq=window.matchMedia('(max-width:1499px)');
+  let lastTrigger=null;
+
+  const backdrop=document.createElement('button');
+  backdrop.type='button';
+  backdrop.className='inspector-backdrop';
+  backdrop.setAttribute('aria-label','Закрыть карточку позиции');
+  document.body.appendChild(backdrop);
+
+  const close=document.createElement('button');
+  close.type='button';
+  close.className='inspector-drawer-close';
+  close.setAttribute('aria-label','Закрыть карточку позиции');
+  close.textContent='×';
+  inspector.prepend(close);
+
+  function openDrawer(trigger){
+    if(!mq.matches)return;
+    lastTrigger=trigger||lastTrigger;
+    document.body.classList.add('inspector-drawer-open');
+    inspector.setAttribute('aria-modal','true');
+    requestAnimationFrame(()=>close.focus({preventScroll:true}));
+  }
+
+  function closeDrawer(restoreFocus=true){
+    if(!document.body.classList.contains('inspector-drawer-open'))return;
+    document.body.classList.remove('inspector-drawer-open');
+    inspector.removeAttribute('aria-modal');
+    if(restoreFocus&&lastTrigger&&document.contains(lastTrigger))lastTrigger.focus({preventScroll:true});
+  }
+
+  table.addEventListener('click',event=>{
+    if(event.target.closest('[data-add],[data-remove],a,button'))return;
+    const row=event.target.closest('tr.r');
+    if(row)openDrawer(row);
+  });
+  backdrop.addEventListener('click',()=>closeDrawer());
+  close.addEventListener('click',()=>closeDrawer());
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&mq.matches)closeDrawer();
+  });
+  const handleMq=()=>{if(!mq.matches)closeDrawer(false)};
+  if(typeof mq.addEventListener==='function')mq.addEventListener('change',handleMq);else mq.addListener(handleMq);
+
+  window.KinoRatesInspectorDrawer={open:openDrawer,close:closeDrawer};
+}
+
 /*
  * Счётчики ниже намеренно считаются из фактически загруженных массивов.
  * Это убирает ручное дублирование цифр после очередного обновления базы.
@@ -103,5 +155,18 @@ function syncKinoRatesVisibleCounters(){
   requestAnimationFrame(applyMobileUpdatesLayout);
 }
 
-if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',syncKinoRatesVisibleCounters,{once:true});
-else queueMicrotask(syncKinoRatesVisibleCounters);
+function bootKinoRatesEnhancements(){
+  syncKinoRatesVisibleCounters();
+  setupResponsiveInspector();
+  /* app.js определяет старую прокрутку к инспектору для <=920px. После загрузки
+     заменяем её открытием drawer, чтобы страница не прыгала под панелью. */
+  window.revealMobileDetail=function(){
+    if(window.matchMedia('(max-width:1499px)').matches){
+      const selected=document.querySelector('#tb tr.r.selected');
+      window.KinoRatesInspectorDrawer?.open(selected||null);
+    }
+  };
+}
+
+if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',bootKinoRatesEnhancements,{once:true});
+else queueMicrotask(bootKinoRatesEnhancements);
