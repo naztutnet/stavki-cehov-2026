@@ -1,0 +1,39 @@
+name: Валидация KinoRates
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kinorates-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Проверить синтаксис
+        run: |
+          node --check app.js
+          node --check rates-data.js
+          node --check sources-data.js
+          node --check market-data.js
+          node --check updates.js
+          node --check check-log.js
+          node --check scripts/validate_data.js
+          node --check scripts/test_core.js
+          python3 -m py_compile scripts/check_sources.py scripts/validate_static.py
+
+      - name: Проверить данные и runtime-overlay
+        run: node scripts/validate_data.js
+
+      - name: Проверить расчёты и защитные функции
+        run: node scripts/test_core.js
+
+      - name: Проверить HTML, CSS, OG и cache-version
+        run: python3 scripts/validate_static.py
