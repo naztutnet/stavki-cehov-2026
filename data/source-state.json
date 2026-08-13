@@ -1,9 +1,9 @@
 {
-  "mpk-rates": {
-    "name": "Справочник ставок МПК",
-    "url": "https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/export?format=csv&gid=0",
-    "sha256": "5fb64c52572af7c183c5ccd17a6ad392eb288402ea67956f7412e66fcffa2cdd",
-    "checked_at": "2026-08-10T21:28:26+00:00"
+  "mpk-source-page": {
+    "name": "Страница справочника МПК",
+    "url": "https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/",
+    "sha256": "fc12b99dada24f8997310dfb52a5d6674a7529c6bd7deaa6ddb112e4aea57ed8",
+    "checked_at": "2026-08-10T21:32:27+00:00"
   },
   "tochno-producer": {
     "name": "Реестр «Точно продюсер»",
@@ -11,11 +11,11 @@
     "sha256": "a931a532477191b9a5de6f9743e6f0a0bfeef024867085596c7b5b57ac2b1b5a",
     "checked_at": "2026-08-10T21:28:26+00:00"
   },
-  "mpk-source-page": {
-    "name": "Страница справочника МПК",
-    "url": "https://kinoprofsoyuz.ru/stranicza-stavok-po-czeham/",
-    "sha256": "fc12b99dada24f8997310dfb52a5d6674a7529c6bd7deaa6ddb112e4aea57ed8",
-    "checked_at": "2026-08-10T21:32:27+00:00"
+  "mpk-rates": {
+    "name": "Справочник ставок МПК",
+    "url": "https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/export?format=csv&gid=0",
+    "sha256": "5fb64c52572af7c183c5ccd17a6ad392eb288402ea67956f7412e66fcffa2cdd",
+    "checked_at": "2026-08-10T21:28:26+00:00"
   },
   "camera-source-page": {
     "name": "Страница операторского цеха МПК",
