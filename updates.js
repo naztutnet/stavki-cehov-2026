@@ -143,7 +143,7 @@ function syncKinoRatesVisibleCounters(){
     live.forEach(([value,label])=>{
       const span=document.createElement('span');span.dataset.liveCounter='';
       const b=document.createElement('b');b.textContent=String(value);
-      span.append(b,document.createTextNode(` ${value,label}`));secondary.appendChild(span);
+      span.append(b,document.createTextNode(` ${label}`));secondary.appendChild(span);
     });
   }
 
