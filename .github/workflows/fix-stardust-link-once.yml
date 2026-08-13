@@ -1,0 +1,32 @@
+name: Fix StarDust Link Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-stardust-link-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fix StarDust link
+        run: node scripts/fix-stardust-link-once.js
+      - name: Validate
+        run: |
+          grep -q 'https://t.me/filmres/7424' index.html
+          ! grep -R -q 'filmres/7441' --exclude-dir=.git .
+          node --check app.js
+          node --check market-data.js
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html market-data.js app.js updates.js sources-data.js
+          git commit -m "Fix StarDust research link"
+          git push
