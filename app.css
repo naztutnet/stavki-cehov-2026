@@ -395,3 +395,6 @@ select{
   line-height:1;
 }
 .row1>.chk{padding-top:0;padding-bottom:0}
+
+/* detail CTA spacing v7 */
+.detail-card .detail-source + .detail-add{margin-top:8px}
