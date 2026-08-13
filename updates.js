@@ -61,7 +61,7 @@ function setupResponsiveInspector(){
   const table=document.getElementById('tb');
   if(!inspector||!table)return;
 
-  const mq=window.matchMedia('(max-width:1499px)');
+  const mq=window.matchMedia('(max-width:1999px)');
   let lastTrigger=null;
 
   const backdrop=document.createElement('button');
@@ -143,7 +143,7 @@ function syncKinoRatesVisibleCounters(){
     live.forEach(([value,label])=>{
       const span=document.createElement('span');span.dataset.liveCounter='';
       const b=document.createElement('b');b.textContent=String(value);
-      span.append(b,document.createTextNode(` ${label}`));secondary.appendChild(span);
+      span.append(b,document.createTextNode(` ${value,label}`));secondary.appendChild(span);
     });
   }
 
@@ -161,7 +161,7 @@ function bootKinoRatesEnhancements(){
   /* app.js определяет старую прокрутку к инспектору для <=920px. После загрузки
      заменяем её открытием drawer, чтобы страница не прыгала под панелью. */
   window.revealMobileDetail=function(){
-    if(window.matchMedia('(max-width:1499px)').matches){
+    if(window.matchMedia('(max-width:1999px)').matches){
       const selected=document.querySelector('#tb tr.r.selected');
       window.KinoRatesInspectorDrawer?.open(selected||null);
     }
