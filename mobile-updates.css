@@ -38,3 +38,84 @@
     overflow:visible!important;
   }
 }
+
+/* Responsive inspector: keep the table wide on laptop-sized screens. */
+.inspector-backdrop{display:none}
+.inspector-drawer-close{display:none}
+@media (max-width:1499px){
+  .layout{grid-template-columns:minmax(0,1fr)!important}
+  .est{
+    position:fixed!important;
+    z-index:320;
+    top:0;
+    right:0;
+    width:min(440px,calc(100vw - 24px));
+    height:100dvh!important;
+    max-height:100dvh;
+    border:0!important;
+    border-left:1px solid var(--rule)!important;
+    background:#fff;
+    box-shadow:-18px 0 48px rgba(20,25,20,.18);
+    overflow-y:auto;
+    transform:translateX(105%);
+    visibility:hidden;
+    transition:transform .2s ease,visibility 0s linear .2s;
+  }
+  body.inspector-drawer-open .est{
+    transform:translateX(0);
+    visibility:visible;
+    transition:transform .2s ease;
+  }
+  .inspector-backdrop{
+    position:fixed;
+    z-index:310;
+    inset:0;
+    border:0;
+    margin:0;
+    padding:0;
+    background:rgba(20,25,20,.28);
+    cursor:pointer;
+  }
+  body.inspector-drawer-open .inspector-backdrop{display:block}
+  .inspector-drawer-close{
+    position:sticky;
+    z-index:3;
+    top:8px;
+    float:right;
+    display:grid;
+    place-items:center;
+    width:36px;
+    height:36px;
+    margin:8px 8px -44px 0;
+    padding:0;
+    border:1px solid var(--rule);
+    border-radius:8px;
+    background:rgba(255,255,255,.96);
+    color:var(--ink-2);
+    font:400 22px/1 var(--body);
+    cursor:pointer;
+  }
+  .inspector-drawer-close:hover{color:var(--ink);border-color:var(--ink-3)}
+  .sources,footer{padding-right:18px!important;margin-right:18px!important}
+}
+@media (max-width:920px){
+  .est{width:min(480px,calc(100vw - 12px))}
+}
+@media (max-width:600px){
+  .est{
+    top:auto;
+    bottom:0;
+    width:100vw;
+    height:min(92dvh,780px)!important;
+    max-height:92dvh;
+    border-left:0!important;
+    border-top:1px solid var(--rule)!important;
+    border-radius:14px 14px 0 0;
+    transform:translateY(105%);
+  }
+  body.inspector-drawer-open .est{transform:translateY(0)}
+  .inspector-drawer-close{top:8px;margin-right:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .est{transition:none!important}
+}
