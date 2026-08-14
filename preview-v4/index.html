@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="googlebot" content="noindex,nofollow,noarchive" />
+    <meta name="yandex" content="none" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="theme-color" content="#f4f4f6" />
+    <title>KinoRates — портал продюсера · Preview v4</title>
+    <link rel="stylesheet" href="app.css?v=20260815-1" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="side" id="side">
+        <a class="logo" href="#home"
+          ><b>K</b><span>KinoRates<small>Портал продюсера</small></span></a
+        >
+        <nav id="nav">
+          <a href="#home" data-route="home">⌂ <span>Главная</span></a
+          ><a href="#projects" data-route="projects"
+            >□ <span>Проекты</span><i id="projectCount">0</i></a
+          ><a href="#rates" data-route="rates">≡ <span>Ставки</span></a
+          ><a href="#knowledge" data-route="knowledge"
+            >▤ <span>База знаний</span></a
+          ><a href="#resources" data-route="resources"
+            >↗ <span>Полезные ресурсы</span></a
+          >
+        </nav>
+        <div class="side-foot">
+          <a href="#about" data-route="about">О проекте</a
+          ><button data-feedback>Обратная связь</button
+          ><button data-feedback>Сообщить новую ставку</button
+          ><small>База ревизована 13.08.2026</small>
+        </div>
+      </aside>
+      <header class="mobile">
+        <button id="menu">☰</button><a href="#home">KinoRates</a
+        ><button class="new-mini" data-new>+ Проект</button>
+      </header>
+      <button class="scrim" id="scrim" hidden></button>
+      <main id="main" tabindex="-1"><div id="view"></div></main>
+    </div>
+    <dialog id="wizard">
+      <form method="dialog" class="modal wizard">
+        <header>
+          <div>
+            <small>Новый проект</small>
+            <h2 id="stepTitle">Формат</h2>
+          </div>
+          <button value="cancel" aria-label="Закрыть">×</button>
+        </header>
+        <div class="progress"><i id="progress"></i></div>
+        <div id="wizardBody"></div>
+        <footer>
+          <button type="button" class="ghost" id="wizardBack">Назад</button
+          ><span id="stepCount">1 из 5</span
+          ><button type="button" class="primary" id="wizardNext">
+            Продолжить
+          </button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="feedback">
+      <form method="dialog" class="modal feedback">
+        <header>
+          <div>
+            <small>KinoRates</small>
+            <h2>Обратная связь</h2>
+          </div>
+          <button value="cancel" aria-label="Закрыть">×</button>
+        </header>
+        <p>
+          Нашли ошибку, хотите поделиться ставками или предложить инструмент?
+        </p>
+        <label
+          >Тема<select id="feedbackTopic">
+            <option>Нашёл ошибку</option>
+            <option>Новая ставка или письмо цеха</option>
+            <option>Предложение по продукту</option>
+          </select></label
+        ><label
+          >Сообщение<textarea
+            rows="6"
+            placeholder="Опишите, что нужно исправить или добавить"
+          ></textarea>
+        </label>
+        <p class="form-note">
+          В этой концепции отправка отключена. Форма показывает предусмотренный
+          сценарий.
+        </p>
+        <button class="primary" value="cancel">Закрыть</button>
+      </form>
+    </dialog>
+    <script src="../rates-data.js?v=20260813-1914"></script>
+    <script src="../sources-data.js?v=20260813-1914"></script>
+    <script src="../market-data.js?v=20260813-1914"></script>
+    <script src="../updates.js?v=20260813-1914"></script>
+    <script src="app.js?v=20260815-1"></script>
+  </body>
+</html>
