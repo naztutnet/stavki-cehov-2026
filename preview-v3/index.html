@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="googlebot" content="noindex,nofollow,noarchive">
+  <meta name="yandex" content="none">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>KinoRates Preview v3</title>
+  <link rel="stylesheet" href="app.css?v=20260815-1">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="brand-mark">K</span><span>KinoRates</span><small>Preview v3</small></div>
+      <nav class="product-nav" id="productNav" aria-label="Разделы KinoRates">
+        <a href="#overview" data-route="overview"><span>⌂</span>Обзор</a>
+        <a href="#rates" data-route="rates"><span>≡</span>Ставки</a>
+        <a href="#professions" data-route="professions"><span>◫</span>Профессии</a>
+        <a href="#departments" data-route="departments"><span>⌘</span>Цеха</a>
+        <a href="#sources" data-route="sources"><span>↗</span>Источники</a>
+        <a href="#budget" data-route="budget"><span>∑</span>Смета <b id="budgetBadge" hidden>0</b></a>
+      </nav>
+      <div class="sidebar-note"><strong>Ревизия базы</strong><span>13 августа 2026</span><span>Ставки рекомендательные</span></div>
+    </aside>
+
+    <header class="mobile-bar"><button id="menuButton" aria-label="Открыть меню">☰</button><a href="#overview">KinoRates</a><span>v3</span></header>
+    <button class="scrim" id="scrim" aria-label="Закрыть меню" hidden></button>
+
+    <main class="main" id="main" tabindex="-1">
+      <div class="view" id="view" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <template id="searchTemplate">
+    <div class="global-search">
+      <span aria-hidden="true">⌕</span>
+      <input type="search" placeholder="Найти профессию, ставку или источник…" autocomplete="off">
+      <kbd>⌘ K</kbd>
+      <div class="search-results" hidden></div>
+    </div>
+  </template>
+
+  <script src="../rates-data.js?v=20260813-1914"></script>
+  <script src="../sources-data.js?v=20260813-1914"></script>
+  <script src="../market-data.js?v=20260813-1914"></script>
+  <script src="../updates.js?v=20260813-1914"></script>
+  <script src="app.js?v=20260815-1"></script>
+</body>
+</html>

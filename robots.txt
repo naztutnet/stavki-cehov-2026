@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /preview-v2/
+Disallow: /preview-v3/
 
 Sitemap: https://kinorates.ru/sitemap.xml
 Host: kinorates.ru
