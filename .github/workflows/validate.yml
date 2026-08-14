@@ -27,7 +27,7 @@ jobs:
           node --check check-log.js
           node --check scripts/validate_data.js
           node --check scripts/test_core.js
-          python3 -m py_compile scripts/check_sources.py scripts/validate_static.py
+          python3 -m py_compile scripts/check_sources.py scripts/validate_static.py scripts/validate_preview_v3.py
 
       - name: Проверить данные и runtime-overlay
         run: node scripts/validate_data.js
@@ -36,4 +36,6 @@ jobs:
         run: node scripts/test_core.js
 
       - name: Проверить HTML, CSS, OG и cache-version
-        run: python3 scripts/validate_static.py
+        run: |
+          python3 scripts/validate_static.py
+          python3 scripts/validate_preview_v3.py
