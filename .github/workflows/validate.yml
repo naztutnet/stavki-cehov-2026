@@ -25,6 +25,8 @@ jobs:
           node --check market-data.js
           node --check updates.js
           node --check check-log.js
+          node --check preview-v4/budget-template.js
+          node --check preview-v4/app.js
           node --check scripts/validate_data.js
           node --check scripts/test_core.js
           python3 -m py_compile scripts/check_sources.py scripts/validate_static.py scripts/validate_preview_v3.py scripts/validate_preview_v4.py
