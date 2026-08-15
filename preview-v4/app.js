@@ -2,10 +2,13 @@
   "use strict";
   const R = Array.isArray(window.KINORATES_DATA) ? window.KINORATES_DATA : [],
     S = Array.isArray(window.KINORATES_SOURCES) ? window.KINORATES_SOURCES : [],
-    U = Array.isArray(window.KINORATES_UPDATES) ? window.KINORATES_UPDATES : [];
+    U = Array.isArray(window.KINORATES_UPDATES) ? window.KINORATES_UPDATES : [],
+    TEMPLATE = Array.isArray(window.KINORATES_BUDGET_TEMPLATE)
+      ? window.KINORATES_BUDGET_TEMPLATE
+      : [];
   const $ = (s) => document.querySelector(s),
     V = $("#view"),
-  rub = (n) => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽",
+    rub = (n) => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽",
     esc = (x) =>
       String(x ?? "").replace(
         /[&<>"']/g,
@@ -22,16 +25,6 @@
     draft = {},
     step = 0,
     rateQuery = "";
-  const sections = [
-    "Административный цех",
-    "Режиссерская группа",
-    "Операторский цех",
-    "Художественно-постановочный цех",
-    "Звуковой цех",
-    "Свет и грип",
-    "Транспортный цех",
-    "CG / VFX",
-  ];
   const articles = [
     {
       id: "source",
@@ -129,10 +122,70 @@
     return `<a class="row" href="#project/${p.id}/budget"><div><strong>${esc(p.name)}</strong><span>${esc(p.format)} · ${p.duration} мин · ${p.shoots} смен</span></div><em>${rub(total(p))}</em></a>`;
   }
   function total(p) {
-    return (p.items || []).reduce(
-      (s, x) => s + (+x.rate || 0) * (+x.qty || 1),
-      0,
+    return (p.items || []).reduce((s, x) => s + itemGross(x), 0);
+  }
+  function itemNet(x) {
+    const base = (+x.rate || 0) * (+x.people || 0) * (+x.periods || 0);
+    return base * (1 + (+x.percent || 0) / 100) + (+x.extra || 0);
+  }
+  function itemGross(x) {
+    return itemNet(x) * (1 + (+x.tax || 0) / 100);
+  }
+  function buildTemplate(p) {
+    const enabled = (tag) =>
+      !tag ||
+      (tag === "expedition" && p.expedition === "yes") ||
+      (tag === "camera2" && +p.cameras > 1) ||
+      (tag === "vfx" && p.vfx !== "Без сложных задач") ||
+      ["stunts", "sfx"].includes(tag);
+    let key = Date.now();
+    return TEMPLATE.flatMap((phase) =>
+      phase.rows
+        .filter((r) => enabled(r[4]))
+        .map((r) => ({
+          key: ++key,
+          code: r[0],
+          prof: r[1],
+          dept: r[2],
+          phase: phase.code,
+          phaseName: phase.name,
+          unit: r[3],
+          rate: 0,
+          people: 0,
+          periods: r[3].includes("смена") ? +p.shoots || 1 : 1,
+          percent: 0,
+          extra: 0,
+          tax: 0,
+          paid: 0,
+          contractor: "",
+          start: "",
+          end: "",
+          comment: "",
+          sourceType: "Шаблон производственной сметы",
+        })),
     );
+  }
+  function ensureProject(p) {
+    if (p.templateVersion === 2) return;
+    const legacy = (p.items || []).map((x) => ({
+      ...x,
+      key: x.key || Date.now() + Math.random(),
+      code: x.code || "1.9.9",
+      phase: x.phase || "1",
+      phaseName: x.phaseName || "Подготовка и съёмка",
+      unit: x.unit || "проект",
+      people: x.people ?? x.qty ?? 1,
+      periods: x.periods ?? 1,
+      percent: x.percent || 0,
+      extra: x.extra || 0,
+      tax: x.tax || 0,
+      paid: x.paid || 0,
+      contractor: x.contractor || "",
+      comment: x.comment || "",
+    }));
+    p.items = [...buildTemplate(p), ...legacy];
+    p.templateVersion = 2;
+    save();
   }
   function projectPage(id, tab = "budget") {
     const p = projects.find((x) => x.id === id);
@@ -140,6 +193,7 @@
       location.hash = "projects";
       return;
     }
+    ensureProject(p);
     V.innerHTML = `<section class="project-head">${head("Проект", esc(p.name), `${esc(p.format)} · ${p.duration} мин · ${p.shoots} смен · ${esc(p.location)}`, '<button class="ghost" id="editParams">Параметры</button>')}<div class="project-meta"><span class="tag">${p.expedition === "yes" ? "С экспедицией" : "Без экспедиции"}</span><span class="tag">VFX: ${esc(p.vfx)}</span><span class="tag">${p.cameras} камеры</span><span class="tag">Резерв ${p.reserve}%</span></div><div class="tabs"><button data-tab="budget" class="${tab === "budget" ? "active" : ""}">Смета</button><button data-tab="analytics" class="${tab === "analytics" ? "active" : ""}">Аналитика</button><button data-tab="params" class="${tab === "params" ? "active" : ""}">Параметры</button><button data-tab="sources" class="${tab === "sources" ? "active" : ""}">Источники</button></div></section><div id="projectBody"></div>`;
     document
       .querySelectorAll("[data-tab]")
@@ -159,11 +213,14 @@
     )();
   }
   function budget(p) {
-    const grouped = sections
-      .map((s) => [s, (p.items || []).filter((x) => x.dept === s)])
-      .filter(([, x]) => x.length);
+    const phases = TEMPLATE.map((phase) => ({
+      ...phase,
+      items: (p.items || []).filter((x) => x.phase === phase.code),
+    })).filter((phase) => phase.items.length);
+    const paid = (p.items || []).reduce((s, x) => s + (+x.paid || 0), 0);
+    const gross = total(p);
     $("#projectBody").innerHTML =
-      `<div class="grid budget-layout"><div class="panel"><div class="rate-picker"><input id="pick" placeholder="Добавить профессию из базы ставок"><button class="ghost" id="addFirst">Найти</button></div>${grouped.length ? grouped.map(([s, items]) => `<section class="budget-section"><header><span>${esc(s)}</span><span>${rub(items.reduce((a, x) => a + x.rate * x.qty, 0))}</span></header>${items.map((x) => budgetRow(p, x)).join("")}</section>`).join("") : `<div class="empty"><h2>Шаблон готов</h2><p>Разделы определены параметрами проекта. Добавьте реальные ставки из базы.</p></div>`}</div><aside><div class="notice">Система не назначает нормативный состав группы. Количество и ставки остаются прозрачными допущениями пользователя.</div><div class="panel summary section"><h2>Предварительный итог</h2><div class="sumline"><span>Статей</span><b>${(p.items || []).length}</b></div><div class="sumline"><span>Съёмочных смен</span><b>${p.shoots}</b></div><div class="sumline"><span>Резерв</span><b>${p.reserve}%</b></div><div class="sumline total"><span>Итого</span><b>${rub(total(p) * (1 + p.reserve / 100))}</b></div><button class="primary" style="width:100%;margin-top:15px" id="toAnalytics">Сформировать аналитику</button></div></aside></div>`;
+      `<div class="budget-toolbar"><div><b>Рабочая смета</b><span>${(p.items || []).length} статей · структура по производственным этапам</span></div><div class="rate-picker"><input id="pick" placeholder="Добавить профессию из базы ставок"><button class="ghost" id="addFirst">Найти</button></div></div><div class="grid budget-layout budget-layout-wide"><div class="budget-canvas">${phases.map((phase, index) => `<details class="budget-phase" ${index < 2 ? "open" : ""}><summary><span><b>${phase.code}</b>${esc(phase.name)}</span><em>${rub(phase.items.reduce((s, x) => s + itemGross(x), 0))}</em></summary><div class="budget-columns"><span>Код / статья</span><span>Цена</span><span>Кол-во</span><span>Период</span><span>Налог</span><span>Сумма</span><span>Оплачено</span><span></span></div>${phase.items.map((x) => budgetRow(p, x)).join("")}</details>`).join("")}</div><aside class="budget-side"><div class="notice">Структура взята из производственной таблицы, но суммы и контрагенты не копировались. Нулевые строки — ожидаемое состояние шаблона.</div><div class="panel summary section"><h2>Лимит проекта</h2><div class="sumline"><span>План с налогом</span><b>${rub(gross)}</b></div><div class="sumline"><span>Выплачено</span><b>${rub(paid)}</b></div><div class="sumline"><span>В плане</span><b>${rub(Math.max(0, gross - paid))}</b></div><div class="sumline"><span>Резерв проекта</span><b>${p.reserve}%</b></div><div class="sumline total"><span>С резервом</span><b>${rub(gross * (1 + p.reserve / 100))}</b></div><button class="primary" style="width:100%;margin-top:15px" id="toAnalytics">Сформировать аналитику</button></div></aside></div>`;
     $("#addFirst").onclick = () => {
       const q = $("#pick").value.toLowerCase(),
         r = R.find((x) => x.prof.toLowerCase().includes(q) && x.amount);
@@ -173,34 +230,45 @@
       p.items.push({
         key: Date.now(),
         id: r.id,
+        code: "1.9.9",
+        phase: "1",
+        phaseName: "Подготовка и съёмка",
         dept: r.dept,
         prof: r.prof,
+        unit: r.unit,
         rate: r.amount,
-        qty: 1,
+        people: 1,
+        periods: String(r.unit).includes("смена") ? +p.shoots || 1 : 1,
+        percent: 0,
+        extra: 0,
+        tax: 0,
+        paid: 0,
+        contractor: "",
+        start: "",
+        end: "",
+        comment: "",
         status: r.status,
         src: r.src,
       });
       save();
       budget(p);
     };
-    document.querySelectorAll("[data-qty]").forEach(
+    document.querySelectorAll("[data-field]").forEach(
       (i) =>
         (i.onchange = () => {
-          p.items.find((x) => x.key == i.dataset.qty).qty = Math.max(
-            1,
-            +i.value || 1,
-          );
-          save();
-          budget(p);
-        }),
-    );
-    document.querySelectorAll("[data-rate]").forEach(
-      (i) =>
-        (i.onchange = () => {
-          p.items.find((x) => x.key == i.dataset.rate).rate = Math.max(
-            0,
-            +i.value || 0,
-          );
+          const item = p.items.find((x) => x.key == i.dataset.key);
+          const numeric = [
+            "rate",
+            "people",
+            "periods",
+            "percent",
+            "extra",
+            "tax",
+            "paid",
+          ].includes(i.dataset.field);
+          item[i.dataset.field] = numeric
+            ? Math.max(0, +i.value || 0)
+            : i.value;
           save();
           budget(p);
         }),
@@ -217,19 +285,25 @@
       (location.hash = `project/${p.id}/analytics`);
   }
   function budgetRow(p, x) {
-    return `<div class="budget-row"><div><strong>${esc(x.prof)}</strong><small>${esc(x.src || "Значение пользователя")}</small></div><input data-qty="${x.key}" type="number" min="1" value="${x.qty}" title="Количество"><input data-rate="${x.key}" type="number" min="0" value="${x.rate}" title="Ставка"><em>${rub(x.rate * x.qty)}</em><button class="x" data-del="${x.key}">×</button></div>`;
+    const input = (field, value, attrs = "") =>
+      `<input data-field="${field}" data-key="${x.key}" value="${esc(value)}" ${attrs}>`;
+    return `<div class="budget-item"><div class="budget-row"><div class="budget-name"><small>${esc(x.code)}</small><strong>${esc(x.prof)}</strong><span>${esc(x.dept)} · ${esc(x.unit || "единица")}</span></div>${input("rate", x.rate, 'type="number" min="0" title="Цена за единицу"')}${input("people", x.people, 'type="number" min="0" step="1" title="Человек / штук"')}${input("periods", x.periods, 'type="number" min="0" step="0.01" title="Количество периодов"')}${input("tax", x.tax, 'type="number" min="0" max="100" title="Налог, %"')}<em>${rub(itemGross(x))}</em>${input("paid", x.paid, 'type="number" min="0" title="Оплачено"')}<button class="x" data-del="${x.key}">×</button></div><div class="budget-meta"><label>Контрагент ${input("contractor", x.contractor || "", 'placeholder="Не указан"')}</label><label>С ${input("start", x.start || "", 'type="date"')}</label><label>По ${input("end", x.end || "", 'type="date"')}</label><label>Начисление ${input("percent", x.percent || 0, 'type="number" min="0" step="0.01" title="Процентное начисление"')}</label><label>Доп. ${input("extra", x.extra || 0, 'type="number" min="0" step="0.01" title="Дополнительная сумма"')}</label><label>Комментарий ${input("comment", x.comment || "", 'placeholder="Допущение или ссылка на расчёт"')}</label><span>${esc(x.src || x.sourceType || "Значение пользователя")}</span></div></div>`;
   }
   function analytics(p) {
     const t = total(p),
       gross = t * (1 + p.reserve / 100),
+      paid = (p.items || []).reduce((s, x) => s + (+x.paid || 0), 0),
       groups = Object.entries(
         (p.items || []).reduce(
-          (a, x) => ((a[x.dept] = (a[x.dept] || 0) + x.rate * x.qty), a),
+          (a, x) => (
+            (a[x.phaseName] = (a[x.phaseName] || 0) + itemGross(x)),
+            a
+          ),
           {},
         ),
       ).sort((a, b) => b[1] - a[1]);
     $("#projectBody").innerHTML =
-      `<div class="grid analytics"><div class="panel metric"><small>Бюджет с резервом</small><b>${rub(gross)}</b></div><div class="panel metric"><small>Стоимость смены</small><b>${p.shoots ? rub(gross / p.shoots) : "—"}</b></div><div class="panel metric"><small>Стоимость минуты</small><b>${p.duration ? rub(gross / p.duration) : "—"}</b></div><div class="panel metric"><small>Заполнено статей</small><b>${(p.items || []).length}</b></div></div><section class="panel section"><div class="panel-head"><h2>Структура по цехам</h2></div><div class="bars">${groups.length ? groups.map(([g, n]) => `<div class="bar"><span>${esc(g)}</span><div class="track"><div class="fill" style="width:${t ? (n / t) * 100 : 0}%"></div></div><b>${rub(n)}</b></div>`).join("") : '<div class="empty">Добавьте ставки, чтобы появилась аналитика.</div>'}</div></section><section class="section notice">Аналитика рассчитана только по заполненным строкам. Она не подтверждает полноту сметы и не заменяет производственный план.</section>`;
+      `<div class="grid analytics"><div class="panel metric"><small>Бюджет с резервом</small><b>${rub(gross)}</b></div><div class="panel metric"><small>Выплачено</small><b>${rub(paid)}</b></div><div class="panel metric"><small>Остаток к планированию</small><b>${rub(Math.max(0, gross - paid))}</b></div><div class="panel metric"><small>Стоимость смены</small><b>${p.shoots ? rub(gross / p.shoots) : "—"}</b></div></div><section class="panel section"><div class="panel-head"><h2>Структура по производственным этапам</h2></div><div class="bars">${groups.length ? groups.map(([g, n]) => `<div class="bar"><span>${esc(g)}</span><div class="track"><div class="fill" style="width:${t ? (n / t) * 100 : 0}%"></div></div><b>${rub(n)}</b></div>`).join("") : '<div class="empty">Заполните строки сметы, чтобы появилась аналитика.</div>'}</div></section><section class="section notice">Аналитика рассчитана по плановым строкам и полю «Оплачено». Нулевые статьи остаются в шаблоне, но не влияют на сумму.</section>`;
   }
   function params(p) {
     $("#projectBody").innerHTML =
@@ -358,7 +432,13 @@
     );
   }
   function finish() {
-    const p = { ...draft, id: String(Date.now()), items: [] };
+    const p = {
+      ...draft,
+      id: String(Date.now()),
+      items: [],
+      templateVersion: 2,
+    };
+    p.items = buildTemplate(p);
     projects.push(p);
     save();
     $("#wizard").close();
