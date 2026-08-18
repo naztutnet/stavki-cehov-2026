@@ -41,4 +41,7 @@ vm.runInContext('const assistantBar=()=>"";'+app.slice(modalStart,modalEnd)+';th
 const rateModal=modalContext.__modal('feedback','Хочу поделиться актуальной ставкой');
 assert(rateModal.includes('<option selected>Хочу поделиться актуальной ставкой</option>'),'Rate-sharing topic is not selected in feedback markup');
 assert(!rateModal.includes('FormSubmit')&&!rateModal.includes('type="checkbox"'),'Consent/cookie copy leaked into feedback markup');
+assert(rateModal.includes('required></textarea></label>'),'Feedback textarea is not closed correctly');
+assert(!rateModal.includes('<dialog open'),'Feedback dialog bypasses native modal behavior');
+assert(app.includes('dialog.showModal()'),'Feedback dialog does not use native modal behavior');
 console.log('Core logic/security/form tests OK');
