@@ -7,14 +7,30 @@ const rub = (n) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 
 const dec2 = (n) => Math.round((+n || 0) * 100) / 100;
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 const normalizeSearch = (value) => String(value ?? "").toLocaleLowerCase("ru-RU").replaceAll("ё", "е").trim();
-const statusLabel = (status) => ({ fresh2026: "Письмо 2026", official2026: "Рекомендации 2026", verified2025: "Письмо 2025", verified2024: "Письмо 2024", verified2023: "Письмо 2023", market2025: "Рыночный ориентир", archive: "Архив", expired: "Архив", no_public_rate: "Без публичного тарифа", check: "Справочная запись", newdoc: "Первичный документ" })[status] || "Справочная запись";
+const appScriptUrl = document.currentScript?.src || location.href;
+const pdfAssetBase = new URL(appScriptUrl.includes("/preview-v4/chat-prototype/") ? "../../vendor/" : "vendor/", appScriptUrl);
+const statusLabel = (status, rate) => {
+  if (["archive", "expired"].includes(status)) {
+    const letterYear = String(rate?.src || "").match(/письм[^·]*(20\d{2})/i)?.[1];
+    if (letterYear) return `Письмо ${letterYear}`;
+  }
+  return ({ fresh2026: "Письмо 2026", official2026: "Рекомендации 2026", verified2025: "Письмо 2025", verified2024: "Письмо 2024", verified2023: "Письмо 2023", market2025: "Рыночный ориентир", archive: "Архив", expired: "Архив", no_public_rate: "Без публичного тарифа", check: "Справочная запись", newdoc: "Первичный документ" })[status] || "Справочная запись";
+};
+const statusTone = (status) => {
+  if (["fresh2026", "official2026"].includes(status)) return "current";
+  if (["verified2025", "verified2024", "verified2023"].includes(status)) return "previous";
+  if (status === "market2025") return "market";
+  if (status === "no_public_rate") return "unpublished";
+  return "archive";
+};
 
 const lazyScriptLoads = new Map();
+let pdfFontsReady = Boolean(window.KINORATES_PDF_RUNTIME_READY && window.pdfMake?.createPdf);
 function loadScriptOnce(src, integrity) {
   if (lazyScriptLoads.has(src)) return lazyScriptLoads.get(src);
   const promise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = src; script.crossOrigin = "anonymous"; script.integrity = integrity;
+    script.src = src; if (/^https?:/i.test(src) && new URL(src).origin !== location.origin) script.crossOrigin = "anonymous"; script.integrity = integrity;
     script.onload = resolve;
     script.onerror = () => { lazyScriptLoads.delete(src); reject(new Error(`Не удалось загрузить ${src}`)); };
     document.head.appendChild(script);
@@ -27,10 +43,11 @@ async function ensureExcelJS() {
   if (!window.ExcelJS) throw new Error("ExcelJS unavailable");
 }
 async function ensurePdfMake() {
-  if (window.pdfMake?.vfs) return;
-  await loadScriptOnce("https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js", "sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs");
-  await loadScriptOnce("https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js", "sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15");
-  if (!window.pdfMake?.vfs) throw new Error("pdfMake unavailable");
+  if (window.pdfMake?.createPdf && pdfFontsReady) return;
+  await loadScriptOnce(new URL("pdfmake.min.js", pdfAssetBase).href, "sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs");
+  await loadScriptOnce(new URL("vfs_fonts.js", pdfAssetBase).href, "sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15");
+  if (!window.pdfMake?.createPdf) throw new Error("pdfMake unavailable");
+  pdfFontsReady = true;
 }
 
 const sections = [
@@ -56,7 +73,10 @@ function loadBudget() {
   try {
     const current = localStorage.getItem(BUDGET_STORAGE_KEY), privateDraft = localStorage.getItem("kinorates-private-budget"), previousProduction = localStorage.getItem("kinorates-budget-v3");
     const saved = migrateLegacyBudget(JSON.parse(current || privateDraft || previousProduction || "[]"));
-    saved.forEach((item) => { if (item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods); });
+    saved.forEach((item) => {
+      if (!usesAttachmentDates(item.unit)) { item.start = ""; item.end = ""; }
+      else if (item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods);
+    });
     if (!current && saved.length) localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(saved));
     return saved;
   } catch { return []; }
@@ -93,11 +113,12 @@ function attachmentFactor(start, end) {
   const endPart = endDay / endMonthDays;
   return startDay > endDay ? completeMonths + startPart + endPart : completeMonths - 1 + startPart + endPart;
 }
-function itemNet(x) { const factor = attachmentFactor(x.start, x.end), periods = factor == null ? (+x.periods || 0) : factor; return (+x.rate || 0) * (+x.qty || 0) * periods + (+x.extra || 0); }
+function usesAttachmentDates(unit) { return normalizeSearch(unit) === "месяц"; }
+function itemNet(x) { const factor = usesAttachmentDates(x.unit) ? attachmentFactor(x.start, x.end) : null, periods = factor == null ? (+x.periods || 0) : factor; return (+x.rate || 0) * (+x.qty || 0) * periods + (+x.extra || 0); }
 function itemGross(x) { const tax = Math.min(99.99, Math.max(0, +x.tax || 0)) / 100; return itemNet(x) / (1 - tax); }
 function shortDate(value) { if (!value) return ""; const [year, month, day] = value.split("-"); return `${day}.${month}.${year}`; }
 function budgetFormula(x) {
-  const attached = attachmentFactor(x.start, x.end) != null;
+  const attached = usesAttachmentDates(x.unit) && attachmentFactor(x.start, x.end) != null;
   const base = attached ? `${shortDate(x.start)}–${shortDate(x.end)} · ${dec2(x.periods)} периода · расчёт по календарным долям месяцев` : `${rub(x.rate)} × ${dec2(x.qty)} × ${dec2(x.periods)}`;
   return `${base}${+x.extra ? ` + доплата ${rub(x.extra)}` : ""} = ${rub(itemNet(x))}${+x.tax ? `; ÷ (1 − ${dec2(x.tax)}%) = ${rub(itemGross(x))}` : "; без налога"}`;
 }
@@ -108,7 +129,7 @@ function periodsFromDates(start, end, unit, fallback) {
   return dec2((last - first) / 86400000 / 30);
 }
 function xml(value) { return String(value ?? "").replace(/[<>&'"]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[char]); }
-function downloadBlob(content, type, filename) { const blob = content instanceof Blob ? content : new Blob([content], { type }), url = URL.createObjectURL(blob), link = document.createElement("a"); link.href = url; link.download = filename; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+function downloadBlob(content, type, filename) { const blob = content instanceof Blob ? content : new Blob([content], { type }), url = URL.createObjectURL(blob), link = document.createElement("a"); link.href = url; link.download = filename; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); }
 function safeSheetText(value) { const text = String(value ?? "").replace(/[\r\n\t]+/g, " "), trimmed = text.trimStart(); return /^[=+\-@]/.test(trimmed) ? `'${trimmed}` : text; }
 function exportName(ext) { return `KinoRates_Рабочая_смета_${new Date().toISOString().slice(0, 10)}.${ext}`; }
 async function exportBudgetExcel() {
@@ -120,7 +141,7 @@ async function exportBudgetExcel() {
   sheet.mergeCells("A2:M2"); const meta = sheet.getCell("A2"); meta.value = `Экспортировано ${new Date().toLocaleString("ru-RU")} · ${budgetItems.length} позиций`; meta.font = { name: "Arial", size: 9, color: { argb: "FF77777F" } }; meta.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.getRow(2).height = 23;
   const headers = ["Статья", "Цех", "Единица", "Ставка", "Количество", "Периоды", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом", "Заметка"];
   sheet.addRow([]); sheet.addRow(headers);
-  budgetItems.forEach((x) => sheet.addRow([safeSheetText(x.prof), safeSheetText(x.dept), safeSheetText(x.unit), +x.rate || 0, +x.qty || 0, attachmentFactor(x.start, x.end) ?? (+x.periods || 0), x.start ? new Date(`${x.start}T12:00:00`) : "", x.end ? new Date(`${x.end}T12:00:00`) : "", +x.extra || 0, (+x.tax || 0) / 100, itemNet(x), itemGross(x), safeSheetText(x.comment)]));
+  budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit); sheet.addRow([safeSheetText(x.prof), safeSheetText(x.dept), safeSheetText(x.unit), +x.rate || 0, +x.qty || 0, (monthly ? attachmentFactor(x.start, x.end) : null) ?? (+x.periods || 0), monthly && x.start ? new Date(`${x.start}T12:00:00`) : "", monthly && x.end ? new Date(`${x.end}T12:00:00`) : "", +x.extra || 0, (+x.tax || 0) / 100, itemNet(x), itemGross(x), safeSheetText(x.comment)]); });
   const first = 5, last = 4 + budgetItems.length, totalRow = sheet.addRow(["", "", "", "", "", "", "", "", "", "ИТОГО", { formula: `SUM(K${first}:K${last})`, result: budgetItems.reduce((s, x) => s + itemNet(x), 0) }, { formula: `SUM(L${first}:L${last})`, result: budgetItems.reduce((s, x) => s + itemGross(x), 0) }, ""]);
   sheet.columns = [30, 20, 13, 15, 11, 11, 14, 14, 15, 11, 17, 17, 32].map((width) => ({ width }));
   const header = sheet.getRow(4); header.height = 28; header.eachCell((cell) => { cell.font = { name: "Arial", size: 9, bold: true, color: { argb: "FF4C4855" } }; cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEDEAFB" } }; cell.alignment = { vertical: "middle", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: "FFCBC5E6" } } }; });
@@ -132,13 +153,22 @@ async function exportBudgetExcel() {
 }
 async function exportBudgetPdf() {
   if (!budgetItems.length) { alert("Сначала добавьте хотя бы одну позицию в смету."); return; }
-  await ensurePdfMake();
-  const money = (n) => `${new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(+n || 0)} ₽`;
-  const body = [["Статья / цех", "Ставка", "Кол-во", "Период", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом"].map((text) => ({ text, bold: true, color: "#ffffff" }))];
-  budgetItems.forEach((x) => body.push([{ text: `${x.prof}\n${x.dept} · ${x.unit}` }, money(x.rate), dec2(x.qty), dec2(attachmentFactor(x.start, x.end) ?? x.periods), shortDate(x.start) || "—", shortDate(x.end) || "—", money(x.extra), `${dec2(x.tax)}%`, money(itemNet(x)), money(itemGross(x))]));
-  body.push([{ text: "ИТОГО", bold: true, colSpan: 8 }, {}, {}, {}, {}, {}, {}, {}, { text: money(budgetItems.reduce((s, x) => s + itemNet(x), 0)), bold: true }, { text: money(budgetItems.reduce((s, x) => s + itemGross(x), 0)), bold: true }]);
-  const doc = { pageSize: "A4", pageOrientation: "landscape", pageMargins: [28, 32, 28, 32], info: { title: "KinoRates — Рабочая смета", author: "KinoRates", creator: "KinoRates" }, defaultStyle: { font: "Roboto", fontSize: 7.3, color: "#27262D" }, content: [{ text: "KINORATES", bold: true, fontSize: 8, color: "#6D4AFF", characterSpacing: 1.2, margin: [0, 0, 0, 4] }, { text: "Рабочая смета", bold: true, fontSize: 18, margin: [0, 0, 0, 4] }, { text: `${budgetItems.length} позиций · сформировано ${new Date().toLocaleString("ru-RU")}`, color: "#77777F", margin: [0, 0, 0, 13] }, { table: { headerRows: 1, widths: [116, 52, 31, 33, 52, 52, 50, 34, 59, 59], body }, layout: { fillColor: (i) => i === 0 ? "#6D4AFF" : i === body.length - 1 ? "#F3F2F7" : null, hLineColor: () => "#E5E4E9", vLineColor: () => "#E5E4E9", paddingLeft: () => 4, paddingRight: () => 4, paddingTop: () => 5, paddingBottom: () => 5 } }], footer: (current, count) => ({ columns: [{ text: "KinoRates · предварительный расчёт", alignment: "left" }, { text: `${current} / ${count}`, alignment: "right" }], margin: [28, 8, 28, 0], fontSize: 7, color: "#88858E" }) };
-  window.pdfMake.createPdf(doc).download(exportName("pdf"));
+  const button = $("[data-export-pdf]"), label = button?.textContent || "PDF";
+  if (button) { button.disabled = true; button.textContent = "Готовим…"; }
+  try {
+    await ensurePdfMake();
+    const money = (n) => `${new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(+n || 0)} ₽`;
+    const body = [["Статья / цех", "Ставка", "Кол-во", "Период", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом"].map((text) => ({ text, bold: true, color: "#ffffff" }))];
+    budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit); body.push([{ text: `${x.prof}\n${x.dept} · ${x.unit}` }, money(x.rate), dec2(x.qty), dec2((monthly ? attachmentFactor(x.start, x.end) : null) ?? x.periods), monthly ? shortDate(x.start) || "—" : "—", monthly ? shortDate(x.end) || "—" : "—", money(x.extra), `${dec2(x.tax)}%`, money(itemNet(x)), money(itemGross(x))]); });
+    body.push([{ text: "ИТОГО", bold: true, colSpan: 8 }, {}, {}, {}, {}, {}, {}, {}, { text: money(budgetItems.reduce((s, x) => s + itemNet(x), 0)), bold: true }, { text: money(budgetItems.reduce((s, x) => s + itemGross(x), 0)), bold: true }]);
+    const doc = { pageSize: "A4", pageOrientation: "landscape", pageMargins: [28, 32, 28, 32], info: { title: "KinoRates — Рабочая смета", author: "KinoRates", creator: "KinoRates" }, defaultStyle: { font: "Roboto", fontSize: 7.3, color: "#27262D" }, content: [{ text: "KINORATES", bold: true, fontSize: 8, color: "#6D4AFF", characterSpacing: 1.2, margin: [0, 0, 0, 4] }, { text: "Рабочая смета", bold: true, fontSize: 18, margin: [0, 0, 0, 4] }, { text: `${budgetItems.length} позиций · сформировано ${new Date().toLocaleString("ru-RU")}`, color: "#77777F", margin: [0, 0, 0, 13] }, { table: { headerRows: 1, widths: [116, 52, 31, 33, 52, 52, 50, 34, 59, 59], body }, layout: { fillColor: (i) => i === 0 ? "#6D4AFF" : i === body.length - 1 ? "#F3F2F7" : null, hLineColor: () => "#E5E4E9", vLineColor: () => "#E5E4E9", paddingLeft: () => 4, paddingRight: () => 4, paddingTop: () => 5, paddingBottom: () => 5 } }], footer: (current, count) => ({ columns: [{ text: "KinoRates · предварительный расчёт", alignment: "left" }, { text: `${current} / ${count}`, alignment: "right" }], margin: [28, 8, 28, 0], fontSize: 7, color: "#88858E" }) };
+    window.pdfMake.createPdf(doc).download(exportName("pdf"));
+  } catch (error) {
+    console.error("PDF export failed", error);
+    alert("Не удалось сформировать PDF. Обновите страницу и попробуйте ещё раз.");
+  } finally {
+    if (button) { button.disabled = false; button.textContent = label; }
+  }
 }
 function addCustomBudgetItem() { budgetItems.push({ id: `custom-${Date.now()}`, custom: true, prof: "Новая статья", dept: "Своя статья", unit: "единица", rate: 0, qty: 1, periods: 1, extra: 0, tax: 0, start: "", end: "", comment: "" }); saveBudget(); render(); }
 const assistantBar = (placeholder = "Спросите о ставках, источниках или смете…") => `<div class="assistant-bar"><textarea rows="1" placeholder="${placeholder}"></textarea><div class="assistant-actions"><button>＋</button><span>Использует данные KinoRates</span><button class="send">↑</button></div></div>`;
@@ -154,11 +184,12 @@ function homeV2() {
 }
 function projects() {
   const net = budgetItems.reduce((sum, x) => sum + itemNet(x), 0), gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
-  return pageHead("Рабочий инструмент", "Рабочая смета", "Расчёт строк по ставке, количеству, периоду, датам, доплатам и налогам. Данные сохраняются только в вашем браузере.", '<div class="budget-actions"><button class="quiet" data-add-custom>＋ Своя статья</button><button class="quiet" data-export-excel>Excel</button><button class="quiet" data-export-pdf>PDF</button><a class="primary button-link" href="#home">＋ Добавить ставку</a></div>') + `<datalist id="taxRates"><option value="6"><option value="7"><option value="8"><option value="9"><option value="10"></datalist><div class="budget-workspace"><section class="budget-sheet">${budgetItems.length ? `<div class="budget-table-head"><span>Позиция и расчёт</span><span>Сумма</span></div>${budgetItems.map((x, index) => `<article class="budget-item"><div class="budget-item-main"><div class="budget-position">${x.custom ? `<label>Название статьи<input value="${esc(x.prof)}" data-budget-field="prof" data-budget-index="${index}"></label>` : `<b>${esc(x.prof)}</b>`}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div><label>Ставка<input type="number" min="0" step="0.01" value="${dec2(x.rate)}" data-budget-field="rate" data-budget-index="${index}"></label><label>Кол-во<input type="number" min="0" step="1" value="${dec2(x.qty)}" data-budget-field="qty" data-budget-index="${index}"></label><label>Периоды<input type="number" min="0" step="0.01" value="${dec2(x.periods)}" data-budget-field="periods" data-budget-index="${index}"></label><strong>${rub(itemGross(x))}</strong><button data-budget-delete="${index}" aria-label="Удалить позицию">×</button></div><div class="budget-item-meta"><label>Начало<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label><label>Окончание<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label><label>Доплата<input type="number" step="0.01" value="${dec2(x.extra)}" data-budget-field="extra" data-budget-index="${index}"></label><label>Налог, %<input type="number" list="taxRates" min="0" step="0.5" value="${dec2(x.tax)}" data-budget-field="tax" data-budget-index="${index}"></label><label class="budget-comment">Заметка<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия расчёта"></label></div><div class="budget-formula">${rub(x.rate)} × ${dec2(x.qty)} × ${dec2(x.periods)}${+x.extra ? ` + ${rub(x.extra)}` : ""} = ${rub(itemNet(x))}${+x.tax ? `; налог ${dec2(x.tax)}% → ${rub(itemGross(x))}` : "; без налога"}</div><div class="budget-item-summary"><span>Без налога <b>${rub(itemNet(x))}</b></span><span>С налогом <b>${rub(itemGross(x))}</b></span></div></article>`).join("")}` : `<div class="budget-empty-state"><i>□</i><h2>Смета пока пуста</h2><p>Добавьте ставку из справочника или создайте собственную статью.</p><button class="primary" data-add-custom>＋ Добавить свою статью</button></div>`}</section><aside class="budget-total"><span>Позиций</span><b>${budgetItems.length}</b><div><span>Без налога</span><strong>${rub(net)}</strong></div><div><span>С налогом</span><strong>${rub(gross)}</strong></div><p>Расчёт не является офертой. Учитывайте условия и период первоисточника каждой ставки.</p></aside></div>`;
+  return pageHead("Предварительный расчёт", "Рабочая смета", "Расчёт строк по ставке, количеству, периоду, датам, доплатам и налогам. Данные сохраняются только в вашем браузере.", '<div class="budget-actions"><button class="quiet" data-add-custom>＋ Своя статья</button><button class="quiet" data-export-excel>Excel</button><button class="quiet" data-export-pdf>PDF</button><a class="primary button-link" href="#home">＋ Добавить ставку</a></div>') + `<datalist id="taxRates"><option value="6"><option value="7"><option value="8"><option value="9"><option value="10"></datalist><div class="budget-workspace"><section class="budget-sheet">${budgetItems.length ? `<div class="budget-table-head"><span>Позиция и расчёт</span><span>Сумма</span></div>${budgetItems.map((x, index) => `<article class="budget-item"><div class="budget-item-main"><div class="budget-position">${x.custom ? `<label>Название статьи<input value="${esc(x.prof)}" data-budget-field="prof" data-budget-index="${index}"></label>` : `<b>${esc(x.prof)}</b>`}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div><label>Ставка<input type="number" min="0" step="0.01" value="${dec2(x.rate)}" data-budget-field="rate" data-budget-index="${index}"></label><label>Кол-во<input type="number" min="0" step="1" value="${dec2(x.qty)}" data-budget-field="qty" data-budget-index="${index}"></label><label>Периоды<input type="number" min="0" step="0.01" value="${dec2(x.periods)}" data-budget-field="periods" data-budget-index="${index}"></label><strong>${rub(itemGross(x))}</strong><button data-budget-delete="${index}" aria-label="Удалить позицию">×</button></div><div class="budget-item-meta"><label>Начало<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label><label>Окончание<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label><label>Доплата<input type="number" step="0.01" value="${dec2(x.extra)}" data-budget-field="extra" data-budget-index="${index}"></label><label>Налог, %<input type="number" list="taxRates" min="0" step="0.5" value="${dec2(x.tax)}" data-budget-field="tax" data-budget-index="${index}"></label><label class="budget-comment">Заметка<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия расчёта"></label></div><div class="budget-formula">${rub(x.rate)} × ${dec2(x.qty)} × ${dec2(x.periods)}${+x.extra ? ` + ${rub(x.extra)}` : ""} = ${rub(itemNet(x))}${+x.tax ? `; налог ${dec2(x.tax)}% → ${rub(itemGross(x))}` : "; без налога"}</div><div class="budget-item-summary"><span>Без налога <b>${rub(itemNet(x))}</b></span><span>С налогом <b>${rub(itemGross(x))}</b></span></div></article>`).join("")}` : `<div class="budget-empty-state"><i>□</i><h2>Смета пока пуста</h2><p>Добавьте ставку из справочника или создайте собственную статью.</p><button class="primary" data-add-custom>＋ Добавить свою статью</button></div>`}</section><aside class="budget-total"><span>Позиций</span><b>${budgetItems.length}</b><div><span>Без налога</span><strong>${rub(net)}</strong></div><div><span>С налогом</span><strong>${rub(gross)}</strong></div><p>Расчёт не является офертой. Учитывайте условия и период первоисточника каждой ставки.</p></aside></div>`;
 }
 function budgetItemMarkup(x, index) {
   const title = x.custom ? `<label>Название статьи<input value="${esc(x.prof)}" data-budget-field="prof" data-budget-index="${index}"></label>` : `<b>${esc(x.prof)}</b>`;
   const taxPresets = [6, 7, 8, 9, 10], presetTax = taxPresets.includes(+x.tax);
+  const attachmentFields = usesAttachmentDates(x.unit) ? `<label>Дата прикрепления<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label><label>Дата открепления<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label>` : "";
   return `<article class="budget-item">
     <div class="budget-item-main">
       <div class="budget-position">${title}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div>
@@ -168,8 +199,7 @@ function budgetItemMarkup(x, index) {
       <strong>${rub(itemGross(x))}</strong><button data-budget-delete="${index}" aria-label="Удалить позицию">×</button>
     </div>
     <div class="budget-item-meta">
-      <label>Дата прикрепления<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label>
-      <label>Дата открепления<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label>
+      ${attachmentFields}
       <label>Доплата<input type="number" step="0.01" value="${dec2(x.extra)}" data-budget-field="extra" data-budget-index="${index}"></label>
       <label>Налог, %<div class="tax-control"><select data-tax-preset="${index}"><option value="" ${+x.tax === 0 ? "selected" : ""}>Без налога</option>${taxPresets.map((value) => `<option value="${value}" ${+x.tax === value ? "selected" : ""}>${value}%</option>`).join("")}<option value="manual" ${+x.tax !== 0 && !presetTax ? "selected" : ""}>Ввести вручную…</option></select><input class="tax-manual" type="number" min="0" max="99" step="0.01" value="${dec2(x.tax)}" data-budget-field="tax" data-budget-index="${index}" ${+x.tax === 0 || presetTax ? "hidden" : ""} placeholder="Процент"></div></label>
       <label class="budget-comment">Заметка<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия расчёта"></label>
@@ -182,17 +212,50 @@ function projectsV2() {
   const net = budgetItems.reduce((sum, x) => sum + itemNet(x), 0), gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
   const actions = '<div class="budget-actions"><button class="quiet budget-action-custom" data-add-custom><span>+</span> Своя статья</button><button class="quiet budget-action-export" data-export-excel>Excel</button><button class="quiet budget-action-export" data-export-pdf>PDF</button><a class="primary button-link budget-action-primary" href="#home"><span>+</span> Добавить ставку</a></div>';
   const content = budgetItems.length ? `<div class="budget-table-head"><span>Позиция и расчёт</span><span>Сумма</span></div>${budgetItems.map(budgetItemMarkup).join("")}` : '<div class="budget-empty-state"><i>□</i><h2>Смета пока пуста</h2><p>Добавьте ставку из справочника или создайте собственную статью.</p><button class="primary" data-add-custom>＋ Добавить свою статью</button></div>';
-  return pageHead("Рабочий инструмент", "Рабочая смета", "Прикрепление и открепление рассчитываются по календарным долям месяцев — по методике исходной производственной таблицы.", actions) + `<div class="budget-workspace"><section class="budget-sheet">${content}</section><aside class="budget-total"><span>Позиций</span><b>${budgetItems.length}</b><div><span>Без налога</span><strong>${rub(net)}</strong></div><div><span>С налогом</span><strong>${rub(gross)}</strong></div><p>Налог рассчитывается делением на (1 − ставка налога), как в исходной таблице.</p></aside></div>`;
+  return pageHead("Предварительный расчёт", "Рабочая смета", "Для помесячных ставок прикрепление рассчитывается по календарным долям месяцев. Смены, дни, часы и аккорды считаются по количеству периодов.", actions) + `<div class="budget-workspace"><section class="budget-sheet">${content}</section><aside class="budget-total"><span>Позиций</span><b>${budgetItems.length}</b><div><span>Без налога</span><strong>${rub(net)}</strong></div><div><span>С налогом</span><strong>${rub(gross)}</strong></div><p>Налог рассчитывается делением на (1 − ставка налога), как в исходной таблице.</p></aside></div>`;
 }
 function rates() {
   return pageHead("Справочная база", "Ставки", "449 реальных записей KinoRates. Учитывайте условия и период источника до переноса значения в смету.", '<button class="quiet">Экспорт вида</button>') + `<div class="data-toolbar"><div class="ai-search"><span>⌕</span><input id="rateSearch" placeholder="Спросить или найти профессию, цех, условие…"></div><select id="rateStatus"><option value="">Все статусы</option><option value="new">Подтверждено 2026</option><option value="old">Архив и ориентиры</option></select></div><div class="suggested"><span>Попробуйте:</span><button>оператор-постановщик</button><button>гаффер</button><button>второй режиссёр</button><button>монтаж</button></div><div id="rateTable"></div>`;
 }
+let pageScrollFrame = 0;
+function animatePageScrollTo(targetY, duration = 680) {
+  const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const safeTargetY = Math.max(0, Math.min(targetY, maxY));
+  const startY = window.scrollY, distance = safeTargetY - startY;
+  cancelAnimationFrame(pageScrollFrame);
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || Math.abs(distance) < 2) { window.scrollTo(0, safeTargetY); return; }
+  const startedAt = performance.now();
+  const step = (now) => {
+    const progress = Math.min(1, (now - startedAt) / duration);
+    const eased = progress < .5 ? 4 * progress ** 3 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    window.scrollTo(0, startY + distance * eased);
+    if (progress < 1) pageScrollFrame = requestAnimationFrame(step);
+  };
+  pageScrollFrame = requestAnimationFrame(step);
+}
+function scrollOpenedRateIntoView(rateId, restoreScrollY = window.scrollY) {
+  if (!window.matchMedia("(max-width: 780px)").matches) return;
+  requestAnimationFrame(() => {
+    window.scrollTo(0, restoreScrollY);
+    requestAnimationFrame(() => {
+    window.scrollTo(0, restoreScrollY);
+    const row = [...document.querySelectorAll("[data-rate-id]")].find((item) => item.dataset.rateId === String(rateId));
+    if (!row) return;
+    const detail = row.nextElementSibling?.classList.contains("rate-detail-row") ? row.nextElementSibling : null;
+    const detailStart = detail?.querySelector(".inline-detail-main") || detail || row;
+    const stickyHeader = document.querySelector(".topbar")?.getBoundingClientRect().height || 54;
+    const targetY = window.scrollY + detailStart.getBoundingClientRect().top - stickyHeader - 10;
+    const distance = Math.abs(targetY - window.scrollY);
+    animatePageScrollTo(targetY, Math.min(1200, Math.max(820, 620 + distance * .28)));
+    });
+  });
+}
 function drawRates() {
   const query = normalizeSearch($("#rateSearch")?.value), status = $("#rateStatus")?.value || "";
   const data = R.filter((r) => (!selectedDept || r.dept === selectedDept) && (!query || normalizeSearch(`${r.prof} ${r.dept} ${r.cond}`).includes(query)) && (!status || (status === "new" ? ["fresh2026", "official2026"].includes(r.status) : !["fresh2026", "official2026"].includes(r.status))));
-  const detail = (r) => `<tr class="rate-detail-row"><td colspan="7"><div class="inline-detail"><div class="inline-detail-main"><span>${esc(r.dept)}</span><h3>${esc(r.prof)}</h3><p>${esc(r.cond || "Условия не указаны")}</p></div><div class="inline-detail-rate"><span>Рекомендованная ставка</span><b>${r.amount ? rub(r.amount) : "Не опубликована"}</b><small>${esc(r.unit)}</small><dl><div><dt>Статус</dt><dd>${esc(statusLabel(r.status))}</dd></div><div><dt>Регион</dt><dd>${esc(r.region || "Не указан")}</dd></div><div><dt>Период</dt><dd>${esc(r.eff || "Не указан")}</dd></div></dl></div><div class="inline-detail-notes">${r.ot ? `<section><b>Переработки</b><p>${esc(r.ot)}</p></section>` : ""}${r.extra ? `<section><b>Дополнительные условия</b><p>${esc(r.extra)}</p></section>` : ""}<div class="inline-detail-actions"><button class="primary" data-add-rate="${r.id}">${budgetItems.some((x) => x.id === r.id) ? "✓ Уже в смете" : "＋ Добавить в смету"}</button>${r.doc ? `<a href="${esc(r.doc)}" target="_blank" rel="noopener">Открыть первоисточник ↗</a>` : ""}</div></div></div></td></tr>`;
-  $("#rateTable").innerHTML = `<div class="table-meta"><span>${data.length} позиций${selectedDept ? ` · ${esc(selectedDept)}` : ""}</span><span>Нажмите на строку, чтобы раскрыть условия</span></div><div class="table-wrap"><table><thead><tr><th>Цех</th><th>Профессия</th><th>Условие</th><th>Ед.</th><th>Мин. ставка</th><th>Статус</th><th></th></tr></thead><tbody>${data.map((r) => `<tr data-rate-id="${r.id}" class="${selectedRate?.id === r.id ? "selected" : ""}"><td>${esc(r.dept)}</td><td><b>${esc(r.prof)}</b></td><td>${esc(r.cond)}</td><td>${esc(r.unit)}</td><td><b>${r.amount ? rub(r.amount) : "—"}</b></td><td><span class="status ${["fresh2026", "official2026"].includes(r.status) ? "good" : ""}">${esc(statusLabel(r.status))}</span></td><td><button class="row-add ${budgetItems.some((x) => x.id === r.id) ? "added" : ""}" data-add-rate="${r.id}" aria-label="Добавить в смету">${budgetItems.some((x) => x.id === r.id) ? "✓" : "＋"}</button></td></tr>${selectedRate?.id === r.id ? detail(r) : ""}`).join("")}</tbody></table></div>`;
-  document.querySelectorAll("[data-rate-id]").forEach((row) => (row.onclick = () => { const rate = R.find((r) => String(r.id) === row.dataset.rateId); selectedRate = selectedRate?.id === rate?.id ? null : rate; if (selectedRate) rememberRate(selectedRate); drawRates(); }));
+  const detail = (r) => `<tr class="rate-detail-row"><td colspan="7"><div class="inline-detail"><div class="inline-detail-main"><span>${esc(r.dept)}</span><h3>${esc(r.prof)}</h3><p>${esc(r.cond || "Условия не указаны")}</p></div><div class="inline-detail-rate"><span>Рекомендованная ставка</span><b>${r.amount ? rub(r.amount) : "Не опубликована"}</b><small>${esc(r.unit)}</small><dl><div><dt>Статус</dt><dd>${esc(statusLabel(r.status, r))}</dd></div><div><dt>Регион</dt><dd>${esc(r.region || "Не указан")}</dd></div><div><dt>Период</dt><dd>${esc(r.eff || "Не указан")}</dd></div></dl></div><div class="inline-detail-notes">${r.ot ? `<section><b>Переработки</b><p>${esc(r.ot)}</p></section>` : ""}${r.extra ? `<section><b>Дополнительные условия</b><p>${esc(r.extra)}</p></section>` : ""}<div class="inline-detail-actions"><button class="primary" data-add-rate="${r.id}">${budgetItems.some((x) => x.id === r.id) ? "✓ Уже в смете" : "＋ Добавить в смету"}</button>${r.doc ? `<a href="${esc(r.doc)}" target="_blank" rel="noopener">Открыть первоисточник ↗</a>` : ""}</div></div></div></td></tr>`;
+  $("#rateTable").innerHTML = `<div class="table-meta"><span>${data.length} позиций${selectedDept ? ` · ${esc(selectedDept)}` : ""}</span><span>Нажмите на строку, чтобы раскрыть условия</span></div><div class="table-wrap"><table><thead><tr><th>Цех</th><th>Профессия</th><th>Условие</th><th>Ед.</th><th>Мин. ставка</th><th>Статус</th><th></th></tr></thead><tbody>${data.map((r) => `<tr data-rate-id="${r.id}" class="${selectedRate?.id === r.id ? "selected" : ""}"><td>${esc(r.dept)}</td><td><b>${esc(r.prof)}</b></td><td>${esc(r.cond)}</td><td>${esc(r.unit)}</td><td><b>${r.amount ? rub(r.amount) : "—"}</b></td><td><span class="status ${statusTone(r.status)}">${esc(statusLabel(r.status, r))}</span></td><td><button class="row-add ${budgetItems.some((x) => x.id === r.id) ? "added" : ""}" data-add-rate="${r.id}" aria-label="Добавить в смету">${budgetItems.some((x) => x.id === r.id) ? "✓" : "＋"}</button></td></tr>${selectedRate?.id === r.id ? detail(r) : ""}`).join("")}</tbody></table></div>`;
+  document.querySelectorAll("[data-rate-id]").forEach((row) => (row.onclick = () => { const rate = R.find((r) => String(r.id) === row.dataset.rateId); const restoreScrollY = window.scrollY; selectedRate = selectedRate?.id === rate?.id ? null : rate; const openedRateId = selectedRate?.id; if (selectedRate) rememberRate(selectedRate); drawRates(); if (openedRateId) scrollOpenedRateIntoView(openedRateId, restoreScrollY); }));
   document.querySelectorAll("[data-add-rate]").forEach((button) => (button.onclick = (event) => { event.stopPropagation(); addRate(button.dataset.addRate); }));
 }
 function addRate(id) {
@@ -252,7 +315,7 @@ function bind(route) {
   bindQueryLinks();
   document.querySelectorAll("[data-focus-search]").forEach((b) => (b.onclick = () => { if (route === "home") return $("#rateSearch")?.focus(); location.hash = "home"; setTimeout(() => $("#rateSearch")?.focus(), 0); }));
   if (["home", "rates"].includes(route)) { drawRates(); $("#rateSearch").oninput = drawRates; $("#rateStatus").onchange = drawRates; document.querySelectorAll(".suggested button").forEach((b) => (b.onclick = () => { selectedDept = ""; $("#rateSearch").value = b.textContent; drawRates(); })); document.querySelectorAll("[data-dept]").forEach((b) => (b.onclick = () => { selectedDept = b.dataset.dept; render(); })); }
-  if (route === "projects") { document.querySelectorAll("[data-budget-field]").forEach((input) => (input.onchange = () => { const item = budgetItems[+input.dataset.budgetIndex], field = input.dataset.budgetField, numeric = ["rate", "qty", "periods", "extra", "tax"].includes(field); item[field] = numeric ? dec2(input.value) : input.value; if (["start", "end"].includes(field) && item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods); saveBudget(); render(); })); document.querySelectorAll("[data-tax-preset]").forEach((select) => (select.onchange = () => { const item = budgetItems[+select.dataset.taxPreset]; if (select.value === "manual") { const input = select.parentElement.querySelector(".tax-manual"); input.hidden = false; input.focus(); return; } item.tax = +select.value || 0; saveBudget(); render(); })); document.querySelectorAll(".date-input").forEach((input) => (input.onclick = () => { if (typeof input.showPicker === "function") input.showPicker(); })); document.querySelectorAll("[data-budget-delete]").forEach((button) => (button.onclick = () => { budgetItems.splice(+button.dataset.budgetDelete, 1); saveBudget(); render(); })); document.querySelectorAll("[data-add-custom]").forEach((button) => (button.onclick = addCustomBudgetItem)); const excel = $("[data-export-excel]"), pdf = $("[data-export-pdf]"); if (excel) excel.onclick = exportBudgetExcel; if (pdf) pdf.onclick = exportBudgetPdf; }
+  if (route === "projects") { document.querySelectorAll("[data-budget-field]").forEach((input) => (input.onchange = () => { const item = budgetItems[+input.dataset.budgetIndex], field = input.dataset.budgetField, numeric = ["rate", "qty", "periods", "extra", "tax"].includes(field); item[field] = numeric ? dec2(input.value) : input.value; if (["start", "end"].includes(field) && usesAttachmentDates(item.unit) && item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods); saveBudget(); render(); })); document.querySelectorAll("[data-tax-preset]").forEach((select) => (select.onchange = () => { const item = budgetItems[+select.dataset.taxPreset]; if (select.value === "manual") { const input = select.parentElement.querySelector(".tax-manual"); input.hidden = false; input.focus(); return; } item.tax = +select.value || 0; saveBudget(); render(); })); document.querySelectorAll(".date-input").forEach((input) => (input.onclick = () => { if (typeof input.showPicker === "function") input.showPicker(); })); document.querySelectorAll("[data-budget-delete]").forEach((button) => (button.onclick = () => { budgetItems.splice(+button.dataset.budgetDelete, 1); saveBudget(); render(); })); document.querySelectorAll("[data-add-custom]").forEach((button) => (button.onclick = addCustomBudgetItem)); const excel = $("[data-export-excel]"), pdf = $("[data-export-pdf]"); if (excel) excel.onclick = exportBudgetExcel; if (pdf) pdf.onclick = exportBudgetPdf; }
 }
 function openModal(type, feedbackTopic) { const root = $("#modalRoot"); root.innerHTML = modal(type, feedbackTopic); const dialog = root.querySelector("dialog"); document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => { if (dialog?.open) dialog.close(); root.innerHTML = ""; })); if (dialog) { if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", ""); } if (type === "feedback") bindFeedbackForm(); }
 function openPrivacy() { const dialog = $("#privacyDialog"); if (!dialog) return; if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", ""); }
@@ -271,7 +334,7 @@ function bindFeedbackForm() {
 }
 const METRIKA_ID = 111489870, CONSENT_KEY = "kinorates_analytics_consent";
 let metrikaStarted = false;
-function consentValue() { try { return localStorage.getItem(CONSENT_KEY); } catch { return null; } }
+function consentValue() { if (location.protocol === "file:") return null; try { return localStorage.getItem(CONSENT_KEY); } catch { return null; } }
 function startMetrika() {
   if (metrikaStarted || location.protocol === "file:") return; metrikaStarted = true;
   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a)})(window,document,"script",`https://mc.yandex.ru/metrika/tag.js?id=${METRIKA_ID}`,"ym");
@@ -284,6 +347,6 @@ function initPrivacyControls() {
   if (accept) accept.onclick = () => saveConsent("granted"); if (reject) reject.onclick = () => saveConsent("denied"); if (close) close.onclick = () => privacy?.close();
   if (privacy) privacy.onclick = (event) => { if (event.target === privacy) privacy.close(); };
 }
-window.addEventListener("hashchange", () => { render(); if (metrikaStarted && window.ym) window.ym(METRIKA_ID, "hit", `${location.pathname}${location.hash}`, { title: document.title }); });
+window.addEventListener("hashchange", () => { render(); animatePageScrollTo(0); if (metrikaStarted && window.ym) window.ym(METRIKA_ID, "hit", `${location.pathname}${location.hash}`, { title: document.title }); });
 initPrivacyControls();
 render();
