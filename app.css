@@ -113,3 +113,4 @@ a,button,.table-wrap tr,.source-strip>a,.market-grid article,.resource-list a{tr
 @media(max-width:780px){.registry-stats{grid-template-columns:repeat(3,1fr)!important}.registry-stats>div{padding:12px 9px}.registry-stats>div b{font-size:18px}}
 @media(max-width:520px){.registry-stats{grid-template-columns:1fr!important}.registry-stats>div{grid-template-columns:auto 1fr;gap:8px;align-items:center;border-right:0;border-bottom:1px solid var(--line)}.registry-stats>div:last-child{border-bottom:0}.registry-stats>div span{margin:0}.feedback{padding:22px}}
 @media(max-width:620px){.cookie-banner{left:10px;right:10px;bottom:10px;grid-template-columns:1fr;gap:12px;padding:14px}.cookie-actions{display:grid;grid-template-columns:1fr 1fr}.cookie-actions button{width:100%;min-width:0;min-height:42px}}
+@media(min-width:521px){.registry-stats>div{grid-template-rows:auto 14px;justify-items:start}.registry-stats>div span{white-space:nowrap}}
