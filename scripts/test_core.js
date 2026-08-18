@@ -28,7 +28,7 @@ assert(app.includes('workbook.xlsx.writeBuffer()'),'True XLSX export missing');
 assert(app.includes('window.pdfMake.createPdf(doc).download'),'Direct PDF download missing');
 assert(app.includes('location.protocol === "file:"'),'Local preview may send production analytics');
 assert(!app.includes('class="avatar">АН'),'Authorization avatar returned');
-assert(app.includes('https://t.me/filmres/7002'),'Direct StarDust/Filmres source link missing');
+assert((app+market).includes('https://t.me/filmres/7002'),'Direct StarDust/Filmres source link missing');
 assert(!app.includes('https://t.me/filmres/7424'),'Incorrect StarDust/Filmres source link returned');
 for(const post of ['7002','7222','7390'])assert((app+market).includes(`https://t.me/filmres/${post}`),`Direct Filmres post ${post} missing`);
 assert(!market.includes('t.me/s/filmres?before='),'Paginated Telegram feed link returned');
@@ -44,4 +44,9 @@ assert(!rateModal.includes('FormSubmit')&&!rateModal.includes('type="checkbox"')
 assert(rateModal.includes('required></textarea></label>'),'Feedback textarea is not closed correctly');
 assert(!rateModal.includes('<dialog open'),'Feedback dialog bypasses native modal behavior');
 assert(app.includes('dialog.showModal()'),'Feedback dialog does not use native modal behavior');
+assert(!app.includes('Данные актуальны'),'Unclear global data-status badge returned');
+assert(!app.includes('market-source-strip'),'Removed market link strip returned');
+assert(app.includes('<span>Цеха</span>'),'About metrics use the wrong workshop label');
+assert(market.includes("id:'mpk-regions-2025'")&&market.includes('ELEMENT_ID=57863'),'Regional market card or its source is missing');
+for(const section of ['Операторы','Звукорежиссеры','Режиссеры%20монтажа','Художники-постановщики','Сценаристы'])assert(market.includes(`#:~:text=${section}`),`Kinopoisk deep link is missing: ${section}`);
 console.log('Core logic/security/form tests OK');
