@@ -150,7 +150,7 @@ function home() {
 }
 function homeV2() {
   const current = R.filter((x) => ["fresh2026", "official2026"].includes(x.status)).length, historical = R.length - current;
-  return home().replace(`<div class="registry-stats"><b>${R.length}</b><span>позиций</span><b>${current}</b><span>сверено в 2026</span></div>`, `<div class="registry-stats"><div><b>${R.length}</b><span>всего позиций</span></div><div><b>${current}</b><span>сверено в 2026</span></div><div><b>${historical}</b><span>исторические и рыночные</span></div></div>`);
+  return home().replace(`<div class="registry-stats"><b>${R.length}</b><span>позиций</span><b>${current}</b><span>сверено в 2026</span></div>`, `<div class="registry-stats"><div><b>${R.length}</b><span>всего позиций</span></div><div><b>${current}</b><span>сверено в 2026</span></div><div><b>${historical}</b><span>архив и рынок</span></div></div>`);
 }
 function projects() {
   const net = budgetItems.reduce((sum, x) => sum + itemNet(x), 0), gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
