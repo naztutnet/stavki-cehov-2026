@@ -1,495 +1,288 @@
-const lazyScriptLoads=new Map();
-function loadScriptOnce(src,integrity){
-  if(lazyScriptLoads.has(src))return lazyScriptLoads.get(src);
-  const promise=new Promise((resolve,reject)=>{
-    const script=document.createElement('script');
-    script.src=src;script.crossOrigin='anonymous';script.integrity=integrity;
-    script.onload=()=>resolve();
-    script.onerror=()=>{lazyScriptLoads.delete(src);reject(new Error(`Не удалось загрузить ${src}`))};
+const R = window.KINORATES_DATA || [];
+const S = window.KINORATES_SOURCES || [];
+const U = window.KINORATES_UPDATES || [];
+const M = window.KINORATES_MARKET_DATA || [];
+const $ = (selector) => document.querySelector(selector);
+const rub = (n) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(+n || 0)} ₽`;
+const dec2 = (n) => Math.round((+n || 0) * 100) / 100;
+const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+const normalizeSearch = (value) => String(value ?? "").toLocaleLowerCase("ru-RU").replaceAll("ё", "е").trim();
+const statusLabel = (status) => ({ fresh2026: "Письмо 2026", official2026: "Рекомендации 2026", verified2025: "Письмо 2025", verified2024: "Письмо 2024", verified2023: "Письмо 2023", market2025: "Рыночный ориентир", archive: "Архив", expired: "Архив", no_public_rate: "Без публичного тарифа", check: "Справочная запись", newdoc: "Первичный документ" })[status] || "Справочная запись";
+
+const lazyScriptLoads = new Map();
+function loadScriptOnce(src, integrity) {
+  if (lazyScriptLoads.has(src)) return lazyScriptLoads.get(src);
+  const promise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src; script.crossOrigin = "anonymous"; script.integrity = integrity;
+    script.onload = resolve;
+    script.onerror = () => { lazyScriptLoads.delete(src); reject(new Error(`Не удалось загрузить ${src}`)); };
     document.head.appendChild(script);
   });
-  lazyScriptLoads.set(src,promise);return promise;
+  lazyScriptLoads.set(src, promise); return promise;
 }
-async function ensureExcelJS(){
-  if(window.ExcelJS)return;
-  await loadScriptOnce('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js','sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz');
-  if(!window.ExcelJS)throw new Error('ExcelJS unavailable');
+async function ensureExcelJS() {
+  if (window.ExcelJS) return;
+  await loadScriptOnce("https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js", "sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz");
+  if (!window.ExcelJS) throw new Error("ExcelJS unavailable");
 }
-async function ensurePdfMake(){
-  if(window.pdfMake&&window.pdfMake.vfs)return;
-  await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js','sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs');
-  await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js','sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15');
-  if(!window.pdfMake)throw new Error('pdfMake unavailable');
+async function ensurePdfMake() {
+  if (window.pdfMake?.vfs) return;
+  await loadScriptOnce("https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js", "sha384-G23ofMOEI98f9UnroUBjDi6Ll55Y5E6bOX4VAMJo0nIbuQRIxzn0g4athUOb58zs");
+  await loadScriptOnce("https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js", "sha384-pv+tpy6KGI5sKXJDf7oGPdvyVNKYXfAmDYpZ3r3PNP0d13PJQ6YMiiAEndd5sU15");
+  if (!window.pdfMake?.vfs) throw new Error("pdfMake unavailable");
 }
-// Аналитика загружается только после явного согласия посетителя.
-const METRIKA_ID=111489870,CONSENT_KEY='kinorates_analytics_consent';
-let metrikaStarted=false;
-function startMetrika(){
-  if(metrikaStarted)return;metrikaStarted=true;
-  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a)})(window,document,'script','https://mc.yandex.ru/metrika/tag.js?id='+METRIKA_ID,'ym');
-  ym(METRIKA_ID,'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLayer',accurateTrackBounce:true,trackLinks:true});
-}
-const cookieBanner=document.getElementById('cookieBanner'),privacyDialog=document.getElementById('privacyDialog');
-function consentValue(){try{return localStorage.getItem(CONSENT_KEY)}catch(e){return null}}
-function saveConsent(value){const wasStarted=metrikaStarted;try{localStorage.setItem(CONSENT_KEY,value)}catch(e){}cookieBanner.hidden=true;if(value==='granted')startMetrika();else if(wasStarted)location.reload()}
-if(consentValue()==='granted')startMetrika();else if(consentValue()!=='denied')cookieBanner.hidden=false;
-document.getElementById('cookieAccept').addEventListener('click',()=>saveConsent('granted'));
-document.getElementById('cookieReject').addEventListener('click',()=>saveConsent('denied'));
-document.querySelectorAll('[data-open-privacy]').forEach(button=>button.addEventListener('click',()=>{if(typeof privacyDialog.showModal==='function')privacyDialog.showModal();else privacyDialog.setAttribute('open','')}));
-document.getElementById('privacyClose').addEventListener('click',()=>privacyDialog.close());
-privacyDialog.addEventListener('click',e=>{if(e.target===privacyDialog)privacyDialog.close()});
-document.querySelector('footer [data-open-privacy]').addEventListener('click',()=>{cookieBanner.hidden=false});
-const DATA = window.KINORATES_DATA;if(!Array.isArray(DATA))throw new Error('KinoRates data unavailable');
-const SRC=Array.isArray(window.KINORATES_SOURCES)?window.KINORATES_SOURCES.map(s=>({...s})):[];
-const MARKET=Array.isArray(window.KINORATES_MARKET_DATA)?window.KINORATES_MARKET_DATA.map(item=>({...item})):[];
-const SCREENWRITER_RATES='https://unikino.ru/%D0%B3%D0%B8%D0%BB%D1%8C%D0%B4%D0%B8%D1%8F-%D0%BA%D0%B8%D0%BD%D0%BE%D0%B4%D1%80%D0%B0%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B3%D0%BE%D0%B2-%D1%81%D0%BE%D1%8E%D0%B7%D0%B0-%D0%BA%D0%B8%D0%BD%D0%B5%D0%BC-10/#more-97531';
-const isScreenwriter=r=>r.dept==='Сценарно-редакторский департамент';
-const RATE_BY_ID=new Map(DATA.map(r=>[r.id,r]));
-const DEPT_COUNTS=new Map(),STATUS_COUNTS=new Map(),MAIN_SEARCH_BY_ID=new Map(),QUICK_SEARCH_BY_ID=new Map();
-DATA.forEach(r=>{
-  DEPT_COUNTS.set(r.dept,(DEPT_COUNTS.get(r.dept)||0)+1);
-  STATUS_COUNTS.set(r.status,(STATUS_COUNTS.get(r.status)||0)+1);
-  MAIN_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.unit+' '+r.amount_text+' '+r.ot+' '+r.extra).toLowerCase());
-  QUICK_SEARCH_BY_ID.set(r.id,(r.dept+' '+r.prof+' '+r.cond+' '+r.content+' '+r.unit).toLowerCase());
-});
-const LBL = {fresh2026:"письмо 2026 ✓", official2026:"рекомендации 2026 ✓", market2025:"рынок 2025", no_public_rate:"нет публичной ставки", check:"источник не найден", newdoc:"цифра не сверена", verified2025:"письмо 2025 ✓", verified2024:"письмо 2024 ✓", verified2023:"письмо 2023 ✓", archive:"данные 2023", expired:"письмо 2024"};
-const TIP = {
-  fresh2026:"Конкретная ставка подтверждена опубликованным цеховым письмом 2026 года.",
-  official2026:"Конкретная ставка подтверждена официальной публикацией профессионального объединения 2026 года.",
-  market2025:"Рыночный ориентир 2025 года. Это не обязательный тариф и не цеховое письмо.",
-  no_public_rate:"Профессия подтверждена, но опубликованной публичной тарифной ставки для этой конкретной работы нет. Сумма определяется по договорённости; рыночные ориентиры показываются отдельно.",
-  check:"Первичный источник, однозначно подтверждающий эту конкретную ставку, пока не найден.",
-  newdoc:"Первичный документ найден, но конкретная цифра в нём ещё не подтверждена.",
-  verified2025:"Конкретная ставка подтверждена опубликованным документом 2025 года. Более свежий соответствующий документ пока не найден.",
-  verified2024:"Конкретная ставка подтверждена опубликованным документом 2024 года. Более свежий соответствующий документ пока не найден.",
-  verified2023:"Конкретная ставка подтверждена опубликованным документом 2023 года. Более свежий соответствующий документ пока не найден.",
-  archive:"Архивный рыночный ориентир. Не используйте его как подтверждённую текущую ставку.",
-  expired:"Документ относится к прошлому периоду. Актуальность этой ставки на 2026 год не подтверждена."
-};
-const SOURCE_KIND={fresh2026:'Цеховое письмо',official2026:'Официальные рекомендации',market2025:'Рыночное исследование / ориентир',no_public_rate:'Профессия подтверждена · публичного тарифа нет',check:'Источник требует проверки',newdoc:'Первичный документ',verified2025:'Профессиональный первоисточник',verified2024:'Профессиональный первоисточник',verified2023:'Профессиональный первоисточник',archive:'Архивный рыночный ориентир',expired:'Письмо 2024'};
-const CONFIRMATION={fresh2026:'Цифра подтверждена ✓',official2026:'Цифра подтверждена ✓',market2025:'Рыночный ориентир — не официальный минимум',no_public_rate:'Публичная ставка не опубликована',check:'Первичный источник цифры не найден',newdoc:'Документ найден, конкретная цифра не сверена',verified2025:'Цифра подтверждена ✓',verified2024:'Цифра подтверждена ✓',verified2023:'Цифра подтверждена ✓',archive:'Текущая актуальность не подтверждена',expired:'Текущая актуальность не подтверждена'};
-function sourceYear(r){const text=[r.eff,r.src].filter(Boolean).join(' '),m=text.match(/20\d{2}/);return r.status==='market2025'?'2025':r.status==='archive'?'2023':r.status==='no_public_rate'?'проверено 13.08.2026':(m?m[0]:'не указан')}
-function sourceMeta(r){return {kind:SOURCE_KIND[r.status]||'Источник',year:sourceYear(r),confirmation:CONFIRMATION[r.status]||TIP[r.status],periodLine:r.status==='no_public_rate'?'Состояние открытых источников проверено 13.08.2026':(r.eff?`Дата / период источника: ${r.eff}`:'Дата / период источника не указаны')}}
-function sourceRangeText(r){const t=String(r.amount_text||'').trim();return /\d[\d\s]*\s*[–—-]\s*\d/.test(t)?t:''}
-function rateRangeHint(r){const t=sourceRangeText(r);return t?`<small class="rate-range-note">Рекомендация источника: ${esc(t)}${/₽/.test(t)?'':' ₽'}</small>`:''}
-function marketItemMatches(item,r){
-  const m=item&&item.match||{};
-  if(m.dept&&r.dept!==m.dept)return false;
-  if(Array.isArray(m.deptIncludes)&&!m.deptIncludes.some(x=>r.dept.includes(x)))return false;
-  if(Array.isArray(m.profIncludes)&&!m.profIncludes.some(x=>r.prof.includes(x)))return false;
-  return Boolean(m.dept||m.deptIncludes||m.profIncludes);
-}
-function marketEvidenceFor(r){return MARKET.filter(item=>marketItemMatches(item,r)).sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,3)}
-function marketEvidenceHtml(r){
-  const items=marketEvidenceFor(r);if(!items.length)return '';
-  return `<div class="detail-section market-evidence"><b>Рыночные данные</b><p class="market-disclaimer">Не заменяют официальную или рекомендованную ставку выше. Год и период исследования указаны отдельно.</p><div class="market-evidence-list">${items.map(item=>`<article class="market-evidence-item"><div class="market-evidence-meta">${esc(item.kind)} · ${esc(item.year)}</div><strong>${esc(item.title)}</strong><p>${esc(item.text)}</p><small>${esc(item.period)}</small><a href="${esc(safeExternalUrl(item.url))}" target="_blank" rel="noopener">${esc(item.source)} →</a></article>`).join('')}</div></div>`;
-}
-const SAFE_UNITS=['месяц','смена','полсмены','час','проект','аккорд','серия','сезон','гонорар','договор','минута','человек','единоразово'];
-const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
-const cleanText=(value,max=160)=>String(value??'').replace(/[\u0000-\u001F\u007F]/g,' ').trim().slice(0,max);
-const clampNumber=(value,min,max,fallback)=>{const number=Number(value);return Number.isFinite(number)?Math.min(max,Math.max(min,number)):fallback};
-const safeDate=value=>{const text=String(value||''),match=text.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!match)return'';const [,y,m,d]=match.map(Number),date=new Date(Date.UTC(y,m-1,d));return date.getUTCFullYear()===y&&date.getUTCMonth()===m-1&&date.getUTCDate()===d?text:''};
-const safeExternalUrl=value=>{if(typeof value!=='string'||!value.trim())return'';try{const url=new URL(value);return url.protocol==='https:'?url.href:''}catch(_e){return''}};
-function sanitizeCustomRecord(source){
-  if(!source||typeof source!=='object')return null;
-  const id=Number(source.id),unit=SAFE_UNITS.includes(source.unit)?source.unit:'проект',prof=cleanText(source.prof,120),dept=cleanText(source.dept,80);
-  if(!Number.isSafeInteger(id)||id>=0||!prof||!dept)return null;
-  const amount=clampNumber(source.amount,0,1e9,0);
-  return {id,custom:true,dept,prof,cond:cleanText(source.cond,160)||'Пользовательская статья',content:'Своя статья',unit,amount,amount_text:String(amount),ot:'',extra:'Добавлено пользователем',region:'',eff:'',src:'Пользовательская статья',status:'check',doc:''};
-}
-const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
-const state = {q:'', words:[], unit:'', content:'', dept:'', only26:false, sort:'dept', open:new Set()};
-const est = new Map();
-const STORAGE_KEY='kinorates-budget-v3',LEGACY_STORAGE_KEYS=['stavki-cehov-budget-v2'],MAX_STORED_ESTIMATE_BYTES=1_000_000;
-function saveEstimate(){
-  try{
-    const payload=JSON.stringify([...est.values()].slice(0,200).map(e=>({id:e.r.id,custom:!!e.r.custom,r:e.r.custom?sanitizeCustomRecord(e.r):undefined,start:safeDate(e.start),end:safeDate(e.end),rate:clampNumber(e.rate,0,1e9,0),qty:clampNumber(e.qty,0,1e5,1),people:clampNumber(e.people,0,1e5,1),tax:clampNumber(e.tax,0,.9999,.08)})));
-    if(payload.length>MAX_STORED_ESTIMATE_BYTES)throw new Error('estimate-too-large');
-    localStorage.setItem(STORAGE_KEY,payload);
-  }catch(error){console.warn('Не удалось сохранить локальную смету.',error)}
-}
-function restoreEstimate(){
-  try{
-    let sourceKey=STORAGE_KEY,raw=localStorage.getItem(STORAGE_KEY);
-    if(raw==null){const legacyKey=LEGACY_STORAGE_KEYS.find(key=>localStorage.getItem(key)!=null);if(legacyKey){sourceKey=legacyKey;raw=localStorage.getItem(legacyKey)}}
-    const parsed=JSON.parse(raw||'[]');if(!Array.isArray(parsed))return;
-    parsed.slice(0,200).forEach(saved=>{if(!saved||typeof saved!=='object')return;const r=saved.custom?sanitizeCustomRecord(saved.r):RATE_BY_ID.get(Number(saved.id));if(r){const legacyMonthly=saved.people==null&&r.unit==='месяц';est.set(r.id,{r,start:safeDate(saved.start),end:safeDate(saved.end),rate:clampNumber(saved.rate,0,1e9,r.amount||0),qty:r.unit==='месяц'?1:clampNumber(saved.qty,0,1e5,1),people:legacyMonthly?clampNumber(saved.qty,0,1e5,1):clampNumber(saved.people,0,1e5,1),tax:clampNumber(saved.tax,0,.9999,.08)})}});
-    if(sourceKey!==STORAGE_KEY){saveEstimate();localStorage.removeItem(sourceKey)}
-  }catch(_e){}
-}
-restoreEstimate();
 
-const depts = [...new Set(DATA.map(r=>r.dept))].sort((a,b)=>a.localeCompare(b,'ru'));
-document.querySelector('.nav-head span').textContent=depts.length;
-const units = SAFE_UNITS;
-const conts = [...new Set(DATA.map(r=>r.content))].sort((a,b)=>a.localeCompare(b,'ru'));
+const sections = [
+  ["knowledge", "▤", "Как читать ставки"], ["home", "≡", "Справочник ставок"],
+  ["market", "⌁", "Рынок и аналитика"], ["resources", "↗", "Цеховые письма"],
+];
+let selectedDept = "";
+let selectedRate = null;
+const budgetItems = loadBudget();
+const recentRates = [];
+const BUDGET_STORAGE_KEY = "kinorates-budget-v4";
+function migrateLegacyBudget(saved) {
+  if (!Array.isArray(saved)) return [];
+  return saved.map((entry) => {
+    if (entry?.prof) return { periods: 1, extra: 0, tax: 0, start: "", end: "", comment: "", ...entry };
+    const rate = R.find((row) => String(row.id) === String(entry?.id));
+    if (!rate) return null;
+    const qty = rate.unit === "месяц" ? (+entry.people || +entry.qty || 1) : ((+entry.qty || 1) * (+entry.people || 1));
+    return { id: rate.id, prof: rate.prof, dept: rate.dept, unit: rate.unit, rate: +entry.rate || +rate.amount || 0, qty, periods: 1, extra: 0, tax: (+entry.tax || 0) * 100, start: entry.start || "", end: entry.end || "", comment: "Перенесено из прежней версии сметы" };
+  }).filter(Boolean);
+}
+function loadBudget() {
+  try {
+    const current = localStorage.getItem(BUDGET_STORAGE_KEY), privateDraft = localStorage.getItem("kinorates-private-budget"), previousProduction = localStorage.getItem("kinorates-budget-v3");
+    const saved = migrateLegacyBudget(JSON.parse(current || privateDraft || previousProduction || "[]"));
+    saved.forEach((item) => { if (item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods); });
+    if (!current && saved.length) localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(saved));
+    return saved;
+  } catch { return []; }
+}
+function saveBudget() { try { localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(budgetItems)); } catch {} }
 
-// счётчики
-const cnt = s => STATUS_COUNTS.get(s)||0;
-const verifiedCount=cnt('fresh2026')+cnt('official2026')+cnt('verified2025')+cnt('verified2024')+cnt('verified2023');
-const unpublishedCount=cnt('no_public_rate');
-document.getElementById('stats').innerHTML = `
-  <div class="stat"><b>${depts.length}</b><i>цеха и департамента</i></div>
-  <div class="stat"><b>${DATA.length}</b><i>позиций в базе</i></div>
-  <div class="stat ok"><b>${verifiedCount}</b><i>подтверждены первоисточниками</i></div>
-  <div class="stat"><b>${unpublishedCount}</b><i>без публичной ставки</i></div>
-  <div class="stats-secondary">
-    <span><b>${cnt('market2025')}</b> рыночных ориентиров</span>
-    <span><b>${cnt('expired')}</b> ставок по старым документам</span>
-    <span><b>${cnt('archive')}</b> архивных ориентиров</span>
-  </div>`;
+function sidebar(route) {
+  const gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
+  return `<aside class="sidebar" id="sidebar"><a class="brand" href="#home"><b>K</b><span>KinoRates<small>Обновлено 13 августа 2026</small></span></a><button class="new-button" data-focus-search>⌕ <span>Найти ставку</span></button><nav>${sections.map(([id, icon, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}"><i>${icon}</i><span>${label}</span></a>`).join("")}</nav><a class="budget-shortcut ${route === "projects" ? "active" : ""}" href="#projects"><span>Рабочая смета</span><b data-budget-count>${budgetItems.length} поз.</b><strong data-budget-total>${rub(gross)}</strong></a><div class="history" id="recentRates">${recentMarkup()}</div><footer><a href="#about">О проекте</a><button data-feedback>Обратная связь</button><button data-feedback>Сообщить новую ставку</button><button data-privacy>Конфиденциальность и cookie</button></footer></aside>`;
+}
+function recentMarkup() {
+  return `<details class="recent-menu"><summary>Недавно смотрели <span>${recentRates.length || ""}</span></summary><div class="recent-popover">${recentRates.length ? recentRates.map((r) => `<a href="#home" data-query="${esc(r.prof)}"><i>◌</i><span>${esc(r.prof)}</span></a>`).join("") : `<p>Открытые ставки появятся здесь</p>`}</div></details>`;
+}
+function rememberRate(rate) {
+  if (!rate) return;
+  const previous = recentRates.findIndex((r) => r.id === rate.id); if (previous >= 0) recentRates.splice(previous, 1);
+  recentRates.unshift(rate); recentRates.splice(4);
+  const history = $("#recentRates"); if (history) { history.innerHTML = recentMarkup(); bindQueryLinks(); }
+}
+function topbar(route) {
+  const label = sections.find((x) => x[0] === route)?.[2] || ({ about: "О проекте", projects: "Рабочая смета", article: "Материал" })[route] || "KinoRates";
+  return `<header class="topbar"><button class="menu" id="menu">☰</button><div class="breadcrumb">KinoRates <span>/</span> ${label}</div><div class="top-actions"><span>● Данные актуальны</span><button class="quiet" data-feedback>Поделиться ставкой</button></div></header>`;
+}
+function attachmentFactor(start, end) {
+  if (!start || !end) return null;
+  const first = new Date(`${start}T12:00:00`), last = new Date(`${end}T12:00:00`);
+  if (!Number.isFinite(first.getTime()) || !Number.isFinite(last.getTime()) || last < first) return null;
+  const startDay = first.getDate(), endDay = last.getDate();
+  const startMonthDays = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  const endMonthDays = new Date(last.getFullYear(), last.getMonth() + 1, 0).getDate();
+  let completeMonths = (last.getFullYear() - first.getFullYear()) * 12 + last.getMonth() - first.getMonth();
+  if (endDay < startDay) completeMonths -= 1;
+  const startPart = (startMonthDays - startDay + 1) / startMonthDays;
+  const endPart = endDay / endMonthDays;
+  return startDay > endDay ? completeMonths + startPart + endPart : completeMonths - 1 + startPart + endPart;
+}
+function itemNet(x) { const factor = attachmentFactor(x.start, x.end), periods = factor == null ? (+x.periods || 0) : factor; return (+x.rate || 0) * (+x.qty || 0) * periods + (+x.extra || 0); }
+function itemGross(x) { const tax = Math.min(99.99, Math.max(0, +x.tax || 0)) / 100; return itemNet(x) / (1 - tax); }
+function shortDate(value) { if (!value) return ""; const [year, month, day] = value.split("-"); return `${day}.${month}.${year}`; }
+function budgetFormula(x) {
+  const attached = attachmentFactor(x.start, x.end) != null;
+  const base = attached ? `${shortDate(x.start)}–${shortDate(x.end)} · ${dec2(x.periods)} периода · расчёт по календарным долям месяцев` : `${rub(x.rate)} × ${dec2(x.qty)} × ${dec2(x.periods)}`;
+  return `${base}${+x.extra ? ` + доплата ${rub(x.extra)}` : ""} = ${rub(itemNet(x))}${+x.tax ? `; ÷ (1 − ${dec2(x.tax)}%) = ${rub(itemGross(x))}` : "; без налога"}`;
+}
+function periodsFromDates(start, end, unit, fallback) {
+  if (!start || !end) return fallback;
+  const first = new Date(`${start}T12:00:00`), last = new Date(`${end}T12:00:00`);
+  if (!Number.isFinite(first.getTime()) || !Number.isFinite(last.getTime()) || last < first) return fallback;
+  return dec2((last - first) / 86400000 / 30);
+}
+function xml(value) { return String(value ?? "").replace(/[<>&'"]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[char]); }
+function downloadBlob(content, type, filename) { const blob = content instanceof Blob ? content : new Blob([content], { type }), url = URL.createObjectURL(blob), link = document.createElement("a"); link.href = url; link.download = filename; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+function safeSheetText(value) { const text = String(value ?? "").replace(/[\r\n\t]+/g, " "), trimmed = text.trimStart(); return /^[=+\-@]/.test(trimmed) ? `'${trimmed}` : text; }
+function exportName(ext) { return `KinoRates_Рабочая_смета_${new Date().toISOString().slice(0, 10)}.${ext}`; }
+async function exportBudgetExcel() {
+  if (!budgetItems.length) { alert("Сначала добавьте хотя бы одну позицию в смету."); return; }
+  await ensureExcelJS();
+  const workbook = new ExcelJS.Workbook(), sheet = workbook.addWorksheet("Рабочая смета");
+  workbook.creator = "KinoRates"; workbook.title = "KinoRates — Рабочая смета"; workbook.company = "KinoRates"; workbook.created = new Date();
+  sheet.mergeCells("A1:M1"); const title = sheet.getCell("A1"); title.value = "KinoRates · Рабочая смета"; title.font = { name: "Arial", size: 18, bold: true, color: { argb: "FFFFFFFF" } }; title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF6D4AFF" } }; title.alignment = { vertical: "middle" }; sheet.getRow(1).height = 36;
+  sheet.mergeCells("A2:M2"); const meta = sheet.getCell("A2"); meta.value = `Экспортировано ${new Date().toLocaleString("ru-RU")} · ${budgetItems.length} позиций`; meta.font = { name: "Arial", size: 9, color: { argb: "FF77777F" } }; meta.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.getRow(2).height = 23;
+  const headers = ["Статья", "Цех", "Единица", "Ставка", "Количество", "Периоды", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом", "Заметка"];
+  sheet.addRow([]); sheet.addRow(headers);
+  budgetItems.forEach((x) => sheet.addRow([safeSheetText(x.prof), safeSheetText(x.dept), safeSheetText(x.unit), +x.rate || 0, +x.qty || 0, attachmentFactor(x.start, x.end) ?? (+x.periods || 0), x.start ? new Date(`${x.start}T12:00:00`) : "", x.end ? new Date(`${x.end}T12:00:00`) : "", +x.extra || 0, (+x.tax || 0) / 100, itemNet(x), itemGross(x), safeSheetText(x.comment)]));
+  const first = 5, last = 4 + budgetItems.length, totalRow = sheet.addRow(["", "", "", "", "", "", "", "", "", "ИТОГО", { formula: `SUM(K${first}:K${last})`, result: budgetItems.reduce((s, x) => s + itemNet(x), 0) }, { formula: `SUM(L${first}:L${last})`, result: budgetItems.reduce((s, x) => s + itemGross(x), 0) }, ""]);
+  sheet.columns = [30, 20, 13, 15, 11, 11, 14, 14, 15, 11, 17, 17, 32].map((width) => ({ width }));
+  const header = sheet.getRow(4); header.height = 28; header.eachCell((cell) => { cell.font = { name: "Arial", size: 9, bold: true, color: { argb: "FF4C4855" } }; cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEDEAFB" } }; cell.alignment = { vertical: "middle", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: "FFCBC5E6" } } }; });
+  sheet.eachRow((row, n) => { if (n >= first) { row.height = 28; row.font = { name: "Arial", size: 10, bold: n === totalRow.number }; row.alignment = { vertical: "middle", wrapText: true }; row.eachCell((cell) => { cell.border = { bottom: { style: "thin", color: { argb: "FFE5E4E9" } } }; }); } });
+  ["D", "I", "K", "L"].forEach((col) => { sheet.getColumn(col).numFmt = '#,##0.00 "₽"'; }); ["E", "F"].forEach((col) => { sheet.getColumn(col).numFmt = "0.00"; }); ["G", "H"].forEach((col) => { sheet.getColumn(col).numFmt = "dd.mm.yyyy"; }); sheet.getColumn("J").numFmt = "0.00%";
+  totalRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.views = [{ state: "frozen", ySplit: 4 }]; sheet.autoFilter = { from: "A4", to: `M${last}` }; sheet.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+  const buffer = await workbook.xlsx.writeBuffer();
+  downloadBlob(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", exportName("xlsx"));
+}
+async function exportBudgetPdf() {
+  if (!budgetItems.length) { alert("Сначала добавьте хотя бы одну позицию в смету."); return; }
+  await ensurePdfMake();
+  const money = (n) => `${new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(+n || 0)} ₽`;
+  const body = [["Статья / цех", "Ставка", "Кол-во", "Период", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом"].map((text) => ({ text, bold: true, color: "#ffffff" }))];
+  budgetItems.forEach((x) => body.push([{ text: `${x.prof}\n${x.dept} · ${x.unit}` }, money(x.rate), dec2(x.qty), dec2(attachmentFactor(x.start, x.end) ?? x.periods), shortDate(x.start) || "—", shortDate(x.end) || "—", money(x.extra), `${dec2(x.tax)}%`, money(itemNet(x)), money(itemGross(x))]));
+  body.push([{ text: "ИТОГО", bold: true, colSpan: 8 }, {}, {}, {}, {}, {}, {}, {}, { text: money(budgetItems.reduce((s, x) => s + itemNet(x), 0)), bold: true }, { text: money(budgetItems.reduce((s, x) => s + itemGross(x), 0)), bold: true }]);
+  const doc = { pageSize: "A4", pageOrientation: "landscape", pageMargins: [28, 32, 28, 32], info: { title: "KinoRates — Рабочая смета", author: "KinoRates", creator: "KinoRates" }, defaultStyle: { font: "Roboto", fontSize: 7.3, color: "#27262D" }, content: [{ text: "KINORATES", bold: true, fontSize: 8, color: "#6D4AFF", characterSpacing: 1.2, margin: [0, 0, 0, 4] }, { text: "Рабочая смета", bold: true, fontSize: 18, margin: [0, 0, 0, 4] }, { text: `${budgetItems.length} позиций · сформировано ${new Date().toLocaleString("ru-RU")}`, color: "#77777F", margin: [0, 0, 0, 13] }, { table: { headerRows: 1, widths: [116, 52, 31, 33, 52, 52, 50, 34, 59, 59], body }, layout: { fillColor: (i) => i === 0 ? "#6D4AFF" : i === body.length - 1 ? "#F3F2F7" : null, hLineColor: () => "#E5E4E9", vLineColor: () => "#E5E4E9", paddingLeft: () => 4, paddingRight: () => 4, paddingTop: () => 5, paddingBottom: () => 5 } }], footer: (current, count) => ({ columns: [{ text: "KinoRates · предварительный расчёт", alignment: "left" }, { text: `${current} / ${count}`, alignment: "right" }], margin: [28, 8, 28, 0], fontSize: 7, color: "#88858E" }) };
+  window.pdfMake.createPdf(doc).download(exportName("pdf"));
+}
+function addCustomBudgetItem() { budgetItems.push({ id: `custom-${Date.now()}`, custom: true, prof: "Новая статья", dept: "Своя статья", unit: "единица", rate: 0, qty: 1, periods: 1, extra: 0, tax: 0, start: "", end: "", comment: "" }); saveBudget(); render(); }
+const assistantBar = (placeholder = "Спросите о ставках, источниках или смете…") => `<div class="assistant-bar"><textarea rows="1" placeholder="${placeholder}"></textarea><div class="assistant-actions"><button>＋</button><span>Использует данные KinoRates</span><button class="send">↑</button></div></div>`;
 
-// фильтры
-const uSel = document.getElementById('unit'), cSel = document.getElementById('content');
-units.filter(u=>DATA.some(r=>r.unit===u)).forEach(u=>uSel.insertAdjacentHTML('beforeend',`<option value="${u}">${u}</option>`));
-conts.forEach(c=>cSel.insertAdjacentHTML('beforeend',`<option value="${c}">${c}</option>`));
-const chips = document.getElementById('chips');
-chips.innerHTML = `<button class="chip" data-d="" aria-pressed="true">Все цеха<span class="n">${DATA.length}</span></button>`+
-  depts.map(d=>`<button class="chip" data-d="${d}" aria-pressed="false">${d}<span class="n">${DEPT_COUNTS.get(d)||0}</span></button>`).join('');
-
-function match(r){
-  if(state.unit && r.unit!==state.unit) return false;
-  if(state.content && r.content!==state.content) return false;
-  if(state.dept && r.dept!==state.dept) return false;
-  if(state.only26 && !['fresh2026','official2026'].includes(r.status)) return false;
-  if(state.words.length){
-    const h=MAIN_SEARCH_BY_ID.get(r.id)||'';
-    if(!state.words.every(w=>h.includes(w))) return false;
-  }
-  return true;
+function home() {
+  const current = R.filter((x) => ["fresh2026", "official2026"].includes(x.status)).length;
+  const depts = [...new Set(R.map((x) => x.dept))].sort((a, b) => a.localeCompare(b, "ru"));
+  return `<div class="registry-page"><section class="registry-intro"><div><span class="eyebrow">KINORATES · ОБНОВЛЕНО 13.08.2026</span><h1>Справочник ставок</h1><p>Рекомендованные ставки специалистов российского кино. Финальная стоимость определяется продюсером и контрагентом по договорённости.</p></div><button class="feedback-link" data-feedback>Нашли неточность? Напишите нам</button></section><div class="source-strip"><div class="registry-stats"><b>${R.length}</b><span>позиций</span><b>${current}</b><span>сверено в 2026</span></div><a href="#resources"><span>Первоисточники</span><b>МПК</b><small>открыть в KinoRates →</small></a><a href="#resources"><span>Первоисточники</span><b>Точно продюсер</b><small>открыть в KinoRates →</small></a><a href="#resources"><span>Первоисточники</span><b>Цеховые письма</b><small>${S.length} документов →</small></a></div><div class="registry-workspace"><aside class="dept-list"><header><h2>Цеха</h2><span>${depts.length}</span></header><button class="${selectedDept ? "" : "active"}" data-dept="">Все цеха <em>${R.length}</em></button>${depts.map((d) => `<button class="${selectedDept === d ? "active" : ""}" data-dept="${esc(d)}">${esc(d)} <em>${R.filter((x) => x.dept === d).length}</em></button>`).join("")}</aside><section class="registry-main"><div class="registry-controls"><div class="ai-search main-search"><span>⌕</span><input id="rateSearch" placeholder="Профессия, цех или условие — например «администратор» или «смена 12»"></div><select id="rateStatus" aria-label="Фильтр по статусу"><option value="">Все статусы</option><option value="new">Сверено в 2026</option><option value="old">Архив и ориентиры</option></select><button class="primary budget-open" data-new data-budget-indicator>Смета · ${budgetItems.length}</button></div><div class="registry-layout"><div><div class="suggested"><span>Быстрый поиск:</span><button>оператор-постановщик</button><button>гаффер</button><button>второй режиссёр</button><button>монтаж</button></div><div id="rateTable"></div></div></div></section></div><div class="toast" id="toast" role="status" aria-live="polite"></div></div>`;
 }
-const dnum=d=>{const text=String(d||'');const full=text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);if(full)return +(full[3]+full[2]+full[1]);const year=text.match(/(20\d{2})/);return year?+(year[1]+'0000'):0};
-function sorted(rows){
-  const o={'месяц':0,'проект':1,'сезон':2,'серия':3,'гонорар':4,'договор':5,'аккорд':6,'смена':7,'полсмены':8,'час':9,'единоразово':10,'человек':11,'минута':12};
-  if(state.sort==='hi') return rows.sort((a,b)=>(b.amount??-1)-(a.amount??-1));
-  if(state.sort==='lo') return rows.sort((a,b)=>(a.amount??1e12)-(b.amount??1e12));
-  if(state.sort==='date') return rows.sort((a,b)=>dnum(b.eff)-dnum(a.eff)||a.dept.localeCompare(b.dept,'ru'));
-  return rows.sort((a,b)=>a.dept.localeCompare(b.dept,'ru')||(o[a.unit]??9)-(o[b.unit]??9)||(b.amount??0)-(a.amount??0));
+function homeV2() {
+  const current = R.filter((x) => ["fresh2026", "official2026"].includes(x.status)).length, historical = R.length - current;
+  return home().replace(`<div class="registry-stats"><b>${R.length}</b><span>позиций</span><b>${current}</b><span>сверено в 2026</span></div>`, `<div class="registry-stats"><div><b>${R.length}</b><span>всего позиций</span></div><div><b>${current}</b><span>сверено в 2026</span></div><div><b>${historical}</b><span>исторические и рыночные</span></div></div>`);
 }
-function amountCell(r){
-  const text=String(r.amount_text||'');
-  if(r.amount==null) return `<td class="sum txt">${esc(text||'по договорённости')}</td>`;
-  if(/[–—+%]|бесплатно|договорённости/i.test(text)) return `<td class="sum txt">${esc(text)}</td>`;
-  const per = r.unit==='месяц' ? 'в месяц' : r.unit==='смена' ? 'за смену' : 'за '+r.unit;
-  const extra = text.replace(/^[\d\s]+/,'').trim();
-  return `<td class="sum">${fmt(r.amount)}<small>${esc(per)}${extra?' · '+esc(extra):''}</small></td>`;
+function projects() {
+  const net = budgetItems.reduce((sum, x) => sum + itemNet(x), 0), gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
+  return pageHead("Рабочий инструмент", "Рабочая смета", "Расчёт строк по ставке, количеству, периоду, датам, доплатам и налогам. Данные сохраняются только в вашем браузере.", '<div class="budget-actions"><button class="quiet" data-add-custom>＋ Своя статья</button><button class="quiet" data-export-excel>Excel</button><button class="quiet" data-export-pdf>PDF</button><a class="primary button-link" href="#home">＋ Добавить ставку</a></div>') + `<datalist id="taxRates"><option value="6"><option value="7"><option value="8"><option value="9"><option value="10"></datalist><div class="budget-workspace"><section class="budget-sheet">${budgetItems.length ? `<div class="budget-table-head"><span>Позиция и расчёт</span><span>Сумма</span></div>${budgetItems.map((x, index) => `<article class="budget-item"><div class="budget-item-main"><div class="budget-position">${x.custom ? `<label>Название статьи<input value="${esc(x.prof)}" data-budget-field="prof" data-budget-index="${index}"></label>` : `<b>${esc(x.prof)}</b>`}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div><label>Ставка<input type="number" min="0" step="0.01" value="${dec2(x.rate)}" data-budget-field="rate" data-budget-index="${index}"></label><label>Кол-во<input type="number" min="0" step="1" value="${dec2(x.qty)}" data-budget-field="qty" data-budget-index="${index}"></label><label>Периоды<input type="number" min="0" step="0.01" value="${dec2(x.periods)}" data-budget-field="periods" data-budget-index="${index}"></label><strong>${rub(itemGross(x))}</strong><button data-budget-delete="${index}" aria-label="Удалить позицию">×</button></div><div class="budget-item-meta"><label>Начало<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label><label>Окончание<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label><label>Доплата<input type="number" step="0.01" value="${dec2(x.extra)}" data-budget-field="extra" data-budget-index="${index}"></label><label>Налог, %<input type="number" list="taxRates" min="0" step="0.5" value="${dec2(x.tax)}" data-budget-field="tax" data-budget-index="${index}"></label><label class="budget-comment">Заметка<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия расчёта"></label></div><div class="budget-formula">${rub(x.rate)} × ${dec2(x.qty)} × ${dec2(x.periods)}${+x.extra ? ` + ${rub(x.extra)}` : ""} = ${rub(itemNet(x))}${+x.tax ? `; налог ${dec2(x.tax)}% → ${rub(itemGross(x))}` : "; без налога"}</div><div class="budget-item-summary"><span>Без налога <b>${rub(itemNet(x))}</b></span><span>С налогом <b>${rub(itemGross(x))}</b></span></div></article>`).join("")}` : `<div class="budget-empty-state"><i>□</i><h2>Смета пока пуста</h2><p>Добавьте ставку из справочника или создайте собственную статью.</p><button class="primary" data-add-custom>＋ Добавить свою статью</button></div>`}</section><aside class="budget-total"><span>Позиций</span><b>${budgetItems.length}</b><div><span>Без налога</span><strong>${rub(net)}</strong></div><div><span>С налогом</span><strong>${rub(gross)}</strong></div><p>Расчёт не является офертой. Учитывайте условия и период первоисточника каждой ставки.</p></aside></div>`;
 }
-function render(){
-  const rows = sorted(DATA.filter(match));
-  document.getElementById('calculatorNote').hidden=!(rows.length&&rows.every(r=>r.dept==='Цветокоррекция'));
-  document.getElementById('empty').hidden = rows.length>0;
-  document.getElementById('resultCount').textContent = `${rows.length} ${rows.length===1?'позиция':'позиций'}`;
-  document.getElementById('tb').innerHTML = rows.map(r=>{
-    const selected = state.open.has(r.id);
-    return `<tr class="r${selected?' selected':''}" data-id="${r.id}" tabindex="0" aria-selected="${selected}">
-      <td class="dept">${esc(r.dept)}</td>
-      <td class="prof" title="${esc(r.prof)}">${esc(r.prof)}</td>
-      <td class="cond">${esc(r.cond||'—')}</td>
-      <td class="unit">${esc(r.unit)}</td>
-      ${amountCell(r)}
-      <td><span class="badge b-${r.status}" title="${esc(TIP[r.status])}">${esc(LBL[r.status])}</span></td>
-      <td>${est.has(r.id)?`<button class="addbtn is-added" data-remove="${r.id}" title="Убрать из сметы" aria-label="Убрать из сметы" aria-pressed="true">−</button>`:`<button class="addbtn" data-add="${r.id}" title="Добавить в смету" aria-label="Добавить в смету" aria-pressed="false">+</button>`}</td>
-    </tr>`;
-  }).join('');
+function budgetItemMarkup(x, index) {
+  const title = x.custom ? `<label>Название статьи<input value="${esc(x.prof)}" data-budget-field="prof" data-budget-index="${index}"></label>` : `<b>${esc(x.prof)}</b>`;
+  const taxPresets = [6, 7, 8, 9, 10], presetTax = taxPresets.includes(+x.tax);
+  return `<article class="budget-item">
+    <div class="budget-item-main">
+      <div class="budget-position">${title}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div>
+      <label>Ставка<input type="number" min="0" step="0.01" value="${dec2(x.rate)}" data-budget-field="rate" data-budget-index="${index}"></label>
+      <label>Кол-во<input type="number" min="0" step="1" value="${dec2(x.qty)}" data-budget-field="qty" data-budget-index="${index}"></label>
+      <label>Периоды<input type="number" min="0" step="0.01" value="${dec2(x.periods)}" data-budget-field="periods" data-budget-index="${index}"></label>
+      <strong>${rub(itemGross(x))}</strong><button data-budget-delete="${index}" aria-label="Удалить позицию">×</button>
+    </div>
+    <div class="budget-item-meta">
+      <label>Дата прикрепления<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label>
+      <label>Дата открепления<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label>
+      <label>Доплата<input type="number" step="0.01" value="${dec2(x.extra)}" data-budget-field="extra" data-budget-index="${index}"></label>
+      <label>Налог, %<div class="tax-control"><select data-tax-preset="${index}"><option value="" ${+x.tax === 0 ? "selected" : ""}>Без налога</option>${taxPresets.map((value) => `<option value="${value}" ${+x.tax === value ? "selected" : ""}>${value}%</option>`).join("")}<option value="manual" ${+x.tax !== 0 && !presetTax ? "selected" : ""}>Ввести вручную…</option></select><input class="tax-manual" type="number" min="0" max="99" step="0.01" value="${dec2(x.tax)}" data-budget-field="tax" data-budget-index="${index}" ${+x.tax === 0 || presetTax ? "hidden" : ""} placeholder="Процент"></div></label>
+      <label class="budget-comment">Заметка<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия расчёта"></label>
+    </div>
+    <div class="budget-formula">${budgetFormula(x)}</div>
+    <div class="budget-item-summary"><span>Без налога <b>${rub(itemNet(x))}</b></span><span>С налогом <b>${rub(itemGross(x))}</b></span></div>
+  </article>`;
 }
-function setInspectorTab(tab){
-  document.querySelectorAll('[data-inspector-tab]').forEach(b=>{
-    const active=b.dataset.inspectorTab===tab;
-    b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));
-  });
-  document.getElementById('detailPane').hidden=tab!=='detail';
-  document.getElementById('budgetPane').hidden=tab!=='budget';
+function projectsV2() {
+  const net = budgetItems.reduce((sum, x) => sum + itemNet(x), 0), gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
+  const actions = '<div class="budget-actions"><button class="quiet budget-action-custom" data-add-custom><span>+</span> Своя статья</button><button class="quiet budget-action-export" data-export-excel>Excel</button><button class="quiet budget-action-export" data-export-pdf>PDF</button><a class="primary button-link budget-action-primary" href="#home"><span>+</span> Добавить ставку</a></div>';
+  const content = budgetItems.length ? `<div class="budget-table-head"><span>Позиция и расчёт</span><span>Сумма</span></div>${budgetItems.map(budgetItemMarkup).join("")}` : '<div class="budget-empty-state"><i>□</i><h2>Смета пока пуста</h2><p>Добавьте ставку из справочника или создайте собственную статью.</p><button class="primary" data-add-custom>＋ Добавить свою статью</button></div>';
+  return pageHead("Рабочий инструмент", "Рабочая смета", "Прикрепление и открепление рассчитываются по календарным долям месяцев — по методике исходной производственной таблицы.", actions) + `<div class="budget-workspace"><section class="budget-sheet">${content}</section><aside class="budget-total"><span>Позиций</span><b>${budgetItems.length}</b><div><span>Без налога</span><strong>${rub(net)}</strong></div><div><span>С налогом</span><strong>${rub(gross)}</strong></div><p>Налог рассчитывается делением на (1 − ставка налога), как в исходной таблице.</p></aside></div>`;
 }
-function revealMobileDetail(){
-  if(!window.matchMedia('(max-width:920px)').matches)return;
-  const inspector=document.querySelector('.est'),controls=document.querySelector('.controls');
-  const behavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    const controlsHeight=controls?.getBoundingClientRect().height||0;
-    const top=window.scrollY+inspector.getBoundingClientRect().top-controlsHeight-10;
-    window.scrollTo({top:Math.max(0,top),behavior});
-  }));
+function rates() {
+  return pageHead("Справочная база", "Ставки", "449 реальных записей KinoRates. Учитывайте условия и период источника до переноса значения в смету.", '<button class="quiet">Экспорт вида</button>') + `<div class="data-toolbar"><div class="ai-search"><span>⌕</span><input id="rateSearch" placeholder="Спросить или найти профессию, цех, условие…"></div><select id="rateStatus"><option value="">Все статусы</option><option value="new">Подтверждено 2026</option><option value="old">Архив и ориентиры</option></select></div><div class="suggested"><span>Попробуйте:</span><button>оператор-постановщик</button><button>гаффер</button><button>второй режиссёр</button><button>монтаж</button></div><div id="rateTable"></div>`;
 }
-function renderDetail(r){
-  const pane=document.getElementById('detailPane');
-  if(!r){pane.innerHTML='<div class="detail-empty">Выберите строку реестра, чтобы увидеть ставку, условия, переработки и первоисточник.</div>';return}
-  const amountText=String(r.amount_text||'');
-  const amount=amountText&&(/[–—+%]|бесплатно|договорённости/i.test(amountText))?amountText:(r.amount?fmt(r.amount):(amountText||'по договорённости'));
-  const meta=sourceMeta(r),docUrl=safeExternalUrl(r.doc);
-  pane.innerHTML=`<div class="detail-card">
-    <div class="kicker">${esc(r.dept)}</div><h4>${esc(r.prof)}</h4><div class="cond">${esc(r.cond||'Условия не указаны')}</div>
-    <div class="rate"><b>${esc(amount)}</b><span>${esc(r.unit)} · ${esc(r.region)}</span></div>
-    <div class="detail-section"><b>Источник и подтверждение</b><p><span class="badge b-${r.status}">${esc(LBL[r.status])}</span><br><br><b>Тип:</b> ${esc(meta.kind)}<br><b>Год данных:</b> ${esc(meta.year)}<br><b>Подтверждение:</b> ${esc(meta.confirmation)}</p></div>
-    <div class="detail-section"><b>Переработка</b><p>${esc(r.ot||'В письме не зафиксирована.')}</p></div>
-    <div class="detail-section"><b>Условия и доплаты</b><p>${esc(r.extra||'Дополнительные условия не указаны.')}</p></div>
-    <div class="detail-section"><b>Источник</b><p>${esc(r.src)}<br>${esc(meta.periodLine)}${docUrl?`<br><a href="${esc(docUrl)}" target="_blank" rel="noopener">Открыть источник →</a>`:''}</p></div>
-    ${marketEvidenceHtml(r)}
-    ${r.dept==='Цветокоррекция'?`<div class="detail-section"><b>Точный расчёт</b><p>Письмо датировано 2022 годом. Актуальную стоимость с учётом хронометража, жанра, HDR и уровня специалиста можно рассчитать в <a href="https://icguild.org/calculator" target="_blank" rel="noopener">калькуляторе ICG →</a></p></div>`:''}
-    ${isScreenwriter(r)?`<a class="detail-source" href="${SCREENWRITER_RATES}" target="_blank" rel="noopener">Открыть ставки сценаристов →</a>`:''}
-    <button class="detail-add${est.has(r.id)?' is-remove':''}" ${est.has(r.id)?`data-remove="${r.id}"`:`data-add="${r.id}"`}>${est.has(r.id)?'Убрать из сметы':'Добавить в смету'}</button>
-  </div>`;
+function drawRates() {
+  const query = normalizeSearch($("#rateSearch")?.value), status = $("#rateStatus")?.value || "";
+  const data = R.filter((r) => (!selectedDept || r.dept === selectedDept) && (!query || normalizeSearch(`${r.prof} ${r.dept} ${r.cond}`).includes(query)) && (!status || (status === "new" ? ["fresh2026", "official2026"].includes(r.status) : !["fresh2026", "official2026"].includes(r.status))));
+  const detail = (r) => `<tr class="rate-detail-row"><td colspan="7"><div class="inline-detail"><div class="inline-detail-main"><span>${esc(r.dept)}</span><h3>${esc(r.prof)}</h3><p>${esc(r.cond || "Условия не указаны")}</p></div><div class="inline-detail-rate"><span>Рекомендованная ставка</span><b>${r.amount ? rub(r.amount) : "Не опубликована"}</b><small>${esc(r.unit)}</small><dl><div><dt>Статус</dt><dd>${esc(statusLabel(r.status))}</dd></div><div><dt>Регион</dt><dd>${esc(r.region || "Не указан")}</dd></div><div><dt>Период</dt><dd>${esc(r.eff || "Не указан")}</dd></div></dl></div><div class="inline-detail-notes">${r.ot ? `<section><b>Переработки</b><p>${esc(r.ot)}</p></section>` : ""}${r.extra ? `<section><b>Дополнительные условия</b><p>${esc(r.extra)}</p></section>` : ""}<div class="inline-detail-actions"><button class="primary" data-add-rate="${r.id}">${budgetItems.some((x) => x.id === r.id) ? "✓ Уже в смете" : "＋ Добавить в смету"}</button>${r.doc ? `<a href="${esc(r.doc)}" target="_blank" rel="noopener">Открыть первоисточник ↗</a>` : ""}</div></div></div></td></tr>`;
+  $("#rateTable").innerHTML = `<div class="table-meta"><span>${data.length} позиций${selectedDept ? ` · ${esc(selectedDept)}` : ""}</span><span>Нажмите на строку, чтобы раскрыть условия</span></div><div class="table-wrap"><table><thead><tr><th>Цех</th><th>Профессия</th><th>Условие</th><th>Ед.</th><th>Мин. ставка</th><th>Статус</th><th></th></tr></thead><tbody>${data.map((r) => `<tr data-rate-id="${r.id}" class="${selectedRate?.id === r.id ? "selected" : ""}"><td>${esc(r.dept)}</td><td><b>${esc(r.prof)}</b></td><td>${esc(r.cond)}</td><td>${esc(r.unit)}</td><td><b>${r.amount ? rub(r.amount) : "—"}</b></td><td><span class="status ${["fresh2026", "official2026"].includes(r.status) ? "good" : ""}">${esc(statusLabel(r.status))}</span></td><td><button class="row-add ${budgetItems.some((x) => x.id === r.id) ? "added" : ""}" data-add-rate="${r.id}" aria-label="Добавить в смету">${budgetItems.some((x) => x.id === r.id) ? "✓" : "＋"}</button></td></tr>${selectedRate?.id === r.id ? detail(r) : ""}`).join("")}</tbody></table></div>`;
+  document.querySelectorAll("[data-rate-id]").forEach((row) => (row.onclick = () => { const rate = R.find((r) => String(r.id) === row.dataset.rateId); selectedRate = selectedRate?.id === rate?.id ? null : rate; if (selectedRate) rememberRate(selectedRate); drawRates(); }));
+  document.querySelectorAll("[data-add-rate]").forEach((button) => (button.onclick = (event) => { event.stopPropagation(); addRate(button.dataset.addRate); }));
 }
-// смета
-function newEstimate(r){
-  return {r,start:'',end:'',rate:r.amount||0,qty:1,people:1,tax:.08};
+function addRate(id) {
+  const rate = R.find((r) => String(r.id) === String(id)); if (!rate) return;
+  const existing = budgetItems.find((x) => x.id === rate.id); if (existing) existing.qty += 1;
+  else budgetItems.push({ id: rate.id, prof: rate.prof, dept: rate.dept, unit: rate.unit, rate: +rate.amount || 0, qty: 1, periods: 1, extra: 0, tax: 0, start: "", end: "", comment: "" });
+  saveBudget();
+  drawRates();
+  document.querySelectorAll("[data-budget-indicator]").forEach((button) => (button.textContent = `Смета · ${budgetItems.length}`));
+  const count = $("[data-budget-count]"), total = $("[data-budget-total]"); if (count) count.textContent = `${budgetItems.length} поз.`; if (total) total.textContent = rub(budgetItems.reduce((sum, x) => sum + itemGross(x), 0));
+  const toast = $("#toast"); if (toast) { toast.textContent = `${rate.prof} добавлен в смету`; toast.classList.add("show"); clearTimeout(addRate.toastTimer); addRate.toastTimer = setTimeout(() => toast.classList.remove("show"), 2200); }
 }
-const quantityLabels={'смена':'Смен','полсмены':'Полусмен','час':'Часов','серия':'Серий','сезон':'Сезонов','гонорар':'Гонораров','договор':'Договоров','минута':'Минут','проект':'Проектов','аккорд':'Аккордов','человек':'Человек','единоразово':'Количество','месяц':'Специалистов'};
-const quantityLabel=unit=>quantityLabels[unit]||'Количество';
-function parseDate(value){
-  if(!value)return null;
-  const [y,m,d]=value.split('-').map(Number);
-  return new Date(Date.UTC(y,m-1,d));
+function knowledge() {
+  const legend = [
+    ["current", "Письмо 2026", "Ставка подтверждена опубликованным цеховым письмом 2026 года. Откройте строку, чтобы увидеть документ и условия, к которым относится сумма."],
+    ["current", "Рекомендации 2026", "Ставка подтверждена официальной публикацией профессионального объединения 2026 года."],
+    ["previous", "Письмо 2025 / 2024 / 2023", "Ставка подтверждена документом указанного года. Это проверенная историческая цифра, но более свежий соответствующий документ пока не найден."],
+    ["market", "Рыночный ориентир", "Данные из исследования или рыночного среза. Это не обязательный тариф и не цеховое письмо — используйте цифру только как ориентир для сравнения."],
+    ["archive", "Архив", "Архивная ставка или рыночный ориентир прошлых периодов. Текущая актуальность не подтверждена; переносить такую сумму в смету без дополнительного согласования не стоит."],
+    ["unpublished", "Без публичного тарифа", "Профессия и источник подтверждены, но открытая тарифная ставка для этой работы не опубликована. Сумма определяется по договорённости."],
+  ];
+  return pageHead("Легенда справочника", "Как читать ставки", "Статус показывает, откуда взята цифра и насколько свежим документом она подтверждена.") + `<section class="legend-intro"><div><span>СНАЧАЛА ПОСМОТРИТЕ НА СТАТУС</span><h2>Одинаковые суммы могут означать разное</h2><p>Ставка читается вместе со статусом, годом документа, единицей расчёта и условиями. Сам по себе размер суммы ещё не говорит, подходит ли она вашему проекту.</p></div><ol><li><b>Статус</b><span>Тип и свежесть подтверждения</span></li><li><b>Единица</b><span>Смена, месяц, день или аккорд</span></li><li><b>Условия</b><span>Формат работы и ограничения</span></li><li><b>Первоисточник</b><span>Документ, на котором основана запись</span></li></ol></section><section class="legend-list"><header><div><span>ОБОЗНАЧЕНИЯ</span><h2>Что означает каждый статус</h2></div><p>Статус относится к конкретной записи и её сумме, а не ко всей профессии целиком.</p></header>${legend.map(([kind, title, text]) => `<article><span class="legend-mark ${kind}"></span><div><h3>${title}</h3><p>${text}</p></div></article>`).join("")}</section><aside class="legend-note"><div><b>Перед переносом в смету</b><p>Раскройте строку ставки и сопоставьте профессию, условия, единицу расчёта, регион и период действия документа.</p></div><a class="primary button-link" href="#home">Открыть справочник ставок →</a></aside>`;
 }
-function daysInMonth(date){return new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()+1,0)).getUTCDate()}
-function monthDiff(start,end){
-  let months=(end.getUTCFullYear()-start.getUTCFullYear())*12+end.getUTCMonth()-start.getUTCMonth();
-  if(end.getUTCDate()<start.getUTCDate())months--;
-  return Math.max(0,months);
+function resources() {
+  return pageHead("Профессиональные первоисточники", "Цеховые письма", "Документы объединений, гильдий и профессиональных сообществ, на которых основана справочная база.") + `<div class="resource-list">${S.map((s, i) => `<a href="${esc(s.url)}" target="_blank" rel="noopener"><i>${String(i + 1).padStart(2, "0")}</i><div><b>${esc(s.name)}</b><span>${esc(s.date)}</span></div><em>Открыть ↗</em></a>`).join("")}</div>`;
 }
-function monthlyProrata(start,end,rate){
-  if(!start||!end||end<start)return 0;
-  const whole=monthDiff(start,end),startDay=start.getUTCDate(),endDay=end.getUTCDate();
-  const first=(daysInMonth(start)-startDay+1)/daysInMonth(start)*rate;
-  const last=endDay/daysInMonth(end)*rate;
-  return startDay>endDay ? rate*whole+first+last : rate*(whole-1)+first+last;
+function market() {
+  const sourceGroups = [...new Set(M.map((x) => x.source))];
+  return pageHead("Дополнительный слой данных", "Рынок и аналитика", "Исследования и рыночные срезы дополняют цеховые письма и помогают увидеть контекст рынка.") + `<div class="market-source-strip"><a href="https://www.kinopoisk.ru/media/article/4009452/" target="_blank" rel="noopener"><span>Исследование · 2024</span><b>Кинопоиск × МШК</b><small>профессии и уровни гонораров</small></a><a href="https://t.me/filmres/7424" target="_blank" rel="noopener"><span>Рынок · 2025</span><b>StarDust × Новости кинопроизводства</b><small>сводные данные индустрии</small></a><a href="https://www.kommersant.ru/doc/8553189" target="_blank" rel="noopener"><span>Динамика рынка</span><b>ИРИ × Коммерсантъ</b><small>изменение стоимости в 2025 году</small></a><a href="https://ktr.su/content/news/detail.php?ELEMENT_ID=57863" target="_blank" rel="noopener"><span>Регионы</span><b>КТР</b><small>опрос 172 специалистов</small></a></div><div class="market-meta"><span>${M.length} аналитических записей</span><span>${sourceGroups.length} групп источников</span><span>Годы и периоды указаны отдельно</span></div><div class="market-grid">${M.map((item) => `<article><div class="market-card-meta"><span>${esc(item.kind)}</span><b>${esc(item.year)}</b></div><h2>${esc(item.title)}</h2><p>${esc(item.text)}</p><small>${esc(item.period)}</small><a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.source)} ↗</a></article>`).join("")}</div>`;
 }
-function calcEstimate(e){
-  const start=parseDate(e.start),end=parseDate(e.end);
-  const elapsed=start&&end&&end>=start?(end-start)/86400000+1:0;
-  const monthly=e.r.unit==='месяц';
-  const quantity=monthly?1:(e.r.unit==='аккорд'?1:(e.qty||0));
-  const people=e.people||0;
-  const period=monthly?monthlyProrata(start,end,1):quantity;
-  const base=monthly?monthlyProrata(start,end,e.rate):(e.rate||0);
-  const net=Math.max(0,base*quantity*people);
-  const gross=e.tax<1?net/(1-e.tax):net;
-  return {period,net,gross};
+function about() {
+  return pageHead("KinoRates", "О проекте", "Инструмент для прозрачной работы со ставками и производственной сметой.", '<button class="primary" data-feedback>Связаться</button>') + `<div class="about-grid"><section><h2>Complex underneath.<br>Clear on the surface.</h2><p>KinoRates объединяет публичные цеховые письма, рекомендации, рыночные исследования и пользовательские допущения в одном рабочем контексте.</p><p>Справочник помогает найти данные, увидеть условия и первоисточник, а затем перенести выбранные позиции в прозрачную рабочую смету.</p></section><aside><div><span>Позиций</span><b>${R.length}</b></div><div><span>Источников</span><b>${S.length}</b></div><div><span>Цехов</span><b>${new Set(R.map((x) => x.dept)).size}</b></div><div><span>Ревизия</span><b>13.08.2026</b></div></aside></div>`;
 }
-function renderEst(){
-  const box=document.getElementById('estlines'), hint=document.getElementById('esthint');
-  hint.hidden = est.size>0;
-  let subtotal=0,total=0;
-  box.innerHTML=[...est.values()].map(e=>{
-    const calc=calcEstimate(e); subtotal+=calc.net; total+=calc.gross;
-    const monthly=e.r.unit==='месяц';
-    return `<div class="line calc-line"><div class="line-head"><div><div class="t">${esc(e.r.prof)}</div><div class="s">${esc(e.r.dept)}</div></div>
-      <div><button class="x" data-del="${e.r.id}" title="Убрать" aria-label="Убрать из сметы">×</button><div class="v">${fmt(calc.gross)}</div></div></div>
-      <div class="calc-grid">
-        ${monthly?`<div class="calc-field"><label>Дата прикрепления</label><input type="date" value="${e.start}" data-field="start" data-id="${e.r.id}"></div><div class="calc-field"><label>Дата открепления</label><input type="date" value="${e.end}" data-field="end" data-id="${e.r.id}"></div>`:''}
-        <div class="calc-field"><label>Ставка за ${esc(e.r.unit)}</label><input type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-field="rate" data-id="${e.r.id}">${rateRangeHint(e.r)}</div>
-        ${monthly?'':`<div class="calc-field"><label>${quantityLabel(e.r.unit)}</label><input type="number" min="0" max="100000" step="1" value="${e.qty}" data-field="qty" data-id="${e.r.id}"></div>`}
-        <div class="calc-field"><label>Специалистов</label><input type="number" min="0" max="100000" step="1" value="${e.people}" data-field="people" data-id="${e.r.id}"></div>
-        ${monthly?`<div class="calc-field"><label>Расчётный период</label><input readonly value="${calc.period.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>`:''}
-        <div class="calc-field"><label>Единица</label><input readonly value="${esc(e.r.unit)}"></div>
-        <div class="calc-field wide"><label>Процент, %</label><input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-field="taxPercent" data-id="${e.r.id}"></div>
-      </div>
-      <div class="calc-result"><span>Сумма без налога</span><b>${fmt(calc.net)}</b><span>Сумма с налогом · ÷ ${(1-e.tax).toLocaleString('ru-RU',{maximumFractionDigits:2})}</span><b>${fmt(calc.gross)}</b></div></div>`;
-  }).join('');
-  document.getElementById('estsubtotal').textContent=fmt(subtotal);
-  document.getElementById('esttotal').textContent=fmt(total);
-  document.getElementById('estn').textContent=est.size+' '+(est.size%10===1&&est.size%100!==11?'позиция':'позиций');
-  document.getElementById('openBuilder').textContent=`Открыть смету · ${est.size}`;
+function pageHead(kicker, title, description, action = "") { return `<section class="page-head"><div><span>${kicker}</span><h1>${title}</h1><p>${description}</p></div>${action}</section>`; }
+function modal(type) {
+  if (type === "project") return `<dialog open class="modal"><button class="modal-close" data-close>×</button><span>НОВЫЙ ПРОЕКТ · 1 ИЗ 5</span><h2>Что вы производите?</h2><p>Ответ можно выбрать или написать обычными словами — помощник уточнит недостающие параметры.</p><div class="choice-grid"><button>Полный метр<small>80–150 минут</small></button><button>Сериал<small>Серии и блоки</small></button><button>Реклама<small>Ролик или кампания</small></button><button>Другое<small>Опишу самостоятельно</small></button></div>${assistantBar("Например: независимый полный метр, 90 минут…")}<footer><button class="quiet" data-close>Отмена</button><button class="primary">Продолжить →</button></footer></dialog>`;
+  return `<dialog open class="modal feedback"><button class="modal-close" data-close>×</button><span>KINORATES</span><h2>Помогите сделать справочник точнее</h2><p>Сообщите об ошибке или поделитесь актуальной ставкой и первоисточником.</p><form id="feedbackForm"><input class="feedback-honey" name="website" tabindex="-1" autocomplete="off"><label>Тема<select name="type"><option>Нашёл ошибку</option><option>Хочу поделиться актуальной ставкой</option><option>Есть новое письмо цеха</option><option>Другое предложение</option></select></label><label>Ваш email<input name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label><label>Что нужно исправить или добавить<textarea name="message" rows="5" maxlength="5000" placeholder="Укажите цех, профессию, ставку и ссылку на первоисточник" required></label><label class="feedback-consent"><input type="checkbox" required><span>Согласен на передачу указанных данных владельцу KinoRates через FormSubmit и ознакомился с <button type="button" data-privacy>политикой конфиденциальности</button>.</span></label><p class="feedback-status" id="feedbackStatus" role="status" aria-live="polite"></p><footer><button class="quiet" type="button" data-close>Закрыть</button><button class="primary" type="submit">Отправить</button></footer></form></dialog>`;
 }
-// события
-document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();state.words=state.q.split(/\s+/).filter(Boolean);render()});
-uSel.addEventListener('change',e=>{state.unit=e.target.value;render()});
-cSel.addEventListener('change',e=>{state.content=e.target.value;render()});
-document.getElementById('sort').addEventListener('change',e=>{state.sort=e.target.value;render()});
-document.getElementById('only26').addEventListener('change',e=>{state.only26=e.target.checked;render()});
-chips.addEventListener('click',e=>{
-  const b=e.target.closest('.chip'); if(!b) return;
-  state.dept=b.dataset.d;
-  [...chips.querySelectorAll('.chip')].forEach(c=>c.setAttribute('aria-pressed',String(c===b)));
-  render();
-});
-document.getElementById('tb').addEventListener('click',e=>{
-  const add=e.target.closest('[data-add]'),remove=e.target.closest('[data-remove]');
-  if(add||remove){const id=+(add?.dataset.add||remove?.dataset.remove),r=RATE_BY_ID.get(id);
-    if(remove)est.delete(id);else if(!est.has(r.id))est.set(r.id,newEstimate(r));
-    renderEst();saveEstimate();render();return}
-  const tr=e.target.closest('tr.r'); if(!tr) return;
-  const id=+tr.dataset.id;state.open.clear();state.open.add(id);render();renderDetail(RATE_BY_ID.get(id));setInspectorTab('detail');revealMobileDetail();
-});
-document.getElementById('tb').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('tr.r')){e.preventDefault();e.target.closest('tr.r').click()}});
-document.getElementById('detailPane').addEventListener('click',e=>{
-  const add=e.target.closest('[data-add]'),remove=e.target.closest('[data-remove]');if(!add&&!remove)return;
-  const id=+(add?.dataset.add||remove?.dataset.remove),r=RATE_BY_ID.get(id);
-  if(remove)est.delete(id);else if(!est.has(id))est.set(id,newEstimate(r));
-  renderEst();saveEstimate();render();renderDetail(r);
-});
-document.getElementById('estlines').addEventListener('change',e=>{
-  const f=e.target.closest('[data-field]'); if(!f) return;
-  const row=est.get(+f.dataset.id); if(!row)return;
-  if(f.dataset.field==='taxPercent')row.tax=clampNumber(f.value,0,99.99,0)/100;
-  else if(f.dataset.field==='rate')row.rate=clampNumber(f.value,0,1e9,0);
-  else if(f.dataset.field==='qty')row.qty=clampNumber(f.value,0,1e5,0);
-  else if(f.dataset.field==='people')row.people=clampNumber(f.value,0,1e5,0);
-  else row[f.dataset.field]=safeDate(f.value);
-  renderEst();saveEstimate();renderBuilder();
-});
-document.getElementById('estlines').addEventListener('click',e=>{
-  const d=e.target.closest('[data-del]'); if(!d) return; est.delete(+d.dataset.del); renderEst();saveEstimate();renderBuilder();render();
-});
-document.getElementById('clear').addEventListener('click',()=>{est.clear();renderEst();saveEstimate();renderBuilder();render()});
-function budgetRows(){
-  return [...est.values()].map((e,index)=>{
-    const c=calcEstimate(e);
-    return {index:index+1,dept:e.r.dept,prof:e.r.prof,cond:e.r.cond||'',start:e.start,end:e.end,unit:e.r.unit,rate:e.rate,qty:e.r.unit==='месяц'?1:(e.r.unit==='аккорд'?1:e.qty),people:e.people,period:c.period,tax:e.tax,net:c.net,gross:c.gross};
-  });
+function render() {
+  const requestedRoute = location.hash.slice(1).split("/")[0] || "home";
+  const route = requestedRoute === "rates" ? "home" : requestedRoute === "article" ? "knowledge" : requestedRoute;
+  const pages = { home: homeV2, market, projects: projectsV2, knowledge, resources, about };
+  $("#app").innerHTML = `<div class="shell">${sidebar(route)}<main>${topbar(route)}<div class="view">${(pages[route] || home)()}</div></main><button class="scrim" id="scrim"></button><div id="modalRoot"></div></div>`;
+  bind(route);
 }
-function safeSheetText(value){const text=String(value??'').replace(/[\r\n\t]+/g,' ');const trimmed=text.trimStart();return /^[=+\-@]/.test(trimmed)?`'${trimmed}`:text}
-function exportName(ext){return `Предварительная_смета_${new Date().toISOString().slice(0,10)}.${ext}`}
-function downloadBlob(blob,name){
-  const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+function bindQueryLinks() {
+  document.querySelectorAll("[data-query]").forEach((b) => (b.onclick = (event) => { event.preventDefault(); selectedDept = ""; const applyQuery = () => { const input = $("#rateSearch"); if (!input) return; input.value = b.dataset.query; drawRates(); input.focus(); }; if (location.hash === "#home") { render(); requestAnimationFrame(applyQuery); } else { location.hash = "home"; setTimeout(applyQuery, 0); } }));
 }
-function setActionState(btn,text){const initial=btn.textContent;btn.textContent=text;btn.disabled=true;return()=>{btn.textContent=initial;btn.disabled=false}}
-document.getElementById('xlsx').addEventListener('click',async()=>{
-  const btn=document.getElementById('xlsx');
-  if(!est.size){const done=setActionState(btn,'смета пуста');setTimeout(done,1400);return}
-  const done=setActionState(btn,'создаю…');
-  try{
-    await ensureExcelJS();
-    const rows=budgetRows(),workbook=new ExcelJS.Workbook(),sheet=workbook.addWorksheet('Смета');
-    workbook.creator='KinoRates';workbook.title='KinoRates — Предварительная смета';workbook.subject='Предварительный расчёт ставок кинопроизводства';workbook.company='KinoRates';workbook.created=new Date();
-    sheet.mergeCells('A1:N1');sheet.getCell('A1').value='KinoRates · Предварительная смета';
-    sheet.getCell('A1').font={name:'Arial',size:16,bold:true,color:{argb:'FF181B18'}};sheet.getCell('A1').alignment={vertical:'middle'};sheet.getRow(1).height=30;
-    sheet.mergeCells('A2:N2');sheet.getCell('A2').value='Ставки носят рекомендательный характер. Финальная ставка определяется сторонами по договорённости.';
-    sheet.getCell('A2').font={name:'Arial',size:10,bold:true,color:{argb:'FFAD3C36'}};sheet.getRow(2).height=24;
-    const headers=['№','Цех','Позиция','Условие','Прикрепление','Открепление','Ед.','Ставка','Объём','Специалистов','Период','Процент','Без налога','С налогом'];
-    sheet.addRow(headers);
-    rows.forEach(r=>sheet.addRow([r.index,safeSheetText(r.dept),safeSheetText(r.prof),safeSheetText(r.cond),r.start,r.end,safeSheetText(r.unit),r.rate,r.qty,r.people,r.period,r.tax,r.net,r.gross]));
-    const net=rows.reduce((s,r)=>s+r.net,0),gross=rows.reduce((s,r)=>s+r.gross,0),totalRow=sheet.addRow(['','','ИТОГО','','','','','','','','','',net,gross]);
-    sheet.columns=[6,24,28,34,14,14,12,15,10,12,11,11,16,16].map(width=>({width}));
-    const header=sheet.getRow(3);header.height=25;header.eachCell(cell=>{cell.font={name:'Arial',size:10,bold:true,color:{argb:'FFFFFFFF'}};cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF252925'}};cell.alignment={vertical:'middle',wrapText:true}});
-    sheet.eachRow((row,rowNumber)=>{if(rowNumber>3){row.alignment={vertical:'top',wrapText:true};row.font={name:'Arial',size:10};row.height=32}});
-    ['H','M','N'].forEach(col=>{sheet.getColumn(col).numFmt='#,##0" ₽"'});sheet.getColumn('K').numFmt='0.00';sheet.getColumn('L').numFmt='0.00%';
-    totalRow.font={name:'Arial',size:11,bold:true};totalRow.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1F3EF'}};
-    sheet.views=[{state:'frozen',ySplit:3}];sheet.autoFilter={from:'A3',to:`N${Math.max(3,3+rows.length)}`};
-    sheet.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9};
-    const buffer=await workbook.xlsx.writeBuffer();
-    downloadBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),exportName('xlsx'));
-    btn.textContent='готово ✓';setTimeout(done,1400);
-  }catch(err){console.error(err);btn.textContent='ошибка';setTimeout(done,1800)}
-});
-document.getElementById('pdf').addEventListener('click',async()=>{
-  const btn=document.getElementById('pdf');
-  if(!est.size){const done=setActionState(btn,'смета пуста');setTimeout(done,1400);return}
-  const done=setActionState(btn,'создаю…');
-  try{
-    await ensurePdfMake();
-    const rows=budgetRows(),money=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
-    const body=[['№','Цех / позиция','Даты','Ед.','Ставка','Объём / период','Спец.','%','Без налога','С налогом'].map(text=>({text,bold:true,color:'#ffffff'}))];
-    rows.forEach(r=>body.push([String(r.index),`${r.dept}\n${r.prof}`,`${r.start||'—'} - ${r.end||'—'}`,r.unit,money(r.rate),`${r.qty} / ${r.period.toLocaleString('ru-RU',{maximumFractionDigits:2})}`,String(r.people),`${(r.tax*100).toLocaleString('ru-RU',{maximumFractionDigits:2})}%`,money(r.net),money(r.gross)]));
-    const net=rows.reduce((s,r)=>s+r.net,0),gross=rows.reduce((s,r)=>s+r.gross,0);
-    body.push(['','','','','','','', 'ИТОГО',money(net),money(gross)]);
-    const doc={pageSize:'A4',pageOrientation:'landscape',pageMargins:[28,34,28,32],
-      info:{title:'KinoRates — Предварительная смета',author:'KinoRates',subject:'Предварительный расчёт ставок кинопроизводства',creator:'KinoRates'},defaultStyle:{font:'Roboto',fontSize:7.5,color:'#181b18'},
-      content:[{text:'KINORATES',fontSize:7.5,bold:true,color:'#2457f5',characterSpacing:1.2,margin:[0,0,0,3]},{text:'Предварительная смета',fontSize:17,bold:true,margin:[0,0,0,5]},
-        {text:'Все ставки носят рекомендательный характер. Финальная ставка определяется продюсером и контрагентом по договорённости.',fontSize:8.5,bold:true,color:'#ad3c36',margin:[0,0,0,14]},
-        {table:{headerRows:1,widths:[16,126,66,38,52,56,32,28,62,62],body},layout:{fillColor:(i)=>i===0?'#252925':i===body.length-1?'#f1f3ef':null,hLineColor:()=> '#dfe2dc',vLineColor:()=> '#dfe2dc',paddingLeft:()=>4,paddingRight:()=>4,paddingTop:()=>5,paddingBottom:()=>5},
-          style:'budgetTable'}],
-      styles:{budgetTable:{fontSize:7}},
-      footer:(current,pageCount)=>({columns:[{text:'KinoRates',alignment:'left'},{text:`${current} / ${pageCount}`,alignment:'right'}],margin:[28,8,28,0],fontSize:7,color:'#818781'})};
-    pdfMake.createPdf(doc).download(exportName('pdf'),()=>{btn.textContent='готово ✓';setTimeout(done,1400)});
-  }catch(err){console.error(err);btn.textContent='ошибка';setTimeout(done,1800)}
-});
-
-// Полноэкранный конструктор: плотная сметная таблица и быстрый каталог.
-const builder=document.getElementById('builder');
-function renderQuickCatalog(query=''){
-  const words=query.trim().toLowerCase().split(/\s+/).filter(Boolean),rows=[];
-  for(const r of DATA){
-    if(rows.length>=80)break;
-    if(!isScreenwriter(r)&&r.amount!=null&&words.every(w=>(QUICK_SEARCH_BY_ID.get(r.id)||'').includes(w)))rows.push(r);
-  }
-  document.getElementById('quickResults').innerHTML=rows.length?rows.map(r=>`<button class="quick-item" data-quick-add="${r.id}"><span><b>${r.prof}</b><small>${r.dept} · ${r.content} · ${r.unit}</small><small class="quick-condition">${r.cond||'Условие не указано'}</small></span><span>${Math.round(r.amount).toLocaleString('ru-RU')} ₽</span></button>`).join(''):'<div class="detail-empty">Ничего не найдено</div>';
+function bind(route) {
+  document.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => (location.hash = b.dataset.go)));
+  document.querySelectorAll("[data-new]").forEach((b) => (b.onclick = () => (location.hash = "projects")));
+  document.querySelectorAll("[data-feedback]").forEach((b) => (b.onclick = () => openModal("feedback")));
+  document.querySelectorAll("[data-privacy]").forEach((b) => (b.onclick = openPrivacy));
+  $("#menu").onclick = () => { $("#sidebar").classList.toggle("open"); $("#scrim").classList.toggle("show"); };
+  $("#scrim").onclick = () => { $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("show"); };
+  bindQueryLinks();
+  document.querySelectorAll("[data-focus-search]").forEach((b) => (b.onclick = () => { if (route === "home") return $("#rateSearch")?.focus(); location.hash = "home"; setTimeout(() => $("#rateSearch")?.focus(), 0); }));
+  if (["home", "rates"].includes(route)) { drawRates(); $("#rateSearch").oninput = drawRates; $("#rateStatus").onchange = drawRates; document.querySelectorAll(".suggested button").forEach((b) => (b.onclick = () => { selectedDept = ""; $("#rateSearch").value = b.textContent; drawRates(); })); document.querySelectorAll("[data-dept]").forEach((b) => (b.onclick = () => { selectedDept = b.dataset.dept; render(); })); }
+  if (route === "projects") { document.querySelectorAll("[data-budget-field]").forEach((input) => (input.onchange = () => { const item = budgetItems[+input.dataset.budgetIndex], field = input.dataset.budgetField, numeric = ["rate", "qty", "periods", "extra", "tax"].includes(field); item[field] = numeric ? dec2(input.value) : input.value; if (["start", "end"].includes(field) && item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods); saveBudget(); render(); })); document.querySelectorAll("[data-tax-preset]").forEach((select) => (select.onchange = () => { const item = budgetItems[+select.dataset.taxPreset]; if (select.value === "manual") { const input = select.parentElement.querySelector(".tax-manual"); input.hidden = false; input.focus(); return; } item.tax = +select.value || 0; saveBudget(); render(); })); document.querySelectorAll(".date-input").forEach((input) => (input.onclick = () => { if (typeof input.showPicker === "function") input.showPicker(); })); document.querySelectorAll("[data-budget-delete]").forEach((button) => (button.onclick = () => { budgetItems.splice(+button.dataset.budgetDelete, 1); saveBudget(); render(); })); document.querySelectorAll("[data-add-custom]").forEach((button) => (button.onclick = addCustomBudgetItem)); const excel = $("[data-export-excel]"), pdf = $("[data-export-pdf]"); if (excel) excel.onclick = exportBudgetExcel; if (pdf) pdf.onclick = exportBudgetPdf; }
 }
-function inputFor(e){
-  if(e.r.unit==='месяц')return `<div class="input-stack two"><label>Прикрепление<input class="${e.start?'':'needs-input'}" type="date" value="${e.start}" data-builder-field="start" data-id="${e.r.id}" aria-invalid="${e.start?'false':'true'}"></label><label>Открепление<input class="${e.end?'':'needs-input'}" type="date" value="${e.end}" data-builder-field="end" data-id="${e.r.id}" aria-invalid="${e.end?'false':'true'}"></label></div>`;
-  if(e.r.unit==='аккорд')return `<div class="input-stack"><label>Аккорд<span class="fixed-input">1</span></label></div>`;
-  return `<div class="input-stack"><label>${quantityLabel(e.r.unit)}<input class="${e.qty>0?'':'needs-input'}" type="number" min="0" max="100000" step="1" value="${e.qty}" data-builder-field="qty" data-id="${e.r.id}" aria-invalid="${e.qty>0?'false':'true'}"></label></div>`;
+function openModal(type) { $("#modalRoot").innerHTML = modal(type); document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => ($("#modalRoot").innerHTML = ""))); document.querySelectorAll("[data-privacy]").forEach((b) => (b.onclick = openPrivacy)); if (type === "feedback") bindFeedbackForm(); }
+function openPrivacy() { const dialog = $("#privacyDialog"); if (!dialog) return; if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", ""); }
+function bindFeedbackForm() {
+  const form = $("#feedbackForm"), status = $("#feedbackStatus"); if (!form) return;
+  form.onsubmit = async (event) => {
+    event.preventDefault(); const data = new FormData(form), type = data.get("type"), email = String(data.get("email") || "").trim(), message = String(data.get("message") || "").trim();
+    if (data.get("website")) return; const button = form.querySelector('[type="submit"]'); button.disabled = true; button.textContent = "Отправляем…"; status.textContent = "";
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/1b36541ff7e8949ab6f3d1b9124677d4", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ _subject: `KinoRates — ${type}`, type, email, message, page: location.href, _honey: "" }) });
+      const result = await response.json(); if (!response.ok || result.success === false || result.success === "false") throw new Error("send-failed"); status.textContent = "Сообщение отправлено. Спасибо!"; status.className = "feedback-status ok"; form.reset(); button.textContent = "Отправлено ✓";
+    } catch {
+      status.textContent = "Браузер заблокировал прямую отправку. Открываем почтовый клиент…"; status.className = "feedback-status error"; window.location.href = `mailto:snegproduction@gmail.com?subject=${encodeURIComponent(`KinoRates — ${type}`)}&body=${encodeURIComponent(`${message}\n\nОтветить: ${email}\nСтраница: ${location.href}`)}`; button.disabled = false; button.textContent = "Отправить";
+    }
+  };
 }
-function renderBuilder(){
-  const values=[...est.values()];let net=0,gross=0;
-  const rows=values.map((e,index)=>{const c=calcEstimate(e),scope=[e.r.content,e.r.cond].filter(Boolean).join(' · ');net+=c.net;gross+=c.gross;return `<div class="budget-row"><div>${index+1}</div><div class="position"><b>${esc(e.r.prof)}</b><small>${esc(e.r.dept)}</small>${scope?`<small class="position-scope">${esc(scope)}</small>`:''}</div><div class="unit">${esc(e.r.unit)}</div><div><div class="input-stack"><label>Ставка<input class="${e.rate>0?'':'needs-input'}" type="number" min="0" max="1000000000" step="100" value="${e.rate}" data-builder-field="rate" data-id="${e.r.id}" aria-label="Ставка" aria-invalid="${e.rate>0?'false':'true'}"></label>${rateRangeHint(e.r)}</div></div><div>${inputFor(e)}</div><div><div class="input-stack"><label>Специалистов<input class="${e.people>0?'':'needs-input'}" type="number" min="0" max="100000" step="1" value="${e.people}" data-builder-field="people" data-id="${e.r.id}" aria-label="Специалистов" aria-invalid="${e.people>0?'false':'true'}"></label></div></div><div><div class="input-stack"><label>Процент<input type="number" min="0" max="99.99" step="0.5" value="${Number((e.tax*100).toFixed(2))}" data-builder-field="taxPercent" data-id="${e.r.id}" aria-label="Процент"></label></div></div><div class="money">${fmt(c.net)}</div><div class="money">${fmt(c.gross)}</div><div><button class="row-remove" data-builder-del="${e.r.id}" aria-label="Удалить">×</button></div></div>`}).join('');
-  const addCustom='<div class="budget-add-row"><button data-builder-custom>+ Добавить свою статью</button></div>';
-  document.getElementById('builderRows').innerHTML=values.length?`<div class="budget-table"><div class="budget-row head"><div>№</div><div>Цех / позиция</div><div>Ед.</div><div>Ставка, ₽</div><div>Параметр расчёта</div><div>Спец.</div><div>%</div><div>Без налога, ₽</div><div>С налогом, ₽</div><div></div></div>${rows}${addCustom}</div>`:`<div class="budget-empty"><div><b>Смета пока пуста</b><br>Найдите позицию в каталоге слева и добавьте её в расчёт.</div></div>${addCustom}`;
-  document.getElementById('builderCount').textContent=values.length;
-  document.getElementById('builderNet').textContent=fmt(net);
-  document.getElementById('builderGross').textContent=fmt(gross);
+const METRIKA_ID = 111489870, CONSENT_KEY = "kinorates_analytics_consent";
+let metrikaStarted = false;
+function consentValue() { try { return localStorage.getItem(CONSENT_KEY); } catch { return null; } }
+function startMetrika() {
+  if (metrikaStarted || location.protocol === "file:") return; metrikaStarted = true;
+  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a)})(window,document,"script",`https://mc.yandex.ru/metrika/tag.js?id=${METRIKA_ID}`,"ym");
+  window.ym(METRIKA_ID, "init", { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", accurateTrackBounce: true, trackLinks: true });
 }
-function openBuilder(){renderBuilder();renderQuickCatalog();builder.hidden=false;document.body.style.overflow='hidden';document.getElementById('quickSearch').focus()}
-function closeBuilder(){builder.hidden=true;document.body.style.overflow='';renderEst();render()}
-document.getElementById('openBuilder').addEventListener('click',openBuilder);
-document.getElementById('closeBuilder').addEventListener('click',closeBuilder);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!builder.hidden)closeBuilder()});
-document.getElementById('quickSearch').addEventListener('input',e=>renderQuickCatalog(e.target.value));
-document.getElementById('quickResults').addEventListener('click',e=>{const b=e.target.closest('[data-quick-add]');if(!b)return;const r=RATE_BY_ID.get(Number(b.dataset.quickAdd));if(!est.has(r.id))est.set(r.id,newEstimate(r));saveEstimate();renderBuilder();renderEst()});
-document.getElementById('builderRows').addEventListener('change',e=>{const f=e.target.closest('[data-builder-field]');if(!f)return;const row=est.get(+f.dataset.id);if(!row)return;if(f.dataset.builderField==='taxPercent')row.tax=clampNumber(f.value,0,99.99,0)/100;else if(f.dataset.builderField==='rate')row.rate=clampNumber(f.value,0,1e9,0);else if(f.dataset.builderField==='qty')row.qty=clampNumber(f.value,0,1e5,0);else if(f.dataset.builderField==='people')row.people=clampNumber(f.value,0,1e5,0);else row[f.dataset.builderField]=safeDate(f.value);saveEstimate();renderBuilder();renderEst()});
-document.getElementById('builderRows').addEventListener('click',e=>{const custom=e.target.closest('[data-builder-custom]');if(custom){openCustom();return}const b=e.target.closest('[data-builder-del]');if(!b)return;est.delete(+b.dataset.builderDel);saveEstimate();renderBuilder();renderEst()});
-document.getElementById('builderClear').addEventListener('click',()=>{if(!est.size||confirm('Очистить все позиции сметы?')){est.clear();saveEstimate();renderBuilder();renderEst()}});
-document.getElementById('builderXlsx').addEventListener('click',()=>document.getElementById('xlsx').click());
-document.getElementById('builderPdf').addEventListener('click',()=>document.getElementById('pdf').click());
-
-// Пользовательская статья расходов сохраняется и экспортируется как обычная позиция сметы.
-const customDialog=document.getElementById('customDialog');
-function openCustom(){if(typeof customDialog.showModal==='function')customDialog.showModal();else customDialog.setAttribute('open','')}
-document.getElementById('customOpen').addEventListener('click',openCustom);
-document.getElementById('customClose').addEventListener('click',()=>customDialog.close());
-customDialog.addEventListener('click',e=>{if(e.target===customDialog)customDialog.close()});
-document.getElementById('customForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  let id=-Date.now();while(est.has(id))id--;
-  const unit=SAFE_UNITS.includes(document.getElementById('customUnit').value)?document.getElementById('customUnit').value:'проект',rate=clampNumber(document.getElementById('customRate').value,0,1e9,0),qty=clampNumber(document.getElementById('customQty').value,1,1e5,1);
-  const r=sanitizeCustomRecord({id,custom:true,dept:document.getElementById('customDept').value,prof:document.getElementById('customName').value,cond:document.getElementById('customCond').value,unit,amount:rate});if(!r)return;
-  est.set(id,{r,start:'',end:'',rate,qty:unit==='аккорд'?1:qty,people:1,tax:.08});saveEstimate();renderEst();renderBuilder();customDialog.close();e.currentTarget.reset();document.getElementById('customRate').value=0;document.getElementById('customQty').value=1;
-});
-
-// Журнал обновлений: данные лежат отдельно в updates.js, чтобы их можно было дополнять автоматически.
-const updatesDialog=document.getElementById('updatesDialog'),updates=[...(Array.isArray(window.KINORATES_UPDATES)?window.KINORATES_UPDATES:[]),...(Array.isArray(window.KINORATES_CHECKS)?window.KINORATES_CHECKS:[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-const safeUpdateUrl=url=>{if(typeof url!=='string'||!url.trim())return'';try{const u=new URL(url);return u.protocol==='https:'?u.href:''}catch(e){return''}};
-const updatesEscape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-document.getElementById('updatesCount').textContent=updates.length;
-document.getElementById('updatesList').innerHTML=updates.length?updates.map(item=>{
-  const type=item.type==='data'?'База ставок':item.type==='check'?'Проверка':'Сервис',url=safeUpdateUrl(item.url);
-  return '<article class="update-item"><div class="update-meta"><time datetime="'+updatesEscape(item.date)+'">'+updatesEscape(item.dateLabel)+'</time><span class="update-type '+(item.type==='data'?'data':item.type==='check'?'check':'')+'">'+type+'</span></div><div class="update-content"><h3>'+updatesEscape(item.title)+'</h3><p>'+updatesEscape(item.text)+'</p>'+(url?'<a href="'+updatesEscape(url)+'" target="_blank" rel="noopener">Открыть источник →</a>':'')+'</div></article>'
-}).join(''):'<p class="updates-empty">Записей об обновлениях пока нет.</p>';
-document.getElementById('updatesOpen').addEventListener('click',()=>{if(typeof updatesDialog.showModal==='function')updatesDialog.showModal();else updatesDialog.setAttribute('open','')});
-document.getElementById('updatesClose').addEventListener('click',()=>updatesDialog.close());
-updatesDialog.addEventListener('click',e=>{if(e.target===updatesDialog)updatesDialog.close()});
-
-// Обратная связь отправляется через FormSubmit; состав передаваемых данных описан в privacy notice.
-const feedbackDialog=document.getElementById('feedbackDialog'),feedbackCooldownKey='kinorates_feedback_last_sent';
-let feedbackOpenedAt=0;
-function openFeedback(){feedbackOpenedAt=Date.now();if(typeof feedbackDialog.showModal==='function')feedbackDialog.showModal();else feedbackDialog.setAttribute('open','')}
-document.getElementById('feedbackOpen').addEventListener('click',openFeedback);
-document.getElementById('builderFeedback').addEventListener('click',openFeedback);
-document.getElementById('feedbackClose').addEventListener('click',()=>feedbackDialog.close());
-feedbackDialog.addEventListener('click',e=>{if(e.target===feedbackDialog)feedbackDialog.close()});
-document.getElementById('feedbackForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const form=e.currentTarget,button=form.querySelector('.feedback-submit'),status=document.getElementById('feedbackStatus');
-  const type=document.getElementById('feedbackType').value,email=document.getElementById('feedbackEmail').value.trim(),message=document.getElementById('feedbackText').value.trim(),honeypot=document.getElementById('feedbackWebsite').value.trim();
-  let lastSent=0;try{lastSent=Number(localStorage.getItem(feedbackCooldownKey)||0)}catch(_){}
-  if(honeypot||Date.now()-feedbackOpenedAt<1500||Date.now()-lastSent<30000){status.className='feedback-status error';status.textContent='Не удалось отправить сообщение. Попробуйте ещё раз через минуту.';return}
-  button.disabled=true;button.textContent='Отправляем…';status.className='feedback-status';status.textContent='';
-  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
-  try{
-    if(location.protocol==='file:')throw new Error('local-page');
-    const response=await fetch('https://formsubmit.co/ajax/1b36541ff7e8949ab6f3d1b9124677d4',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:`Ставки цехов — ${type}`,type,email,message,page:location.origin+location.pathname,_honey:''})});
-    const data=await response.json();
-    if(!response.ok||data.success===false||data.success==='false')throw new Error(data.message||'Ошибка отправки');
-    status.className='feedback-status ok';status.textContent='Сообщение отправлено. Спасибо!';try{localStorage.setItem(feedbackCooldownKey,String(Date.now()))}catch(_){}form.reset();button.textContent='Отправлено ✓';
-    setTimeout(()=>{feedbackDialog.close();button.disabled=false;button.textContent='Отправить →';status.textContent=''},1800);
-  }catch(error){
-    console.warn('Отправка обратной связи не удалась.',error);
-    status.className='feedback-status error';status.textContent='Не удалось отправить сообщение. Попробуйте ещё раз через минуту.';button.disabled=false;button.textContent='Отправить →';
-  }finally{clearTimeout(timeout)}
-});
-// источники
-document.getElementById('slist').innerHTML = SRC.map(s=>{
-  const url=safeExternalUrl(s.url);
-  return `<div class="sitem"><time>${esc(s.date)}</time>
-  ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`:`<span class="no">${esc(s.name)}</span>`}</div>`;
-}).join('');
-render();renderEst();setInspectorTab('detail');
+function saveConsent(value) { try { localStorage.setItem(CONSENT_KEY, value); } catch {} const banner = $("#cookieBanner"); if (banner) banner.hidden = true; if (value === "granted") startMetrika(); else if (metrikaStarted) location.reload(); }
+function initPrivacyControls() {
+  const banner = $("#cookieBanner"), privacy = $("#privacyDialog"), accept = $("#cookieAccept"), reject = $("#cookieReject"), close = $("#privacyClose");
+  const consent = consentValue(); if (consent === "granted") startMetrika(); else if (banner && consent !== "denied") banner.hidden = false;
+  if (accept) accept.onclick = () => saveConsent("granted"); if (reject) reject.onclick = () => saveConsent("denied"); if (close) close.onclick = () => privacy?.close();
+  if (privacy) privacy.onclick = (event) => { if (event.target === privacy) privacy.close(); };
+}
+window.addEventListener("hashchange", () => { render(); if (metrikaStarted && window.ym) window.ym(METRIKA_ID, "hit", `${location.pathname}${location.hash}`, { title: document.title }); });
+initPrivacyControls();
+render();

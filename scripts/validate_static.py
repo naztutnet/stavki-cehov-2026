@@ -46,5 +46,10 @@ if '<style>' in index: fail('Inline CSS unexpectedly returned to index.html')
 for token in ('FilmRate','FILMRATE_CHECKS','filmrate.ru'):
     for path in ('app.js','index.html','rates-data.js','sources-data.js','market-data.js'):
         if token in (root/path).read_text(encoding='utf-8'): fail(f'Legacy token {token} found in {path}')
-if '<lastmod>2026-08-13</lastmod>' not in (root/'sitemap.xml').read_text(encoding='utf-8'): fail('sitemap lastmod was not refreshed')
+for required in ('<meta name="robots" content="index, follow, max-image-preview:large">','<link rel="canonical" href="https://kinorates.ru/">','id="cookieBanner"','id="privacyDialog"'):
+    if required not in index: fail(f'Missing production metadata or privacy control: {required}')
+for required in ('METRIKA_ID = 111489870','kinorates_analytics_consent','location.protocol === "file:"'):
+    if required not in app: fail(f'Missing analytics safeguard: {required}')
+if 'class="avatar">АН' in app: fail('Authorization avatar is present without authorization')
+if '<lastmod>2026-08-18</lastmod>' not in (root/'sitemap.xml').read_text(encoding='utf-8'): fail('sitemap lastmod was not refreshed')
 print(f'Static validation OK: {len(dom_refs)} DOM refs, OG {w}x{h}, asset version {next(iter(versions.values()))}')
