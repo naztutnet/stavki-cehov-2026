@@ -162,7 +162,10 @@ async function exportBudgetPdf() {
     budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit); body.push([{ text: `${x.prof}\n${x.dept} · ${x.unit}` }, money(x.rate), dec2(x.qty), dec2((monthly ? attachmentFactor(x.start, x.end) : null) ?? x.periods), monthly ? shortDate(x.start) || "—" : "—", monthly ? shortDate(x.end) || "—" : "—", money(x.extra), `${dec2(x.tax)}%`, money(itemNet(x)), money(itemGross(x))]); });
     body.push([{ text: "ИТОГО", bold: true, colSpan: 8 }, {}, {}, {}, {}, {}, {}, {}, { text: money(budgetItems.reduce((s, x) => s + itemNet(x), 0)), bold: true }, { text: money(budgetItems.reduce((s, x) => s + itemGross(x), 0)), bold: true }]);
     const doc = { pageSize: "A4", pageOrientation: "landscape", pageMargins: [28, 32, 28, 32], info: { title: "KinoRates — Рабочая смета", author: "KinoRates", creator: "KinoRates" }, defaultStyle: { font: "Roboto", fontSize: 7.3, color: "#27262D" }, content: [{ text: "KINORATES", bold: true, fontSize: 8, color: "#6D4AFF", characterSpacing: 1.2, margin: [0, 0, 0, 4] }, { text: "Рабочая смета", bold: true, fontSize: 18, margin: [0, 0, 0, 4] }, { text: `${budgetItems.length} позиций · сформировано ${new Date().toLocaleString("ru-RU")}`, color: "#77777F", margin: [0, 0, 0, 13] }, { table: { headerRows: 1, widths: [116, 52, 31, 33, 52, 52, 50, 34, 59, 59], body }, layout: { fillColor: (i) => i === 0 ? "#6D4AFF" : i === body.length - 1 ? "#F3F2F7" : null, hLineColor: () => "#E5E4E9", vLineColor: () => "#E5E4E9", paddingLeft: () => 4, paddingRight: () => 4, paddingTop: () => 5, paddingBottom: () => 5 } }], footer: (current, count) => ({ columns: [{ text: "KinoRates · предварительный расчёт", alignment: "left" }, { text: `${current} / ${count}`, alignment: "right" }], margin: [28, 8, 28, 0], fontSize: 7, color: "#88858E" }) };
-    window.pdfMake.createPdf(doc).download(exportName("pdf"));
+    const pdfBlob = await new Promise((resolve, reject) => {
+      try { window.pdfMake.createPdf(doc).getBlob(resolve); } catch (error) { reject(error); }
+    });
+    downloadBlob(pdfBlob, "application/pdf", exportName("pdf"));
   } catch (error) {
     console.error("PDF export failed", error);
     alert("Не удалось сформировать PDF. Обновите страницу и попробуйте ещё раз.");
