@@ -5,11 +5,15 @@
 })(typeof globalThis !== "undefined" ? globalThis : window, () => {
   const FILTERS = [
     { id: "all", label: "Все" },
-    { id: "feature", label: "Полный метр" },
-    { id: "series", label: "Сериал" },
-    { id: "advertising", label: "Реклама" },
-    { id: "clip-tv", label: "Клип / ТВ" },
+    { id: "cinema-series", label: "Кино и сериал" },
+    { id: "commercial-media", label: "Реклама / клип / ТВ" },
   ];
+  const FILTER_ALIASES = {
+    feature: "cinema-series",
+    series: "cinema-series",
+    advertising: "commercial-media",
+    "clip-tv": "commercial-media",
+  };
 
   const normalize = (value) => String(value ?? "")
     .toLocaleLowerCase("ru-RU")
@@ -19,7 +23,6 @@
 
   const hasFullMeterSignal = (value) => /(полный\s+метр|полнометраж|полные\s+метры|фильм|(?:не)?прокатн\w*\s+кино)/i.test(value);
   const hasSeriesSignal = (value) => /(сериал|многосерийн|\bсери(?:я|и|й|ю|е)\b|эпизод|пилот)/i.test(value);
-  const hasCombinedScreenSignal = (value) => /(?:кино|фильм\w*)\s*[\/]\s*сериал/i.test(value);
   const hasShortMeterSignal = (value) => /(коротк\w*\s+метр|короткометраж|(?:^|\s)к-м(?:\s|$))/i.test(value);
   const hasAdvertisingSignal = (value) => /реклам/i.test(value);
   const hasClipTvSignal = (value) => /(клип|музыкальн\w*\s+видео|(?:^|[^а-я])тв(?:[^а-я]|$)|телевид|интернет-шоу|шоу|подкаст|реалити)/i.test(value);
@@ -35,38 +38,31 @@
     const sharedScreenContent = content.includes("кино") && content.includes("сериал");
     const conditionIsFull = hasFullMeterSignal(condition);
     const conditionIsSeries = hasSeriesSignal(condition);
-    const conditionIsShared = hasCombinedScreenSignal(condition) || (conditionIsFull && conditionIsSeries);
     const conditionIsShortOnly = hasShortMeterSignal(condition) && !conditionIsFull && !conditionIsSeries;
 
-    if (fullContent) types.push("feature");
-    if (seriesContent) types.push("series");
+    const hasCinemaSeriesType = conditionIsFull
+      || conditionIsSeries
+      || ((fullContent || seriesContent || sharedScreenContent) && !conditionIsShortOnly);
+    if (hasCinemaSeriesType) types.push("cinema-series");
 
-    if (sharedScreenContent) {
-      if (conditionIsShared || (!conditionIsFull && !conditionIsSeries && !conditionIsShortOnly)) {
-        types.push("feature", "series");
-      } else if (conditionIsFull) {
-        types.push("feature");
-      } else if (conditionIsSeries) {
-        types.push("series");
-      }
-    } else if (!fullContent && !seriesContent) {
-      if (conditionIsFull) types.push("feature");
-      if (conditionIsSeries) types.push("series");
-    }
-
-    if (hasAdvertisingSignal(searchable)) types.push("advertising");
-    if (hasClipTvSignal(searchable)) types.push("clip-tv");
+    if (hasAdvertisingSignal(searchable) || hasClipTvSignal(searchable)) types.push("commercial-media");
 
     return [...new Set(types)];
   }
 
+  function normalizeFilterId(filterId) {
+    const resolved = FILTER_ALIASES[filterId] || filterId;
+    return FILTERS.some(({ id }) => id === resolved) ? resolved : "all";
+  }
+
   function matchesType(rate, filterId) {
-    return filterId === "all" || classifyRate(rate).includes(filterId);
+    const normalizedFilterId = normalizeFilterId(filterId);
+    return normalizedFilterId === "all" || classifyRate(rate).includes(normalizedFilterId);
   }
 
   function countByType(rates) {
     return Object.fromEntries(FILTERS.map(({ id }) => [id, rates.filter((rate) => matchesType(rate, id)).length]));
   }
 
-  return { FILTERS, classifyRate, matchesType, countByType };
+  return { FILTERS, classifyRate, matchesType, countByType, normalizeFilterId };
 });

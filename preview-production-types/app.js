@@ -1,23 +1,23 @@
 // One read-only KinoRates variant for testing production-type filtering on the canonical dataset.
 const RATES = window.KINORATES_DATA || [];
 const TYPE_FILTER = window.KINORATES_TYPE_FILTER;
+const SITE_UPDATES = Array.isArray(window.KINORATES_SITE_UPDATES) ? window.KINORATES_SITE_UPDATES : [];
 const $ = (selector) => document.querySelector(selector);
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 const normalizeSearch = (value) => String(value ?? "").toLocaleLowerCase("ru-RU").replaceAll("ё", "е").trim();
 const rub = (value) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(+value || 0)} ₽`;
-const validFilterIds = new Set((TYPE_FILTER?.FILTERS || []).map(({ id }) => id));
-const initialType = new URLSearchParams(location.search).get("type");
+const initialParams = new URLSearchParams(location.search);
+const initialType = initialParams.get("type");
+const selectedPage = initialParams.get("page") === "updates" ? "updates" : "rates";
 
-let selectedType = validFilterIds.has(initialType) ? initialType : "all";
+let selectedType = TYPE_FILTER?.normalizeFilterId(initialType) || "all";
 let selectedDept = "";
 let expandedRateId = "";
 
 const descriptions = {
   all: "Весь канонический набор без исключений и новых категорий.",
-  feature: "Общие ставки «Кино / сериал» и записи, явно относящиеся к полному метру.",
-  series: "Общие ставки «Кино / сериал» и записи, явно относящиеся к сериалам.",
-  advertising: "Только записи с прямым указанием рекламы в content или cond. Пересчёта из киношных ставок нет.",
-  "clip-tv": "Записи с прямым указанием клипа, музыкального видео, ТВ, шоу, подкаста или реалити.",
+  "cinema-series": "Общие и специальные ставки для полного метра и сериалов — в одном режиме.",
+  "commercial-media": "Реклама, клипы, музыкальное видео, ТВ и шоу — только когда этот тип прямо указан в content или cond. Пересчёта из киношных ставок нет.",
 };
 
 function statusMeta(rate) {
@@ -67,20 +67,33 @@ function typeButtons() {
   return TYPE_FILTER.FILTERS.map(({ id, label }) => `<button type="button" role="tab" aria-selected="${selectedType === id}" class="type-tab ${selectedType === id ? "active" : ""}" data-type="${id}"><span>${esc(label)}</span><b>${counts[id]}</b></button>`).join("");
 }
 
+function ratesView() {
+  return `<div class="view">
+    <section class="intro"><div><span class="eyebrow">КАНОНИЧЕСКИЙ НАБОР · ${RATES.length} СТАВОК</span><h1>Ставки по типу производства</h1><p>Одна запись может относиться к нескольким режимам. Категории определяются только существующими полями <code>content</code> и <code>cond</code>.</p></div><div class="dataset-mark"><span>Источник данных</span><b>rates-data.js</b><small>без копии ставок</small></div></section>
+    <section class="type-panel"><div class="type-tabs" role="tablist" aria-label="Тип производства">${typeButtons()}</div><p id="typeDescription">${esc(descriptions[selectedType])}</p></section>
+    <section class="registry"><aside class="dept-list" id="deptList"></aside><div class="registry-main"><div class="controls"><label class="search"><span aria-hidden="true">⌕</span><input id="rateSearch" type="search" autocomplete="off" placeholder="Профессия, цех или условие"></label><button type="button" class="clear" id="clearFilters">Сбросить</button></div><div id="rateTable"></div></div></section>
+  </div>`;
+}
+
+function updatesView() {
+  const entries = SITE_UPDATES.map((update) => `<article class="release-card"><div class="release-meta"><time datetime="${esc(update.date)}">${esc(update.dateLabel)}</time><span>${esc(update.type)}</span></div><div class="release-copy"><h2>${esc(update.title)}</h2><p>${esc(update.text)}</p></div></article>`).join("");
+  return `<div class="view updates-view">
+    <section class="intro"><div><span class="eyebrow">ЖУРНАЛ ПРОДУКТА</span><h1>Обновления KinoRates</h1><p>Основные изменения сайта, базы ставок и рабочих инструментов — коротко и без технических деталей.</p></div><div class="dataset-mark"><span>Последнее обновление</span><b>${esc(SITE_UPDATES[0]?.dateLabel || "—")}</b><small>${SITE_UPDATES.length} записей</small></div></section>
+    <section class="release-feed" aria-label="Лента обновлений">${entries || '<div class="empty"><b>Обновлений пока нет</b></div>'}</section>
+  </div>`;
+}
+
 function page() {
+  const pageLabel = selectedPage === "updates" ? "Обновления" : "Фильтр производства";
   return `<div class="shell">
     <aside class="sidebar">
       <a class="brand" href="../" aria-label="Открыть KinoRates"><i>K</i><span><b>KinoRates</b><small>СТАВКИ КИНОЦЕХОВ</small></span></a>
-      <nav aria-label="Раздел прототипа"><span>ПРОТОТИП</span><a class="active" href="./">Фильтр производства</a><a href="../">Текущий KinoRates ↗</a></nav>
+      <nav aria-label="Раздел прототипа"><span>ПРОТОТИП</span><a class="${selectedPage === "rates" ? "active" : ""}" href="./"${selectedPage === "rates" ? ' aria-current="page"' : ""}>Фильтр производства</a><a class="${selectedPage === "updates" ? "active" : ""}" href="?page=updates"${selectedPage === "updates" ? ' aria-current="page"' : ""}>Обновления</a><a href="../">Текущий KinoRates ↗</a></nav>
       <div class="prototype-note"><b>Скрытая версия</b><p>Страница не добавлена в навигацию и закрыта от индексации.</p></div>
     </aside>
     <main>
-      <header class="topbar"><div><span>KinoRates</span><i>/</i><b>Фильтр производства</b></div><span class="prototype-badge">NOINDEX · ПРОТОТИП</span></header>
-      <div class="view">
-        <section class="intro"><div><span class="eyebrow">КАНОНИЧЕСКИЙ НАБОР · ${RATES.length} СТАВОК</span><h1>Ставки по типу производства</h1><p>Одна запись может относиться к нескольким режимам. Категории определяются только существующими полями <code>content</code> и <code>cond</code>.</p></div><div class="dataset-mark"><span>Источник данных</span><b>rates-data.js</b><small>без копии ставок</small></div></section>
-        <section class="type-panel"><div class="type-tabs" role="tablist" aria-label="Тип производства">${typeButtons()}</div><p id="typeDescription">${esc(descriptions[selectedType])}</p></section>
-        <section class="registry"><aside class="dept-list" id="deptList"></aside><div class="registry-main"><div class="controls"><label class="search"><span aria-hidden="true">⌕</span><input id="rateSearch" type="search" autocomplete="off" placeholder="Профессия, цех или условие"></label><button type="button" class="clear" id="clearFilters">Сбросить</button></div><div id="rateTable"></div></div></section>
-      </div>
+      <header class="topbar"><div><span>KinoRates</span><i>/</i><b>${pageLabel}</b></div><span class="prototype-badge">NOINDEX · ПРОТОТИП</span></header>
+      ${selectedPage === "updates" ? updatesView() : ratesView()}
     </main>
   </div>`;
 }
@@ -145,10 +158,13 @@ function bindPage() {
 }
 
 if (RATES.length && TYPE_FILTER?.FILTERS?.length) {
+  if (initialType && initialType !== selectedType) updateTypeInUrl();
   $("#app").innerHTML = page();
-  bindPage();
-  renderResults();
-  revealActiveType();
+  if (selectedPage === "rates") {
+    bindPage();
+    renderResults();
+    revealActiveType();
+  }
 } else {
   $("#app").innerHTML = '<div class="load-error"><b>Не удалось загрузить ставки</b><p>Обновите страницу.</p></div>';
 }
