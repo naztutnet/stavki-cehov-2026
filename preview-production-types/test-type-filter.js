@@ -43,14 +43,20 @@ assert(!html.includes('rel="canonical"'), "Prototype must not declare itself can
 assert(!/metrika|mc\.yandex|METRIKA_ID/i.test(html + app), "Prototype must not load analytics");
 const localVersions = [...html.matchAll(/(?:app\.css|type-filter\.js|site-updates\.js|app\.js)\?v=([^"]+)/g)].map((match) => match[1]);
 assert(localVersions.length === 4 && new Set(localVersions).size === 1, "Prototype asset versions must match");
-assert(Array.isArray(siteUpdates) && siteUpdates.length === 19, "Review draft must contain all 19 confirmed update candidates");
+assert(Array.isArray(siteUpdates) && siteUpdates.length === 13, "Curated review draft must contain exactly 13 updates");
 assert(siteUpdates.every(({ date, dateLabel, type, title, text }) => date && dateLabel && type && title && text), "Every site update must be complete");
 assert(siteUpdates.every((update, index) => !index || update.date <= siteUpdates[index - 1].date), "Site updates must be newest first");
 for (const title of ["Рабочая смета с экспортом", "Рынок и аналитика стали точнее", "Сценарные ставки 2026", "Аэросъёмка АПАК 2025", "Запущен первый справочник ставок", "Создана единая схема данных", "Проведена большая сверка базы"]) {
   assert(siteUpdates.some((update) => update.title === title), `Confirmed update is missing: ${title}`);
 }
+for (const title of ["Исправлена выгрузка рабочей сметы в PDF", "Новое рабочее пространство KinoRates", "Даты применяются только к месячным ставкам", "Карточки источников ведут прямо к документам", "Обратная связь стала понятнее", "Проект получил имя KinoRates"]) {
+  assert(!siteUpdates.some((update) => update.title === title), `Removed update returned: ${title}`);
+}
 assert(app.includes('?page=updates') && app.includes('Обновления KinoRates'), "Updates section must be reachable from the prototype navigation");
 assert(app.includes('Расширенный черновик для отбора'), "Updates page must explain that the expanded list is a review draft");
+assert(!app.includes('String(index + 1).padStart'), "Update cards must not expose review numbering");
+assert(!app.includes('${SITE_UPDATES.length} кандидатов'), "Updates page must not expose the review-candidate counter");
+assert(app.includes('class="intro updates-intro"'), "Updates intro must use the single-column layout without review metadata");
 
 for (const rate of rates.filter((rate) => classifyRate(rate).includes("commercial-media"))) {
   assert(/реклам|клип|музыкальн\w*\s+видео|(?:^|[^а-я])тв(?:[^а-я]|$)|телевид|шоу|подкаст|реалити/i.test(`${rate.content} ${rate.cond}`), `Commercial/media type was inferred for rate ${rate.id}`);

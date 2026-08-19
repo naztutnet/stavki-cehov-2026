@@ -19,6 +19,7 @@ main{min-width:0}
 .prototype-badge{padding:6px 8px;border:1px solid #d8d2fa;border-radius:6px;color:#5f49cc;background:#f5f2ff;font-size:8px;font-weight:650;letter-spacing:.07em}
 .view{max-width:1320px;margin:0 auto;padding:37px 38px 90px}
 .intro{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:45px;align-items:end;padding:10px 0 29px;border-bottom:1px solid var(--line)}
+.updates-intro{grid-template-columns:1fr}
 .eyebrow{color:#777580;font-size:8px;font-weight:650;letter-spacing:.12em}
 .intro h1{margin:10px 0 9px;font-size:clamp(33px,4.2vw,48px);font-weight:520;line-height:.98;letter-spacing:-.05em}
 .intro p{max-width:670px;margin:0;color:var(--muted);font-size:12px;line-height:1.55}.intro p strong{color:#4c4953;font-weight:600}.intro code{padding:1px 4px;border-radius:4px;color:#5f49cc;background:var(--accent-soft);font-family:inherit;font-size:11px}
@@ -29,7 +30,7 @@ main{min-width:0}
 .type-panel>p{margin:0;padding:10px 17px;border-top:1px solid var(--line);color:#77747e;background:#fbfbfc;font-size:10px;line-height:1.45}
 .release-feed{margin-top:14px;border:1px solid var(--line);border-radius:9px;background:#fff;overflow:hidden}
 .release-card{display:grid;grid-template-columns:190px minmax(0,1fr);gap:34px;padding:24px 26px;border-bottom:1px solid var(--line)}.release-card:last-child{border-bottom:0}
-.release-meta{display:grid;align-content:start;justify-items:start;gap:9px}.release-meta b{color:#aaa7b0;font-size:8px;font-weight:600;letter-spacing:.08em}.release-meta time{color:#6f6c77;font-size:10px}.release-meta span{padding:5px 7px;border-radius:5px;color:#5f49cc;background:var(--accent-soft);font-size:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.release-meta{display:grid;align-content:start;justify-items:start;gap:9px}.release-meta time{color:#6f6c77;font-size:10px}.release-meta span{padding:5px 7px;border-radius:5px;color:#5f49cc;background:var(--accent-soft);font-size:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .release-copy h2{margin:0;color:#34323a;font-size:18px;font-weight:540;letter-spacing:-.025em}.release-copy p{max-width:760px;margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.65}
 .registry{display:grid;grid-template-columns:218px minmax(0,1fr);margin-top:14px;border:1px solid var(--line);border-radius:9px;background:#fff;overflow:hidden}
 .dept-list{border-right:1px solid var(--line);background:#fcfcfd}.dept-list header{display:flex;height:51px;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line)}.dept-list h2{margin:0;font-size:11px;font-weight:570}.dept-list header span{color:#aaa7b0;font-size:9px}
