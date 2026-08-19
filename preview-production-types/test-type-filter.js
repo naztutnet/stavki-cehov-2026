@@ -6,6 +6,8 @@ const context = { window: {} };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(require.resolve("../rates-data.js"), "utf8"), context);
 const rates = context.window.KINORATES_DATA;
+const html = fs.readFileSync(require.resolve("./index.html"), "utf8");
+const app = fs.readFileSync(require.resolve("./app.js"), "utf8");
 const byId = (id) => rates.find((rate) => String(rate.id) === String(id));
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const has = (id, type) => classifyRate(byId(id)).includes(type);
@@ -22,6 +24,12 @@ assert(has(1103, "feature") && !has(1103, "series"), "Explicit full-meter conten
 assert(has(1088, "series") && !has(1088, "feature"), "Explicit series content is misclassified");
 assert(classifyRate(byId(1086)).length === 0, "Short meter must stay in All without an invented category");
 assert(classifyRate(byId(1091)).length === 0, "Microdrama must stay in All without an invented category");
+assert(html.includes('<meta name="robots" content="noindex, nofollow, noarchive">'), "Prototype must be noindex");
+assert(html.includes('<script src="../rates-data.js?v='), "Prototype must load the canonical parent dataset");
+assert(!html.includes('rel="canonical"'), "Prototype must not declare itself canonical");
+assert(!/metrika|mc\.yandex|METRIKA_ID/i.test(html + app), "Prototype must not load analytics");
+const localVersions = [...html.matchAll(/(?:app\.css|type-filter\.js|app\.js)\?v=([^"]+)/g)].map((match) => match[1]);
+assert(localVersions.length === 3 && new Set(localVersions).size === 1, "Prototype asset versions must match");
 
 for (const rate of rates.filter((rate) => classifyRate(rate).includes("advertising"))) {
   assert(/реклам/i.test(`${rate.content} ${rate.cond}`), `Advertising was inferred for rate ${rate.id}`);
