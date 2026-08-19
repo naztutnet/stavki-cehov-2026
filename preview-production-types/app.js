@@ -76,9 +76,9 @@ function ratesView() {
 }
 
 function updatesView() {
-  const entries = SITE_UPDATES.map((update, index) => `<article class="release-card"><div class="release-meta"><b>№ ${String(index + 1).padStart(2, "0")}</b><time datetime="${esc(update.date)}">${esc(update.dateLabel)}</time><span>${esc(update.type)}</span></div><div class="release-copy"><h2>${esc(update.title)}</h2><p>${esc(update.text)}</p></div></article>`).join("");
+  const entries = SITE_UPDATES.map((update) => `<article class="release-card"><div class="release-meta"><time datetime="${esc(update.date)}">${esc(update.dateLabel)}</time><span>${esc(update.type)}</span></div><div class="release-copy"><h2>${esc(update.title)}</h2><p>${esc(update.text)}</p></div></article>`).join("");
   return `<div class="view updates-view">
-    <section class="intro"><div><span class="eyebrow">ЖУРНАЛ ПРОДУКТА</span><h1>Обновления KinoRates</h1><p><strong>Расширенный черновик для отбора.</strong> Здесь собраны подтверждённые изменения сайта, базы ставок и рабочих инструментов — после просмотра оставим только самое важное.</p></div><div class="dataset-mark"><span>Последнее обновление</span><b>${esc(SITE_UPDATES[0]?.dateLabel || "—")}</b><small>${SITE_UPDATES.length} кандидатов</small></div></section>
+    <section class="intro updates-intro"><div><span class="eyebrow">ЖУРНАЛ ПРОДУКТА</span><h1>Обновления KinoRates</h1><p><strong>Расширенный черновик для отбора.</strong> Здесь собраны подтверждённые изменения сайта, базы ставок и рабочих инструментов — после просмотра оставим только самое важное.</p></div></section>
     <section class="release-feed" aria-label="Лента обновлений">${entries || '<div class="empty"><b>Обновлений пока нет</b></div>'}</section>
   </div>`;
 }
