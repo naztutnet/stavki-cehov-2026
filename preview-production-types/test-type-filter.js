@@ -1,6 +1,6 @@
 const fs = require("fs");
 const vm = require("vm");
-const { FILTERS, classifyRate, countByType, normalizeFilterId } = require("./type-filter.js");
+const { FILTERS, classifyRate, countByType, normalizeFilterId } = require("../production-type-filter.js");
 
 const context = { window: {} };
 vm.createContext(context);
@@ -10,7 +10,7 @@ const html = fs.readFileSync(require.resolve("./index.html"), "utf8");
 const app = fs.readFileSync(require.resolve("./app.js"), "utf8");
 const updatesContext = { window: {} };
 vm.createContext(updatesContext);
-vm.runInContext(fs.readFileSync(require.resolve("./site-updates.js"), "utf8"), updatesContext);
+vm.runInContext(fs.readFileSync(require.resolve("../site-updates-data.js"), "utf8"), updatesContext);
 const siteUpdates = updatesContext.window.KINORATES_SITE_UPDATES;
 const byId = (id) => rates.find((rate) => String(rate.id) === String(id));
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -38,10 +38,10 @@ assert(normalizeFilterId("advertising") === "commercial-media" && normalizeFilte
 assert(normalizeFilterId("unknown") === "all", "Unknown filters must fall back to All");
 assert(html.includes('<meta name="robots" content="noindex, nofollow, noarchive">'), "Prototype must be noindex");
 assert(html.includes('<script src="../rates-data.js?v='), "Prototype must load the canonical parent dataset");
-assert(html.includes('<script src="site-updates.js?v='), "Prototype must load its update log");
+assert(html.includes('<script src="../site-updates-data.js?v='), "Prototype must load the shared update log");
 assert(!html.includes('rel="canonical"'), "Prototype must not declare itself canonical");
 assert(!/metrika|mc\.yandex|METRIKA_ID/i.test(html + app), "Prototype must not load analytics");
-const localVersions = [...html.matchAll(/(?:app\.css|type-filter\.js|site-updates\.js|app\.js)\?v=([^"]+)/g)].map((match) => match[1]);
+const localVersions = [...html.matchAll(/(?:app\.css|production-type-filter\.js|site-updates-data\.js|app\.js)\?v=([^"]+)/g)].map((match) => match[1]);
 assert(localVersions.length === 4 && new Set(localVersions).size === 1, "Prototype asset versions must match");
 assert(Array.isArray(siteUpdates) && siteUpdates.length === 13, "Curated review draft must contain exactly 13 updates");
 assert(siteUpdates.every(({ date, dateLabel, type, title, text }) => date && dateLabel && type && title && text), "Every site update must be complete");

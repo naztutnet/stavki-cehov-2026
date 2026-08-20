@@ -1,7 +1,8 @@
 const R = window.KINORATES_DATA || [];
 const S = window.KINORATES_SOURCES || [];
-const U = window.KINORATES_UPDATES || [];
 const M = window.KINORATES_MARKET_DATA || [];
+const TYPE_FILTER = window.KINORATES_TYPE_FILTER;
+const SITE_UPDATES = window.KINORATES_SITE_UPDATES || [];
 const $ = (selector) => document.querySelector(selector);
 const rub = (n) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(+n || 0)} ₽`;
 const dec2 = (n) => Math.round((+n || 0) * 100) / 100;
@@ -52,10 +53,12 @@ async function ensurePdfMake() {
 
 const sections = [
   ["knowledge", "▤", "Как читать ставки"], ["home", "≡", "Справочник ставок"],
-  ["market", "⌁", "Рынок и аналитика"], ["resources", "↗", "Цеховые письма"],
+  ["market", "⌁", "Рынок и аналитика"], ["resources", "↗", "Цеховые письма"], ["updates", "◷", "Обновления"],
 ];
+const initialProductionType = new URL(location.href).searchParams.get("type");
 let selectedDept = "";
 let selectedRate = null;
+let selectedProductionType = TYPE_FILTER?.normalizeFilterId(initialProductionType) || "all";
 const budgetItems = loadBudget();
 const recentRates = [];
 const BUDGET_STORAGE_KEY = "kinorates-budget-v4";
@@ -85,7 +88,7 @@ function saveBudget() { try { localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stri
 
 function sidebar(route) {
   const gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
-  return `<aside class="sidebar" id="sidebar"><a class="brand" href="#home"><b>K</b><span>KinoRates<small>Обновлено 13 августа 2026</small></span></a><button class="new-button" data-focus-search>⌕ <span>Найти ставку</span></button><nav>${sections.map(([id, icon, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}"><i>${icon}</i><span>${label}</span></a>`).join("")}</nav><a class="budget-shortcut ${route === "projects" ? "active" : ""}" href="#projects"><span>Рабочая смета</span><b data-budget-count>${budgetItems.length} поз.</b><strong data-budget-total>${rub(gross)}</strong></a><div class="history" id="recentRates">${recentMarkup()}</div><footer><a href="#about">О проекте</a><button data-feedback>Обратная связь</button><button data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Сообщить новую ставку</button><button data-privacy>Конфиденциальность и cookie</button></footer></aside>`;
+  return `<aside class="sidebar" id="sidebar"><a class="brand" href="#home"><b>K</b><span>KinoRates<small>Обновлено 20 августа 2026</small></span></a><button class="new-button" data-focus-search>⌕ <span>Найти ставку</span></button><nav>${sections.map(([id, icon, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}"><i>${icon}</i><span>${label}</span></a>`).join("")}</nav><a class="budget-shortcut ${route === "projects" ? "active" : ""}" href="#projects"><span>Рабочая смета</span><b data-budget-count>${budgetItems.length} поз.</b><strong data-budget-total>${rub(gross)}</strong></a><div class="history" id="recentRates">${recentMarkup()}</div><footer><a href="#about">О проекте</a><button data-feedback>Обратная связь</button><button data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Сообщить новую ставку</button><button data-privacy>Конфиденциальность и cookie</button></footer></aside>`;
 }
 function recentMarkup() {
   return `<details class="recent-menu"><summary>Недавно смотрели <span>${recentRates.length || ""}</span></summary><div class="recent-popover">${recentRates.length ? recentRates.map((r) => `<a href="#home" data-query="${esc(r.prof)}"><i>◌</i><span>${esc(r.prof)}</span></a>`).join("") : `<p>Открытые ставки появятся здесь</p>`}</div></details>`;
@@ -176,10 +179,28 @@ async function exportBudgetPdf() {
 function addCustomBudgetItem() { budgetItems.push({ id: `custom-${Date.now()}`, custom: true, prof: "Новая статья", dept: "Своя статья", unit: "единица", rate: 0, qty: 1, periods: 1, extra: 0, tax: 0, start: "", end: "", comment: "" }); saveBudget(); render(); }
 const assistantBar = (placeholder = "Спросите о ставках, источниках или смете…") => `<div class="assistant-bar"><textarea rows="1" placeholder="${placeholder}"></textarea><div class="assistant-actions"><button>＋</button><span>Использует данные KinoRates</span><button class="send">↑</button></div></div>`;
 
+const productionTypeDescriptions = {
+  all: "Весь справочник без исключений и новых категорий.",
+  "cinema-series": "Общие и специальные ставки для полного метра и сериалов — в одном режиме.",
+  "commercial-media": "Реклама, клипы, музыкальное видео, ТВ и шоу — только когда этот тип прямо указан в данных. Киношные ставки не пересчитываются.",
+};
+function updateProductionTypeInUrl() {
+  const url = new URL(location.href);
+  if (selectedProductionType === "all") url.searchParams.delete("type");
+  else url.searchParams.set("type", selectedProductionType);
+  history.replaceState(history.state, "", `${url.pathname}${url.search}${url.hash}`);
+}
+function productionTypePanel() {
+  const counts = TYPE_FILTER.countByType(R);
+  const tabs = TYPE_FILTER.FILTERS.map(({ id, label }) => `<button type="button" role="tab" aria-selected="${selectedProductionType === id}" class="${selectedProductionType === id ? "active" : ""}" data-production-type="${id}"><span>${esc(label)}</span><b>${counts[id]}</b></button>`).join("");
+  return `<section class="production-type-panel"><div class="production-type-tabs" role="tablist" aria-label="Тип производства">${tabs}</div><p>${esc(productionTypeDescriptions[selectedProductionType])}</p></section>`;
+}
+
 function home() {
   const current = R.filter((x) => ["fresh2026", "official2026"].includes(x.status)).length;
-  const depts = [...new Set(R.map((x) => x.dept))].sort((a, b) => a.localeCompare(b, "ru"));
-  return `<div class="registry-page"><section class="registry-intro"><div><span class="eyebrow">KINORATES · ОБНОВЛЕНО 13.08.2026</span><h1>Справочник ставок</h1><p>Рекомендованные ставки специалистов российского кино. Финальная стоимость определяется продюсером и контрагентом по договорённости.</p></div><button class="feedback-link" data-feedback>Нашли неточность? Напишите нам</button></section><div class="source-strip"><div class="registry-stats"><b>${R.length}</b><span>позиций</span><b>${current}</b><span>сверено в 2026</span></div><a href="https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/edit?gid=0#gid=0" target="_blank" rel="noopener"><span>Первоисточники</span><b>МПК</b><small>открыть таблицу ↗</small></a><a href="https://docs.google.com/spreadsheets/d/1BCgusuck7uhHvDZ2d-nUVyjZHlzrf05286fwpahlwdE/edit?gid=0#gid=0" target="_blank" rel="noopener"><span>Первоисточники</span><b>Точно продюсер</b><small>открыть таблицу ↗</small></a><a href="#resources"><span>Первоисточники</span><b>Цеховые письма</b><small>${S.length} документов →</small></a></div><div class="registry-workspace"><aside class="dept-list"><header><h2>Цеха</h2><span>${depts.length}</span></header><button class="${selectedDept ? "" : "active"}" data-dept="">Все цеха <em>${R.length}</em></button>${depts.map((d) => `<button class="${selectedDept === d ? "active" : ""}" data-dept="${esc(d)}">${esc(d)} <em>${R.filter((x) => x.dept === d).length}</em></button>`).join("")}</aside><section class="registry-main"><div class="registry-controls"><div class="ai-search main-search"><span>⌕</span><input id="rateSearch" placeholder="Профессия, цех или условие — например «администратор» или «смена 12»"></div><select id="rateStatus" aria-label="Фильтр по статусу"><option value="">Все статусы</option><option value="new">Сверено в 2026</option><option value="old">Архив и ориентиры</option></select><button class="primary budget-open" data-new data-budget-indicator>Смета · ${budgetItems.length}</button></div><div class="registry-layout"><div><div class="suggested"><span>Быстрый поиск:</span><button>оператор-постановщик</button><button>гаффер</button><button>второй режиссёр</button><button>монтаж</button></div><div id="rateTable"></div></div></div></section></div><div class="toast" id="toast" role="status" aria-live="polite"></div></div>`;
+  const typedRates = R.filter((rate) => TYPE_FILTER.matchesType(rate, selectedProductionType));
+  const depts = [...new Set(typedRates.map((x) => x.dept))].sort((a, b) => a.localeCompare(b, "ru"));
+  return `<div class="registry-page"><section class="registry-intro"><div><span class="eyebrow">KINORATES · ОБНОВЛЕНО 20.08.2026</span><h1>Справочник ставок</h1><p>Рекомендованные ставки специалистов российского кино. Финальная стоимость определяется продюсером и контрагентом по договорённости.</p></div><button class="feedback-link" data-feedback>Нашли неточность? Напишите нам</button></section><div class="source-strip"><div class="registry-stats"><b>${R.length}</b><span>позиций</span><b>${current}</b><span>сверено в 2026</span></div><a href="https://docs.google.com/spreadsheets/d/19GyzCN-CKlAehf2u7-hJyL4lzIsNtIu06t0vjsYflt4/edit?gid=0#gid=0" target="_blank" rel="noopener"><span>Первоисточники</span><b>МПК</b><small>открыть таблицу ↗</small></a><a href="https://docs.google.com/spreadsheets/d/1BCgusuck7uhHvDZ2d-nUVyjZHlzrf05286fwpahlwdE/edit?gid=0#gid=0" target="_blank" rel="noopener"><span>Первоисточники</span><b>Точно продюсер</b><small>открыть таблицу ↗</small></a><a href="#resources"><span>Первоисточники</span><b>Цеховые письма</b><small>${S.length} документов →</small></a></div>${productionTypePanel()}<div class="registry-workspace"><aside class="dept-list"><header><h2>Цеха</h2><span>${depts.length}</span></header><button class="${selectedDept ? "" : "active"}" data-dept="">Все цеха <em>${typedRates.length}</em></button>${depts.map((d) => `<button class="${selectedDept === d ? "active" : ""}" data-dept="${esc(d)}">${esc(d)} <em>${typedRates.filter((x) => x.dept === d).length}</em></button>`).join("")}</aside><section class="registry-main"><div class="registry-controls"><div class="ai-search main-search"><span>⌕</span><input id="rateSearch" placeholder="Профессия, цех или условие — например «администратор» или «смена 12»"></div><select id="rateStatus" aria-label="Фильтр по статусу"><option value="">Все статусы</option><option value="new">Сверено в 2026</option><option value="old">Архив и ориентиры</option></select><button class="primary budget-open" data-new data-budget-indicator>Смета · ${budgetItems.length}</button></div><div class="registry-layout"><div><div class="suggested"><span>Быстрый поиск:</span><button>оператор-постановщик</button><button>гаффер</button><button>второй режиссёр</button><button>монтаж</button></div><div id="rateTable"></div></div></div></section></div><div class="toast" id="toast" role="status" aria-live="polite"></div></div>`;
 }
 function homeV2() {
   const current = R.filter((x) => ["fresh2026", "official2026"].includes(x.status)).length, historical = R.length - current;
@@ -255,7 +276,7 @@ function scrollOpenedRateIntoView(rateId, restoreScrollY = window.scrollY) {
 }
 function drawRates() {
   const query = normalizeSearch($("#rateSearch")?.value), status = $("#rateStatus")?.value || "";
-  const data = R.filter((r) => (!selectedDept || r.dept === selectedDept) && (!query || normalizeSearch(`${r.prof} ${r.dept} ${r.cond}`).includes(query)) && (!status || (status === "new" ? ["fresh2026", "official2026"].includes(r.status) : !["fresh2026", "official2026"].includes(r.status))));
+  const data = R.filter((r) => TYPE_FILTER.matchesType(r, selectedProductionType) && (!selectedDept || r.dept === selectedDept) && (!query || normalizeSearch(`${r.prof} ${r.dept} ${r.cond} ${r.content}`).includes(query)) && (!status || (status === "new" ? ["fresh2026", "official2026"].includes(r.status) : !["fresh2026", "official2026"].includes(r.status))));
   const detail = (r) => `<tr class="rate-detail-row"><td colspan="7"><div class="inline-detail"><div class="inline-detail-main"><span>${esc(r.dept)}</span><h3>${esc(r.prof)}</h3><p>${esc(r.cond || "Условия не указаны")}</p></div><div class="inline-detail-rate"><span>Рекомендованная ставка</span><b>${r.amount ? rub(r.amount) : "Не опубликована"}</b><small>${esc(r.unit)}</small><dl><div><dt>Статус</dt><dd>${esc(statusLabel(r.status, r))}</dd></div><div><dt>Регион</dt><dd>${esc(r.region || "Не указан")}</dd></div><div><dt>Период</dt><dd>${esc(r.eff || "Не указан")}</dd></div></dl></div><div class="inline-detail-notes">${r.ot ? `<section><b>Переработки</b><p>${esc(r.ot)}</p></section>` : ""}${r.extra ? `<section><b>Дополнительные условия</b><p>${esc(r.extra)}</p></section>` : ""}<div class="inline-detail-actions"><button class="primary" data-add-rate="${r.id}">${budgetItems.some((x) => x.id === r.id) ? "✓ Уже в смете" : "＋ Добавить в смету"}</button>${r.doc ? `<a href="${esc(r.doc)}" target="_blank" rel="noopener">Открыть первоисточник ↗</a>` : ""}</div></div></div></td></tr>`;
   $("#rateTable").innerHTML = `<div class="table-meta"><span>${data.length} позиций${selectedDept ? ` · ${esc(selectedDept)}` : ""}</span><span>Нажмите на строку, чтобы раскрыть условия</span></div><div class="table-wrap"><table><thead><tr><th>Цех</th><th>Профессия</th><th>Условие</th><th>Ед.</th><th>Мин. ставка</th><th>Статус</th><th></th></tr></thead><tbody>${data.map((r) => `<tr data-rate-id="${r.id}" class="${selectedRate?.id === r.id ? "selected" : ""}"><td>${esc(r.dept)}</td><td><b>${esc(r.prof)}</b></td><td>${esc(r.cond)}</td><td>${esc(r.unit)}</td><td><b>${r.amount ? rub(r.amount) : "—"}</b></td><td><span class="status ${statusTone(r.status)}">${esc(statusLabel(r.status, r))}</span></td><td><button class="row-add ${budgetItems.some((x) => x.id === r.id) ? "added" : ""}" data-add-rate="${r.id}" aria-label="Добавить в смету">${budgetItems.some((x) => x.id === r.id) ? "✓" : "＋"}</button></td></tr>${selectedRate?.id === r.id ? detail(r) : ""}`).join("")}</tbody></table></div>`;
   document.querySelectorAll("[data-rate-id]").forEach((row) => (row.onclick = () => { const rate = R.find((r) => String(r.id) === row.dataset.rateId); const restoreScrollY = window.scrollY; selectedRate = selectedRate?.id === rate?.id ? null : rate; const openedRateId = selectedRate?.id; if (selectedRate) rememberRate(selectedRate); drawRates(); if (openedRateId) scrollOpenedRateIntoView(openedRateId, restoreScrollY); }));
@@ -289,8 +310,12 @@ function market() {
   const sourceGroups = [...new Set(M.map((x) => x.source))];
   return pageHead("Дополнительный слой данных", "Рынок и аналитика", "Исследования и рыночные срезы дополняют цеховые письма и помогают увидеть контекст рынка.") + `<div class="market-meta"><span>${M.length} аналитических записей</span><span>${sourceGroups.length} групп источников</span><span>Годы и периоды указаны отдельно</span></div><div class="market-grid">${M.map((item) => `<article><div class="market-card-meta"><span>${esc(item.kind)}</span><b>${esc(item.year)}</b></div><h2>${esc(item.title)}</h2><p>${esc(item.text)}</p><small>${esc(item.period)}</small><a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.source)} ↗</a></article>`).join("")}</div>`;
 }
+function siteUpdates() {
+  const entries = SITE_UPDATES.map((update) => `<article class="site-update-card"><div class="site-update-meta"><time datetime="${esc(update.date)}">${esc(update.dateLabel)}</time><span>${esc(update.type)}</span></div><div><h2>${esc(update.title)}</h2><p>${esc(update.text)}</p></div></article>`).join("");
+  return pageHead("Журнал продукта", "Обновления KinoRates", "Основные изменения справочника, базы ставок и рабочих инструментов.") + `<section class="site-update-feed" aria-label="Лента обновлений">${entries}</section>`;
+}
 function about() {
-  return pageHead("KinoRates", "О проекте", "Инструмент для прозрачной работы со ставками и производственной сметой.", '<button class="primary" data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Связаться</button>') + `<div class="about-grid"><section><h2>Ставки и источники<br>в одном месте.</h2><p>KinoRates объединяет публичные цеховые письма, рекомендации, рыночные исследования и пользовательские допущения в одном рабочем контексте.</p><p>Справочник помогает найти данные, увидеть условия и первоисточник, а затем перенести выбранные позиции в прозрачную рабочую смету.</p></section><aside><div><span>Позиций</span><b>${R.length}</b></div><div><span>Источников</span><b>${S.length}</b></div><div><span>Цеха</span><b>${new Set(R.map((x) => x.dept)).size}</b></div><div><span>Ревизия</span><b>13.08.2026</b></div></aside></div>`;
+  return pageHead("KinoRates", "О проекте", "Инструмент для прозрачной работы со ставками и производственной сметой.", '<button class="primary" data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Связаться</button>') + `<div class="about-grid"><section><h2>Ставки и источники<br>в одном месте.</h2><p>KinoRates объединяет публичные цеховые письма, рекомендации, рыночные исследования и пользовательские допущения в одном рабочем контексте.</p><p>Справочник помогает найти данные, увидеть условия и первоисточник, а затем перенести выбранные позиции в прозрачную рабочую смету.</p></section><aside><div><span>Позиций</span><b>${R.length}</b></div><div><span>Источников</span><b>${S.length}</b></div><div><span>Цеха</span><b>${new Set(R.map((x) => x.dept)).size}</b></div><div><span>Ревизия</span><b>20.08.2026</b></div></aside></div>`;
 }
 function pageHead(kicker, title, description, action = "") { return `<section class="page-head"><div><span>${kicker}</span><h1>${title}</h1><p>${description}</p></div>${action}</section>`; }
 function modal(type, feedbackTopic = "Нашёл ошибку") {
@@ -301,7 +326,7 @@ function modal(type, feedbackTopic = "Нашёл ошибку") {
 function render() {
   const requestedRoute = location.hash.slice(1).split("/")[0] || "home";
   const route = requestedRoute === "rates" ? "home" : requestedRoute === "article" ? "knowledge" : requestedRoute;
-  const pages = { home: homeV2, market, projects: projectsV2, knowledge, resources, about };
+  const pages = { home: homeV2, market, projects: projectsV2, knowledge, resources, updates: siteUpdates, about };
   $("#app").innerHTML = `<div class="shell">${sidebar(route)}<main>${topbar(route)}<div class="view">${(pages[route] || home)()}</div></main><button class="scrim" id="scrim"></button><div id="modalRoot"></div></div>`;
   bind(route);
 }
@@ -317,6 +342,7 @@ function bind(route) {
   $("#scrim").onclick = () => { $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("show"); };
   bindQueryLinks();
   document.querySelectorAll("[data-focus-search]").forEach((b) => (b.onclick = () => { if (route === "home") return $("#rateSearch")?.focus(); location.hash = "home"; setTimeout(() => $("#rateSearch")?.focus(), 0); }));
+  document.querySelectorAll("[data-production-type]").forEach((button) => (button.onclick = () => { selectedProductionType = TYPE_FILTER.normalizeFilterId(button.dataset.productionType); selectedDept = ""; selectedRate = null; updateProductionTypeInUrl(); render(); }));
   if (["home", "rates"].includes(route)) { drawRates(); $("#rateSearch").oninput = drawRates; $("#rateStatus").onchange = drawRates; document.querySelectorAll(".suggested button").forEach((b) => (b.onclick = () => { selectedDept = ""; $("#rateSearch").value = b.textContent; drawRates(); })); document.querySelectorAll("[data-dept]").forEach((b) => (b.onclick = () => { selectedDept = b.dataset.dept; render(); })); }
   if (route === "projects") { document.querySelectorAll("[data-budget-field]").forEach((input) => (input.onchange = () => { const item = budgetItems[+input.dataset.budgetIndex], field = input.dataset.budgetField, numeric = ["rate", "qty", "periods", "extra", "tax"].includes(field); item[field] = numeric ? dec2(input.value) : input.value; if (["start", "end"].includes(field) && usesAttachmentDates(item.unit) && item.start && item.end) item.periods = periodsFromDates(item.start, item.end, item.unit, item.periods); saveBudget(); render(); })); document.querySelectorAll("[data-tax-preset]").forEach((select) => (select.onchange = () => { const item = budgetItems[+select.dataset.taxPreset]; if (select.value === "manual") { const input = select.parentElement.querySelector(".tax-manual"); input.hidden = false; input.focus(); return; } item.tax = +select.value || 0; saveBudget(); render(); })); document.querySelectorAll(".date-input").forEach((input) => (input.onclick = () => { if (typeof input.showPicker === "function") input.showPicker(); })); document.querySelectorAll("[data-budget-delete]").forEach((button) => (button.onclick = () => { budgetItems.splice(+button.dataset.budgetDelete, 1); saveBudget(); render(); })); document.querySelectorAll("[data-add-custom]").forEach((button) => (button.onclick = addCustomBudgetItem)); const excel = $("[data-export-excel]"), pdf = $("[data-export-pdf]"); if (excel) excel.onclick = exportBudgetExcel; if (pdf) pdf.onclick = exportBudgetPdf; }
 }
@@ -352,4 +378,5 @@ function initPrivacyControls() {
 }
 window.addEventListener("hashchange", () => { render(); animatePageScrollTo(0); if (metrikaStarted && window.ym) window.ym(METRIKA_ID, "hit", `${location.pathname}${location.hash}`, { title: document.title }); });
 initPrivacyControls();
+updateProductionTypeInUrl();
 render();
