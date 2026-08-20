@@ -5,6 +5,8 @@ root=Path(__file__).resolve().parents[1]
 index=(root/'index.html').read_text(encoding='utf-8')
 app=(root/'app.js').read_text(encoding='utf-8')
 css=(root/'app.css').read_text(encoding='utf-8')
+navigation_css=(root/'navigation.css').read_text(encoding='utf-8')
+seo_css=(root/'seo-pages.css').read_text(encoding='utf-8')
 def fail(msg): raise SystemExit(msg)
 static_ids=set(re.findall(r'\bid=["\']([^"\']+)["\']',index))
 dom_refs=set(re.findall(r'getElementById\(["\']([^"\']+)["\']\)',app))
@@ -52,4 +54,30 @@ for required in ('METRIKA_ID = 111489870','kinorates_analytics_consent','locatio
     if required not in app: fail(f'Missing analytics safeguard: {required}')
 if 'class="avatar">АН' in app: fail('Authorization avatar is present without authorization')
 if '<lastmod>2026-08-20</lastmod>' not in (root/'sitemap.xml').read_text(encoding='utf-8'): fail('sitemap lastmod was not refreshed')
+main_font_url='family=Golos+Text:wght@400;500;600'
+if main_font_url not in index: fail('Main page does not load Golos Text 400/500/600')
+if 'font-family:"Golos Text"' not in css: fail('app.css does not use Golos Text')
+if '"Golos Text"' not in navigation_css: fail('navigation.css does not use Golos Text')
+if "--body:'Golos Text'" not in seo_css: fail('seo-pages.css does not use Golos Text')
+seo_font_url='family=Golos+Text:wght@400;500;600;700'
+seo_pages=(
+    'stavki-kinotsekhov/index.html',
+    'smeta-filma/index.html',
+    'operatorskiy-tsekh/index.html',
+    'rezhisserskiy-tsekh/index.html',
+    'hudozhestvennyy-tsekh/index.html',
+)
+for path in seo_pages:
+    page=(root/path).read_text(encoding='utf-8')
+    if seo_font_url not in page: fail(f'{path} does not load Golos Text 400/500/600/700')
+font_files={
+    'index.html':index,
+    'app.css':css,
+    'navigation.css':navigation_css,
+    'seo-pages.css':seo_css,
+    **{path:(root/path).read_text(encoding='utf-8') for path in seo_pages},
+}
+for path,content in font_files.items():
+    if 'family=Inter' in content or 'font-family:Inter' in content or "--body:'Inter'" in content:
+        fail(f'Legacy Inter font found in {path}')
 print(f'Static validation OK: {len(dom_refs)} DOM refs, OG {w}x{h}, asset version {next(iter(versions.values()))}')

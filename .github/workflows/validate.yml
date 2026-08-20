@@ -42,6 +42,7 @@ jobs:
         run: |
           node scripts/test_core.js
           node scripts/test_production_promotion.js
+          node scripts/test_budget_persistence.js
           node preview-production-types/test-type-filter.js
 
       - name: Проверить HTML, CSS, OG и cache-version
