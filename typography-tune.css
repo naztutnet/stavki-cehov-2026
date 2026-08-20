@@ -1,0 +1,14 @@
+/* Typography tuning: closer to ChatGPT-style weight hierarchy */
+body{font-weight:400}
+
+/* Regular interface copy */
+.sidebar nav a,.history a,.sidebar footer a,.sidebar footer button,.resource-list span,.article-grid p,.updates p,.page-head p,.hero>p,.about-grid p,.knowledge-lead p,.modal>p,.feedback>small,td{font-weight:400}
+
+/* Controls and secondary emphasis */
+.new-button,.quiet,.primary,.article-grid a,.resource-list b,.updates b,.breadcrumb,.suggested button,.prompt-chips button,.data-toolbar select,.ai-search input,.choice-grid button,.budget-shortcut,.topbar button{font-weight:500}
+
+/* Strong hierarchy only */
+.brand,.sidebar nav a.active,.history>small,.eyebrow,.page-head>div>span,.content-section header small,.block header small,.article-grid article>span,.knowledge-lead span,.modal>span,.avatar,.snapshot b,.block h2,.content-section h2,.article-grid h3,.page-head h1,.knowledge-lead h2,.about-grid h2,.modal h2,.empty-project h2{font-weight:600}
+
+/* Explicitly avoid extra-heavy synthetic weights */
+strong,b{font-weight:600}
