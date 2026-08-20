@@ -1,0 +1,13 @@
+.brand b{
+  display:block;
+  width:28px;
+  height:28px;
+  min-width:28px;
+  padding:0;
+  border-radius:8px;
+  background:#fff url('/favicon.svg?v=20260820-2') center/cover no-repeat;
+  color:transparent;
+  font-size:0;
+  line-height:0;
+  overflow:hidden;
+}
