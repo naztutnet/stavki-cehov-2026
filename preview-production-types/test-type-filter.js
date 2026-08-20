@@ -43,7 +43,7 @@ assert(!html.includes('rel="canonical"'), "Prototype must not declare itself can
 assert(!/metrika|mc\.yandex|METRIKA_ID/i.test(html + app), "Prototype must not load analytics");
 const localVersions = [...html.matchAll(/(?:app\.css|production-type-filter\.js|site-updates-data\.js|app\.js)\?v=([^"]+)/g)].map((match) => match[1]);
 assert(localVersions.length === 4 && new Set(localVersions).size === 1, "Prototype asset versions must match");
-assert(Array.isArray(siteUpdates) && siteUpdates.length === 13, "Curated review draft must contain exactly 13 updates");
+assert(Array.isArray(siteUpdates) && siteUpdates.length === 14, "Curated review draft must contain exactly 14 updates");
 assert(siteUpdates.every(({ date, dateLabel, type, title, text }) => date && dateLabel && type && title && text), "Every site update must be complete");
 assert(siteUpdates.every((update, index) => !index || update.date <= siteUpdates[index - 1].date), "Site updates must be newest first");
 for (const title of ["Рабочая смета с экспортом", "Рынок и аналитика стали точнее", "Сценарные ставки 2026", "Аэросъёмка АПАК 2025", "Запущен первый справочник ставок", "Создана единая схема данных", "Проведена большая сверка базы"]) {
