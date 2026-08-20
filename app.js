@@ -8,6 +8,7 @@ const rub = (n) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 
 const dec2 = (n) => Math.round((+n || 0) * 100) / 100;
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 const normalizeSearch = (value) => String(value ?? "").toLocaleLowerCase("ru-RU").replaceAll("ё", "е").trim();
+const CONTACT_EMAIL = "snegproduction@gmail.com";
 const appScriptUrl = document.currentScript?.src || location.href;
 const pdfAssetBase = new URL(appScriptUrl.includes("/preview-v4/chat-prototype/") ? "../../vendor/" : "vendor/", appScriptUrl);
 const statusLabel = (status, rate) => {
@@ -352,7 +353,7 @@ function siteUpdates() {
 }
 function contacts() {
   const mailIcon = `<svg class="contact-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"></rect><path d="m4 6 8 6 8-6"></path></svg>`;
-  return pageHead("KinoRates", "Контакты", "Для предложений по сотрудничеству и совместных проектов.") + `<section class="contact-card"><div class="contact-copy"><span>СОТРУДНИЧЕСТВО</span><h2>Напишите, если хотите обсудить сотрудничество.</h2><p>Совместный проект, партнёрство или развитие KinoRates.</p></div><div class="contact-methods"><a class="contact-method" href="mailto:snegproduction@gmail.com" aria-label="Написать на snegproduction@gmail.com">${mailIcon}<span><small>Email</small><b>snegproduction@gmail.com</b></span><i>Написать ↗</i></a></div></section>`;
+  return pageHead("KinoRates", "Контакты", "Для предложений по сотрудничеству и совместных проектов.") + `<section class="contact-card"><div class="contact-copy"><span>СОТРУДНИЧЕСТВО</span><h2>Напишите, если хотите обсудить сотрудничество.</h2><p>Совместный проект, партнёрство или развитие KinoRates.</p></div><div class="contact-methods"><button type="button" class="contact-method" data-copy-email aria-label="Скопировать адрес ${CONTACT_EMAIL}">${mailIcon}<span><small>Email</small><b>${CONTACT_EMAIL}</b></span><i data-copy-label aria-live="polite">Скопировать</i></button></div></section>`;
 }
 function about() {
   return pageHead("KinoRates", "О проекте", "Инструмент для прозрачной работы со ставками и производственной сметой.", '<div class="page-head-actions"><a class="primary button-link" href="#contacts">Контакты</a><button class="quiet" data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Поделиться ставкой</button></div>') + `<div class="about-grid"><section><h2>Ставки и источники<br>в одном месте.</h2><p>KinoRates объединяет публичные цеховые письма, рекомендации, рыночные исследования и пользовательские допущения в одном рабочем контексте.</p><p>Справочник помогает найти данные, увидеть условия и первоисточник, а затем перенести выбранные позиции в прозрачную рабочую смету.</p></section><aside><div><span>Позиций</span><b>${R.length}</b></div><div><span>Источников</span><b>${S.length}</b></div><div><span>Цеха</span><b>${new Set(R.map((x) => x.dept)).size}</b></div><div><span>Ревизия</span><b>20.08.2026</b></div></aside></div>`;
@@ -381,11 +382,25 @@ function render() {
 function bindQueryLinks() {
   document.querySelectorAll("[data-query]").forEach((b) => (b.onclick = (event) => { event.preventDefault(); selectedDept = ""; rateQuery = b.dataset.query; const applyQuery = () => { const input = $("#rateSearch"); if (!input) return; input.value = rateQuery; drawRates(); input.focus(); }; if (location.hash === "#home") { render(); requestAnimationFrame(applyQuery); } else { location.hash = "home"; setTimeout(applyQuery, 0); } }));
 }
+async function copyContactEmail(button) {
+  let copied = false;
+  try { await navigator.clipboard.writeText(CONTACT_EMAIL); copied = true; } catch (_) {
+    const field = document.createElement("textarea");
+    field.value = CONTACT_EMAIL; field.readOnly = true; field.style.position = "fixed"; field.style.opacity = "0";
+    document.body.append(field); field.select(); copied = document.execCommand("copy"); field.remove();
+  }
+  const label = button.querySelector("[data-copy-label]");
+  if (!label) return;
+  label.textContent = copied ? "Скопировано ✓" : "Не удалось скопировать";
+  clearTimeout(copyContactEmail.timer);
+  copyContactEmail.timer = setTimeout(() => { label.textContent = "Скопировать"; }, 2200);
+}
 function bind(route) {
   document.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => (location.hash = b.dataset.go)));
   document.querySelectorAll("[data-new]").forEach((b) => (b.onclick = () => (location.hash = "projects")));
   document.querySelectorAll("[data-feedback]").forEach((b) => (b.onclick = () => openModal("feedback", b.dataset.feedbackTopic)));
   bindContributionTriggers();
+  document.querySelectorAll("[data-copy-email]").forEach((button) => (button.onclick = () => copyContactEmail(button)));
   document.querySelectorAll("[data-privacy]").forEach((b) => (b.onclick = openPrivacy));
   $("#menu").onclick = () => { $("#sidebar").classList.toggle("open"); $("#scrim").classList.toggle("show"); };
   $("#scrim").onclick = () => { $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("show"); };
