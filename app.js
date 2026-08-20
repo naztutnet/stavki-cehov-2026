@@ -215,7 +215,9 @@ function projects() {
 function budgetItemMarkup(x, index) {
   const title = x.custom ? `<label>Название статьи<input value="${esc(x.prof)}" data-budget-field="prof" data-budget-index="${index}"></label>` : `<b>${esc(x.prof)}</b>`;
   const taxPresets = [6, 7, 8, 9, 10], presetTax = taxPresets.includes(+x.tax);
-  const attachmentFields = usesAttachmentDates(x.unit) ? `<label>Дата прикрепления<input class="date-input" type="date" value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}"></label><label>Дата открепления<input class="date-input" type="date" value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}"></label>` : "";
+  const attachmentEnabled = usesAttachmentDates(x.unit), attachmentDisabled = attachmentEnabled ? "" : "disabled";
+  const attachmentFields = `<label class="budget-attachment${attachmentEnabled ? "" : " is-disabled"}">Дата прикрепления<input class="date-input" type="date" ${attachmentDisabled} value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}" title="${attachmentEnabled ? "Дата начала прикрепления" : "Доступно только для ставки за месяц"}"></label><label class="budget-attachment${attachmentEnabled ? "" : " is-disabled"}">Дата открепления<input class="date-input" type="date" ${attachmentDisabled} value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}" title="${attachmentEnabled ? "Дата окончания прикрепления" : "Доступно только для ставки за месяц"}"></label>`;
+  const attachmentHint = attachmentEnabled ? "" : `<p class="budget-attachment-hint">Даты доступны только для ставки за месяц. Для смен, часов и других единиц расчёт идёт по количеству периодов.</p>`;
   return `<article class="budget-item">
     <div class="budget-item-main">
       <div class="budget-position">${title}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div>
@@ -228,7 +230,8 @@ function budgetItemMarkup(x, index) {
       ${attachmentFields}
       <label>Доплата<input type="number" step="0.01" value="${dec2(x.extra)}" data-budget-field="extra" data-budget-index="${index}"></label>
       <label>Налог, %<div class="tax-control"><select data-tax-preset="${index}"><option value="" ${+x.tax === 0 ? "selected" : ""}>Без налога</option>${taxPresets.map((value) => `<option value="${value}" ${+x.tax === value ? "selected" : ""}>${value}%</option>`).join("")}<option value="manual" ${+x.tax !== 0 && !presetTax ? "selected" : ""}>Ввести вручную…</option></select><input class="tax-manual" type="number" min="0" max="99" step="0.01" value="${dec2(x.tax)}" data-budget-field="tax" data-budget-index="${index}" ${+x.tax === 0 || presetTax ? "hidden" : ""} placeholder="Процент"></div></label>
-      <label class="budget-comment">Заметка<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия расчёта"></label>
+      ${attachmentHint}
+      <label class="budget-comment">Заметка к позиции<input value="${esc(x.comment)}" data-budget-field="comment" data-budget-index="${index}" placeholder="Например: особые условия, дни или состав работ"></label>
     </div>
     <div class="budget-formula">${budgetFormula(x)}</div>
     <div class="budget-item-summary"><span>Без налога <b>${rub(itemNet(x))}</b></span><span>С налогом <b>${rub(itemGross(x))}</b></span></div>
