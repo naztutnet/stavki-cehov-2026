@@ -146,6 +146,9 @@ a,button,.table-wrap tr,.source-strip>a,.market-grid article,.resource-list a{tr
 /* Passive market metadata wraps instead of masquerading as a swipeable control. */
 @media(max-width:680px){.market-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px;overflow:visible;white-space:normal}.market-meta span:last-child{grid-column:1/-1}}
 
+/* On mobile, editing the positions comes before reviewing the totals. */
+@media(max-width:780px){.budget-total{order:initial}}
+
 /* Keep the first complete rate visible in a 720px-tall laptop viewport. */
 @media(min-width:781px){.registry-page .registry-intro{padding-top:0;padding-bottom:16px}.registry-page .registry-intro h1{margin:6px 0 7px;font-size:40px}.registry-page .source-strip{margin-bottom:9px}.registry-page .source-strip>a{padding:11px 16px}.registry-page .registry-stats>div{padding:9px 11px}.registry-page .production-type-panel{margin-bottom:9px}.registry-page .production-type-tabs button{min-height:48px}.registry-page .production-type-panel>p{min-height:32px;padding:7px 16px}}
 
