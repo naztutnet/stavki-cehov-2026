@@ -143,6 +143,9 @@ a,button,.table-wrap tr,.source-strip>a,.market-grid article,.resource-list a{tr
 /* Tablet navigation keeps section labels in the same drawer used on mobile. */
 @media(max-width:950px){:root{--side:0}.shell{display:block}.sidebar{position:fixed;left:0;width:260px;transform:translateX(-105%);transition:transform .34s cubic-bezier(.16,1,.3,1)}.sidebar.open{transform:none}.sidebar.open .brand span,.sidebar.open .new-button span,.sidebar.open nav span,.sidebar.open .history,.sidebar.open footer{display:grid}.sidebar.open nav a{grid-template-columns:20px 1fr auto;justify-content:initial}.menu{display:grid;width:44px;height:44px;margin-left:-10px;place-items:center;border-radius:8px}.scrim.show{position:fixed;z-index:15;inset:0;display:block;border:0;background:rgba(0,0,0,.25)}}
 
+/* Passive market metadata wraps instead of masquerading as a swipeable control. */
+@media(max-width:680px){.market-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px;overflow:visible;white-space:normal}.market-meta span:last-child{grid-column:1/-1}}
+
 /* Keep the first complete rate visible in a 720px-tall laptop viewport. */
 @media(min-width:781px){.registry-page .registry-intro{padding-top:0;padding-bottom:16px}.registry-page .registry-intro h1{margin:6px 0 7px;font-size:40px}.registry-page .source-strip{margin-bottom:9px}.registry-page .source-strip>a{padding:11px 16px}.registry-page .registry-stats>div{padding:9px 11px}.registry-page .production-type-panel{margin-bottom:9px}.registry-page .production-type-tabs button{min-height:48px}.registry-page .production-type-panel>p{min-height:32px;padding:7px 16px}}
 
