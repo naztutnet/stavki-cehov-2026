@@ -90,7 +90,7 @@ function saveBudget() { try { localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stri
 
 function sidebar(route) {
   const gross = budgetItems.reduce((sum, x) => sum + itemGross(x), 0);
-  return `<aside class="sidebar" id="sidebar"><a class="brand" href="#home"><b>K</b><span>KinoRates<small>Обновлено 20 августа 2026</small></span></a><button class="new-button" data-focus-search>⌕ <span>Найти ставку</span></button><nav>${sections.map(([id, icon, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}"><i>${icon}</i><span>${label}</span></a>`).join("")}</nav><a class="budget-shortcut ${route === "projects" ? "active" : ""}" href="#projects"><span>Рабочая смета</span><b data-budget-count>${budgetItems.length} поз.</b><strong data-budget-total>${rub(gross)}</strong></a><div class="history" id="recentRates">${recentMarkup()}</div><footer><a href="#about">О проекте</a><button data-feedback>Обратная связь</button><button data-contribution data-contribution-kind="rate">Сообщить новую ставку</button><button data-privacy>Конфиденциальность и cookie</button></footer></aside>`;
+  return `<aside class="sidebar" id="sidebar"><a class="brand" href="#home"><b>K</b><span>KinoRates<small>Обновлено 20 августа 2026</small></span></a><button class="new-button" data-focus-search>⌕ <span>Найти ставку</span></button><nav>${sections.map(([id, icon, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}"><i>${icon}</i><span>${label}</span></a>`).join("")}</nav><a class="budget-shortcut ${route === "projects" ? "active" : ""}" href="#projects"><span>Рабочая смета</span><b data-budget-count>${budgetItems.length} поз.</b><strong data-budget-total>${rub(gross)}</strong></a><div class="history" id="recentRates">${recentMarkup()}</div><footer><a href="#about">О проекте</a><a href="#contacts">Контакты</a><button data-feedback>Обратная связь</button><button data-contribution data-contribution-kind="rate">Сообщить новую ставку</button><button data-privacy>Конфиденциальность и cookie</button></footer></aside>`;
 }
 function recentMarkup() {
   return `<details class="recent-menu"><summary>Недавно смотрели <span>${recentRates.length || ""}</span></summary><div class="recent-popover">${recentRates.length ? recentRates.map((r) => `<a href="#home" data-query="${esc(r.prof)}"><i>◌</i><span>${esc(r.prof)}</span></a>`).join("") : `<p>Открытые ставки появятся здесь</p>`}</div></details>`;
@@ -102,8 +102,9 @@ function rememberRate(rate) {
   const history = $("#recentRates"); if (history) { history.innerHTML = recentMarkup(); bindQueryLinks(); }
 }
 function topbar(route) {
-  const label = sections.find((x) => x[0] === route)?.[2] || ({ about: "О проекте", projects: "Рабочая смета", article: "Материал" })[route] || "KinoRates";
-  return `<header class="topbar"><button class="menu" id="menu">☰</button><div class="breadcrumb">KinoRates <span>/</span> ${label}</div><div class="top-actions"><button class="quiet" data-contribution data-contribution-kind="rate">Поделиться ставкой</button></div></header>`;
+  const label = sections.find((x) => x[0] === route)?.[2] || ({ about: "О проекте", contacts: "Контакты", projects: "Рабочая смета", article: "Материал" })[route] || "KinoRates";
+  const action = route === "contacts" ? "" : '<button class="quiet" data-contribution data-contribution-kind="rate">Поделиться ставкой</button>';
+  return `<header class="topbar"><button class="menu" id="menu">☰</button><div class="breadcrumb">KinoRates <span>/</span> ${label}</div><div class="top-actions">${action}</div></header>`;
 }
 function attachmentFactor(start, end) {
   if (!start || !end) return null;
@@ -349,8 +350,11 @@ function siteUpdates() {
   const entries = SITE_UPDATES.map((update) => `<article class="site-update-card"><div class="site-update-meta"><time datetime="${esc(update.date)}">${esc(update.dateLabel)}</time><span>${esc(update.type)}</span></div><div><h2>${esc(update.title)}</h2><p>${esc(update.text)}</p></div></article>`).join("");
   return pageHead("Журнал продукта", "Обновления KinoRates", "Основные изменения справочника, базы ставок и рабочих инструментов.") + `<section class="site-update-feed" aria-label="Лента обновлений">${entries}</section>`;
 }
+function contacts() {
+  return pageHead("KinoRates", "Контакты", "Для предложений по сотрудничеству и совместных проектов.") + `<section class="contact-card"><div class="contact-copy"><span>СОТРУДНИЧЕСТВО</span><h2>Напишите, если хотите обсудить сотрудничество.</h2><p>Совместный проект, партнёрство или развитие KinoRates.</p></div><a class="contact-email" href="mailto:snegproduction@gmail.com"><span>Email</span><b>snegproduction@gmail.com</b><i>Написать ↗</i></a></section>`;
+}
 function about() {
-  return pageHead("KinoRates", "О проекте", "Инструмент для прозрачной работы со ставками и производственной сметой.", '<button class="primary" data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Связаться</button>') + `<div class="about-grid"><section><h2>Ставки и источники<br>в одном месте.</h2><p>KinoRates объединяет публичные цеховые письма, рекомендации, рыночные исследования и пользовательские допущения в одном рабочем контексте.</p><p>Справочник помогает найти данные, увидеть условия и первоисточник, а затем перенести выбранные позиции в прозрачную рабочую смету.</p></section><aside><div><span>Позиций</span><b>${R.length}</b></div><div><span>Источников</span><b>${S.length}</b></div><div><span>Цеха</span><b>${new Set(R.map((x) => x.dept)).size}</b></div><div><span>Ревизия</span><b>20.08.2026</b></div></aside></div>`;
+  return pageHead("KinoRates", "О проекте", "Инструмент для прозрачной работы со ставками и производственной сметой.", '<div class="page-head-actions"><a class="primary button-link" href="#contacts">Контакты</a><button class="quiet" data-feedback data-feedback-topic="Хочу поделиться актуальной ставкой">Поделиться ставкой</button></div>') + `<div class="about-grid"><section><h2>Ставки и источники<br>в одном месте.</h2><p>KinoRates объединяет публичные цеховые письма, рекомендации, рыночные исследования и пользовательские допущения в одном рабочем контексте.</p><p>Справочник помогает найти данные, увидеть условия и первоисточник, а затем перенести выбранные позиции в прозрачную рабочую смету.</p></section><aside><div><span>Позиций</span><b>${R.length}</b></div><div><span>Источников</span><b>${S.length}</b></div><div><span>Цеха</span><b>${new Set(R.map((x) => x.dept)).size}</b></div><div><span>Ревизия</span><b>20.08.2026</b></div></aside></div>`;
 }
 function pageHead(kicker, title, description, action = "") { return `<section class="page-head"><div><span>${kicker}</span><h1>${title}</h1><p>${description}</p></div>${action}</section>`; }
 function modal(type, feedbackTopic = "Нашёл ошибку", context = {}) {
@@ -369,7 +373,7 @@ function modal(type, feedbackTopic = "Нашёл ошибку", context = {}) {
 function render() {
   const requestedRoute = location.hash.slice(1).split("/")[0] || "home";
   const route = requestedRoute === "rates" ? "home" : requestedRoute === "article" ? "knowledge" : requestedRoute;
-  const pages = { home: homeV2, market, projects: projectsV2, knowledge, resources, updates: siteUpdates, about };
+  const pages = { home: homeV2, market, projects: projectsV2, knowledge, resources, updates: siteUpdates, about, contacts };
   $("#app").innerHTML = `<div class="shell">${sidebar(route)}<main>${topbar(route)}<div class="view">${(pages[route] || home)()}</div></main><button class="scrim" id="scrim"></button><div id="modalRoot"></div></div>`;
   bind(route);
 }
