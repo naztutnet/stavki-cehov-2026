@@ -27,7 +27,8 @@ jobs:
           node --check check-log.js
           node --check preview-v4/budget-template.js
           node --check preview-v4/app.js
-          node --check preview-production-types/type-filter.js
+          node --check production-type-filter.js
+          node --check site-updates-data.js
           node --check preview-production-types/app.js
           node --check preview-production-types/test-type-filter.js
           node --check scripts/validate_data.js
@@ -40,6 +41,7 @@ jobs:
       - name: Проверить расчёты и защитные функции
         run: |
           node scripts/test_core.js
+          node scripts/test_production_promotion.js
           node preview-production-types/test-type-filter.js
 
       - name: Проверить HTML, CSS, OG и cache-version

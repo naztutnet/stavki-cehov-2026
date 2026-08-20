@@ -91,3 +91,4 @@ window.KINORATES_SITE_UPDATES = [
     text: "Опубликованы первые рабочие версии каталога ставок кинопроизводства и связанной с ним сметы."
   }
 ];
+window.KINORATES_UPDATES = window.KINORATES_SITE_UPDATES;
