@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="KinoRates">
-  <rect width="120" height="120" rx="30" fill="#25252B"/>
-  <path d="M36 28h16v27l25-27h20L69 58l31 34H79L52 62v30H36V28Z" fill="#FFFFFF"/>
+  <rect width="120" height="120" rx="30" fill="#FFFFFF"/>
+  <g fill="#111111">
+    <path d="M30 42h20v50H30z" rx="2"/>
+    <path d="M30 34h17l9-12H39c-5 0-9 4-9 9v3Z"/>
+    <path d="M54 30l14-17h22L75 31Z"/>
+    <path d="M79 27l11-14h14L93 28Z"/>
+    <path d="M52 57l28-31h22L68 66Z"/>
+    <path d="M62 69l11-12 29 35H80Z"/>
+  </g>
 </svg>
