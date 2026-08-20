@@ -64,5 +64,15 @@
     return Object.fromEntries(FILTERS.map(({ id }) => [id, rates.filter((rate) => matchesType(rate, id)).length]));
   }
 
-  return { FILTERS, classifyRate, matchesType, countByType, normalizeFilterId };
+  function contributionState(rates, query, filterId) {
+    const normalizedQuery = normalize(query);
+    if (!normalizedQuery) return { kind: "none", profession: "", allRows: [], selectedRows: [] };
+    const allRows = rates.filter((rate) => normalize(rate?.prof) === normalizedQuery);
+    const selectedRows = allRows.filter((rate) => matchesType(rate, filterId));
+    const profession = allRows[0]?.prof || String(query ?? "").trim();
+    const kind = selectedRows.length ? "has-rate" : allRows.length ? "missing-rate" : "missing-profession";
+    return { kind, profession, allRows, selectedRows };
+  }
+
+  return { FILTERS, classifyRate, matchesType, countByType, normalizeFilterId, contributionState };
 });
