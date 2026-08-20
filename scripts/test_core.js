@@ -138,6 +138,7 @@ assert(app.includes('href="mailto:snegproduction@gmail.com"'),'Collaboration con
 assert((app.match(/class="contact-icon"/g)||[]).length===1,'Contact email needs one inline icon');
 assert(app.includes('route === "contacts" ? ""'),'Contacts page still shows the unrelated rate-contribution action');
 assert(css.includes('.contact-card')&&css.includes('.contact-method:focus-visible'),'Contact section is missing its responsive or keyboard-focus styling');
+assert(css.includes('font-size:clamp(24px,2.2vw,32px)')&&css.includes('.contact-copy h2{font-size:26px}'),'Contact typography is no longer intentionally restrained');
 assert(market.includes("id:'mpk-regions-2025'")&&market.includes('ELEMENT_ID=57863'),'Regional market card or its source is missing');
 for(const section of ['Operatori','Zvukorezhisseri','RezhisseriMontazha','HudozhnikiPostanovschiki','Stsenaristi'])assert(market.includes(`/#${section}`),`Kinopoisk native section link is missing: ${section}`);
 for(const tone of ['current','previous','market','archive','unpublished'])assert(css.includes(`.status.${tone}`),`Rate status palette is missing: ${tone}`);
