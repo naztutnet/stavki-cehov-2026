@@ -31,11 +31,22 @@ while i<len(css):
             if depth<0: fail('Extra closing brace in app.css')
     i+=1
 if comment or quote or depth: fail('Unclosed construct in app.css')
-og=(root/'og-image.png').read_bytes()
-if og[:8]!=b'\x89PNG\r\n\x1a\n' or og[12:16]!=b'IHDR': fail('og-image.png is not valid PNG')
+og_name='og-image-v2.png'
+og=(root/og_name).read_bytes()
+if og[:8]!=b'\x89PNG\r\n\x1a\n' or og[12:16]!=b'IHDR': fail(f'{og_name} is not valid PNG')
 w,h=struct.unpack('>II',og[16:24])
 mw=re.search(r'<meta property="og:image:width" content="(\d+)">',index);mh=re.search(r'<meta property="og:image:height" content="(\d+)">',index)
 if not mw or not mh or (w,h)!=(int(mw.group(1)),int(mh.group(1))): fail('OG image dimensions mismatch')
+if (w,h)!=(1200,630): fail(f'OG image must use the standard 1200x630 canvas, got {w}x{h}')
+og_url=f'https://kinorates.ru/{og_name}'
+for required in (
+    '<meta property="og:title" content="Ставки для кино, сериалов и рекламы">',
+    '<meta property="og:description" content="449 ставок с первоисточниками, фильтрами по формату и рабочей сметой.">',
+    f'<meta property="og:image" content="{og_url}">',
+    '<meta property="og:image:alt" content="KinoRates — справочник ставок и рабочая смета">',
+    f'<meta name="twitter:image" content="{og_url}">',
+):
+    if required not in index: fail(f'Missing refreshed social preview metadata: {required}')
 assets={'app.css':r'<link rel="stylesheet" href="app\.css\?v=([^"]+)">','production-type-filter.js':r'<script src="production-type-filter\.js\?v=([^"]+)"></script>','site-updates-data.js':r'<script src="site-updates-data\.js\?v=([^"]+)"></script>','updates.js':r'<script src="updates\.js\?v=([^"]+)"></script>','check-log.js':r'<script src="check-log\.js\?v=([^"]+)"></script>','rates-data.js':r'<script src="rates-data\.js\?v=([^"]+)"></script>','sources-data.js':r'<script src="sources-data\.js\?v=([^"]+)"></script>','market-data.js':r'<script src="market-data\.js\?v=([^"]+)"></script>','app.js':r'<script src="app\.js\?v=([^"]+)"></script>'}
 versions={};positions={}
 for name,pattern in assets.items():
@@ -70,6 +81,7 @@ seo_pages=(
 for path in seo_pages:
     page=(root/path).read_text(encoding='utf-8')
     if seo_font_url not in page: fail(f'{path} does not load Golos Text 400/500/600/700')
+    if f'<meta property="og:image" content="{og_url}">' not in page: fail(f'{path} still uses the stale social preview image')
 font_files={
     'index.html':index,
     'app.css':css,

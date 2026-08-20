@@ -1,61 +1,117 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FDFEFF"/>
-      <stop offset="1" stop-color="#E7EBF0"/>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FBFBFC"/>
+      <stop offset="1" stop-color="#F0EEF8"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F1720" flood-opacity="0.12"/>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FAF9FD"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#2B2149" flood-opacity="0.13"/>
     </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#2B2149" flood-opacity="0.11"/>
+    </filter>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap');
+      text { font-family: 'Golos Text', Arial, sans-serif; }
+    </style>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <path d="M0 520 C180 455 260 575 420 500 S720 370 860 430 S1050 570 1200 500 V630 H0Z" fill="#F4F6F8"/>
-  <path d="M720 0 C800 80 875 100 960 76 S1110 10 1200 35 V0Z" fill="#F0F2F4"/>
-  <g font-family="Arial, Helvetica, sans-serif" fill="#0F1720">
-    <text x="52" y="70" font-size="39" font-weight="700">KinoRates</text>
-    <text x="52" y="210" font-size="72" font-weight="700">Ставки</text>
-    <text x="52" y="290" font-size="72" font-weight="700">киноцехов</text>
-    <text x="52" y="370" font-size="72" font-weight="700">России</text>
-    <text x="54" y="435" font-size="24" fill="#4A5A68">Актуальные цеховые письма</text>
-    <text x="54" y="470" font-size="24" fill="#4A5A68">и конструктор предварительной сметы</text>
-    <text x="54" y="560" font-size="17">Ставки</text>
-    <circle cx="128" cy="554" r="3" fill="#17456B"/>
-    <text x="146" y="560" font-size="17">Цеховые письма</text>
-    <circle cx="280" cy="554" r="3" fill="#17456B"/>
-    <text x="298" y="560" font-size="17">Предварительная смета</text>
+
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1088" cy="66" r="190" fill="#E9E4FF" opacity="0.72"/>
+  <circle cx="1160" cy="625" r="260" fill="#F8EFDF" opacity="0.72"/>
+  <path d="M0 585 C180 540 280 625 460 580 C620 540 720 548 870 598 L870 630 L0 630Z" fill="#FFFFFF" opacity="0.58"/>
+
+  <g transform="translate(58 50)">
+    <rect width="38" height="38" rx="10" fill="#25252B"/>
+    <text x="19" y="26" text-anchor="middle" font-size="18" font-weight="600" fill="#FFFFFF">K</text>
+    <text x="52" y="26" font-size="20" font-weight="600" fill="#25252B">KinoRates</text>
+    <text x="52" y="45" font-size="10" font-weight="500" fill="#87848F">ОБНОВЛЕНО 20 АВГУСТА 2026</text>
   </g>
-  <g filter="url(#shadow)">
-    <rect x="500" y="78" width="650" height="390" rx="16" fill="#FDFEFF" stroke="#C4D0DA"/>
-    <text x="528" y="120" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#0F1720">Справочник ставок</text>
-    <rect x="528" y="142" width="86" height="30" rx="4" fill="#0F1720"/>
-    <text x="544" y="162" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#fff">Все группы</text>
-    <g font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#4A5A68">
-      <rect x="624" y="142" width="122" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/><text x="638" y="162">Режиссёрский цех</text>
-      <rect x="756" y="142" width="126" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/><text x="770" y="162">Операторский цех</text>
-      <rect x="892" y="142" width="134" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/><text x="906" y="162">Художественный цех</text>
+
+  <g transform="translate(58 160)">
+    <text x="0" y="0" font-size="12" font-weight="600" letter-spacing="1.5" fill="#6D4AFF">СПРАВОЧНИК СТАВОК · РАБОЧАЯ СМЕТА</text>
+    <text x="0" y="76" font-size="56" font-weight="600" letter-spacing="-2.1" fill="#24242A">Ставки для кино,</text>
+    <text x="0" y="140" font-size="56" font-weight="600" letter-spacing="-2.1" fill="#24242A">сериалов и рекламы</text>
+    <text x="0" y="190" font-size="18" font-weight="400" fill="#6F6C77">449 позиций с первоисточниками, условиями</text>
+    <text x="0" y="218" font-size="18" font-weight="400" fill="#6F6C77">и понятным переносом в рабочую смету.</text>
+
+    <g transform="translate(0 258)">
+      <rect width="132" height="34" rx="8" fill="#EDE9FF"/>
+      <text x="66" y="22" text-anchor="middle" font-size="12" font-weight="500" fill="#5942C6">Кино и сериал</text>
+      <rect x="142" width="184" height="34" rx="8" fill="#FAF0DF"/>
+      <text x="234" y="22" text-anchor="middle" font-size="12" font-weight="500" fill="#7A531C">Реклама / клип / ТВ</text>
     </g>
-    <rect x="1038" y="142" width="88" height="30" rx="4" fill="#fff" stroke="#C4D0DA"/>
-    <text x="1052" y="162" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#7C8B98">Поиск</text>
-    <g font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#7C8B98">
-      <text x="528" y="208">Должность</text><text x="848" y="208">Единица</text><text x="982" y="208">Ставка</text>
-    </g>
-    <g stroke="#D9E1E7" stroke-width="1"><line x1="528" y1="220" x2="1126" y2="220"/><line x1="528" y1="270" x2="1126" y2="270"/><line x1="528" y1="320" x2="1126" y2="320"/><line x1="528" y1="370" x2="1126" y2="370"/><line x1="528" y1="420" x2="1126" y2="420"/></g>
-    <g font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#0F1720">
-      <text x="528" y="252">Режиссёр-постановщик</text><text x="848" y="252">смена</text><text x="982" y="252">по письму цеха</text>
-      <text x="528" y="302">Оператор-постановщик</text><text x="848" y="302">смена</text><text x="982" y="302">по письму цеха</text>
-      <text x="528" y="352">Художник-постановщик</text><text x="848" y="352">проект</text><text x="982" y="352">по письму цеха</text>
-      <text x="528" y="402">Гримёр</text><text x="848" y="402">смена</text><text x="982" y="402">ставка</text>
-      <text x="528" y="452">Осветитель</text><text x="848" y="452">смена</text><text x="982" y="452">ставка</text>
+
+    <g transform="translate(0 336)" fill="#4E4B56">
+      <circle cx="5" cy="-4" r="4" fill="#6D4AFF"/>
+      <text x="18" y="1" font-size="13" font-weight="500">Проверенные источники</text>
+      <circle cx="194" cy="-4" r="4" fill="#6D4AFF"/>
+      <text x="207" y="1" font-size="13" font-weight="500">Фильтры по формату</text>
+      <circle cx="374" cy="-4" r="4" fill="#6D4AFF"/>
+      <text x="387" y="1" font-size="13" font-weight="500">Excel и PDF</text>
     </g>
   </g>
-  <g filter="url(#shadow)">
-    <rect x="890" y="405" width="260" height="150" rx="14" fill="#FDFEFF" stroke="#C4D0DA"/>
-    <text x="912" y="440" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#0F1720">Предварительная смета</text>
-    <g font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#4A5A68">
-      <text x="912" y="474">Выбранные позиции</text><text x="1118" y="474" text-anchor="end">12</text>
-      <text x="912" y="500">Цехов в смете</text><text x="1118" y="500" text-anchor="end">5</text>
+
+  <g transform="translate(640 76)" filter="url(#shadow)">
+    <rect width="510" height="468" rx="18" fill="url(#panel)" stroke="#DCD9E5"/>
+    <rect width="510" height="54" rx="18" fill="#FFFFFF"/>
+    <path d="M0 36 Q0 54 18 54 H492 Q510 54 510 36 V54 H0Z" fill="#FFFFFF"/>
+    <line x1="0" y1="54" x2="510" y2="54" stroke="#E5E3E9"/>
+    <rect x="18" y="15" width="24" height="24" rx="7" fill="#25252B"/>
+    <text x="30" y="32" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">K</text>
+    <text x="52" y="32" font-size="14" font-weight="600" fill="#28272D">Справочник ставок</text>
+    <rect x="394" y="13" width="98" height="28" rx="7" fill="#6D4AFF"/>
+    <text x="443" y="31" text-anchor="middle" font-size="10" font-weight="500" fill="#FFFFFF">Смета · 3</text>
+
+    <g transform="translate(18 72)">
+      <rect width="474" height="44" rx="9" fill="#F7F6FA" stroke="#E4E2E8"/>
+      <rect x="3" y="3" width="84" height="38" rx="7" fill="#FFFFFF"/>
+      <text x="45" y="27" text-anchor="middle" font-size="10" font-weight="500" fill="#5B5863">Все</text>
+      <rect x="94" y="3" width="142" height="38" rx="7" fill="#ECE8FF"/>
+      <text x="165" y="27" text-anchor="middle" font-size="10" font-weight="500" fill="#5D43CE">Кино и сериал</text>
+      <rect x="243" y="3" width="228" height="38" rx="7" fill="#FAF0DF"/>
+      <text x="357" y="27" text-anchor="middle" font-size="10" font-weight="500" fill="#7A531C">Реклама / клип / ТВ</text>
     </g>
-    <line x1="912" y1="516" x2="1128" y2="516" stroke="#C4D0DA"/>
-    <text x="912" y="540" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#0F1720">Итого — рассчитывается автоматически</text>
+
+    <g transform="translate(18 134)">
+      <text x="0" y="0" font-size="10" font-weight="500" fill="#8B8892">ПРОФЕССИЯ</text>
+      <text x="292" y="0" font-size="10" font-weight="500" fill="#8B8892">ЕД.</text>
+      <text x="472" y="0" text-anchor="end" font-size="10" font-weight="500" fill="#8B8892">СТАВКА</text>
+
+      <g transform="translate(0 18)">
+        <rect width="474" height="64" rx="10" fill="#FFFFFF" stroke="#E5E3E9"/>
+        <text x="14" y="25" font-size="13" font-weight="600" fill="#2D2C32">Директор</text>
+        <text x="14" y="45" font-size="10" fill="#87848F">Рекламное / музыкальное видео</text>
+        <text x="292" y="35" font-size="11" fill="#6F6C77">проект</text>
+        <text x="458" y="35" text-anchor="end" font-size="13" font-weight="600" fill="#2D2C32">150 000 ₽</text>
+      </g>
+      <g transform="translate(0 90)">
+        <rect width="474" height="64" rx="10" fill="#FFFFFF" stroke="#E5E3E9"/>
+        <text x="14" y="25" font-size="13" font-weight="600" fill="#2D2C32">Художник-постановщик</text>
+        <text x="14" y="45" font-size="10" fill="#87848F">Кино / сериал</text>
+        <text x="292" y="35" font-size="11" fill="#6F6C77">месяц</text>
+        <text x="458" y="35" text-anchor="end" font-size="13" font-weight="600" fill="#2D2C32">по источнику</text>
+      </g>
+      <g transform="translate(0 162)">
+        <rect width="474" height="64" rx="10" fill="#FFFFFF" stroke="#E5E3E9"/>
+        <text x="14" y="25" font-size="13" font-weight="600" fill="#2D2C32">Оператор-постановщик</text>
+        <text x="14" y="45" font-size="10" fill="#87848F">Кино / сериал</text>
+        <text x="292" y="35" font-size="11" fill="#6F6C77">смена</text>
+        <text x="458" y="35" text-anchor="end" font-size="13" font-weight="600" fill="#2D2C32">по источнику</text>
+      </g>
+    </g>
+
+    <g transform="translate(148 370)" filter="url(#softShadow)">
+      <rect width="344" height="122" rx="14" fill="#FFFFFF" stroke="#D8D4E3"/>
+      <text x="18" y="30" font-size="12" font-weight="500" fill="#77747E">РАБОЧАЯ СМЕТА</text>
+      <text x="18" y="59" font-size="18" font-weight="600" fill="#29282E">3 позиции</text>
+      <text x="326" y="59" text-anchor="end" font-size="18" font-weight="600" fill="#5C43CF">370 000 ₽</text>
+      <line x1="18" y1="76" x2="326" y2="76" stroke="#E6E3EB"/>
+      <text x="18" y="101" font-size="11" fill="#807D87">Формат сохранён · даты · налоги · заметки</text>
+    </g>
   </g>
 </svg>
