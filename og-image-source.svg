@@ -1,55 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FBFBFC"/>
-      <stop offset="1" stop-color="#F1EFF8"/>
-    </linearGradient>
-    <filter id="shadow" x="-25%" y="-25%" width="160%" height="170%">
-      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#302561" flood-opacity="0.12"/>
-    </filter>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap');
-      text { font-family: 'Golos Text', Arial, sans-serif; }
-    </style>
-  </defs>
-
-  <rect width="1200" height="630" fill="url(#background)"/>
-  <circle cx="1130" cy="-20" r="235" fill="#E9E4FF" opacity="0.78"/>
-  <circle cx="1160" cy="650" r="255" fill="#F7EAD4" opacity="0.72"/>
-  <circle cx="-40" cy="650" r="220" fill="#EAE5FF" opacity="0.40"/>
-
-  <g transform="translate(62 46)">
-    <rect width="44" height="44" rx="12" fill="#25252B"/>
-    <text x="22" y="30" text-anchor="middle" font-size="20" font-weight="600" fill="#FFFFFF">K</text>
-    <text x="58" y="30" font-size="24" font-weight="600" fill="#25252B">KinoRates</text>
+<rect width="1200" height="630" rx="36" fill="#F7F7F8"/>
+<g transform="translate(62 48)">
+  <rect width="56" height="56" rx="14" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <g transform="translate(10 9)" fill="#111111">
+    <rect x="0" y="13" width="10" height="28" rx="2"/>
+    <path d="M14 23 L27 9 H38 L24 25 L39 41 H28 L18 30 L14 34 Z"/>
+    <path d="M0 6 L9 6 L13 0 L4 0 Z"/>
+    <path d="M12 6 L23 6 L27 0 L16 0 Z"/>
+    <path d="M26 6 L36 6 L40 0 L30 0 Z"/>
   </g>
-
-  <g transform="translate(62 150)">
-    <rect width="252" height="40" rx="10" fill="#EDE9FF"/>
-    <text x="126" y="27" text-anchor="middle" font-size="16" font-weight="600" letter-spacing="0.6" fill="#5942C6">СПРАВОЧНИК СТАВОК</text>
-
-    <text x="0" y="144" font-size="84" font-weight="600" letter-spacing="-3.2" fill="#24242A">Ставки для кино,</text>
-    <text x="0" y="236" font-size="84" font-weight="600" letter-spacing="-3.2" fill="#24242A">сериалов и рекламы</text>
-
-    <g transform="translate(0 292)">
-      <rect width="204" height="54" rx="14" fill="#FFFFFF" stroke="#DCD8E7" stroke-width="2"/>
-      <text x="102" y="35" text-anchor="middle" font-size="18" font-weight="600" fill="#504C59">КИНО + СЕРИАЛ</text>
-      <rect x="218" width="296" height="54" rx="14" fill="#FAF0DF"/>
-      <text x="366" y="35" text-anchor="middle" font-size="18" font-weight="600" fill="#7A531C">РЕКЛАМА + КЛИП + ТВ</text>
-    </g>
-  </g>
-
-  <g transform="translate(935 50)" filter="url(#shadow)">
-    <rect width="205" height="138" rx="22" fill="#FFFFFF" stroke="#DDD9E7"/>
-    <line x1="0" y1="46" x2="205" y2="46" stroke="#DDD9E7"/>
-    <line x1="0" y1="92" x2="205" y2="92" stroke="#DDD9E7"/>
-    <line x1="104" y1="0" x2="104" y2="138" stroke="#DDD9E7"/>
-    <rect x="112" y="54" width="85" height="30" rx="8" fill="#6D4AFF"/>
-    <circle cx="24" cy="23" r="6" fill="#6D4AFF"/>
-    <rect x="38" y="18" width="42" height="10" rx="5" fill="#D8D2EF"/>
-    <rect x="14" y="108" width="66" height="10" rx="5" fill="#E6E2EE"/>
-  </g>
-
-  <path d="M62 566 H884" stroke="#6D4AFF" stroke-width="5" stroke-linecap="round"/>
-  <path d="M900 566 H1138" stroke="#DAD4EC" stroke-width="5" stroke-linecap="round"/>
+  <text x="72" y="24" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#202124">KinoRates</text>
+  <text x="72" y="49" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="500" fill="#8A8A91">Ставки съёмочных групп</text>
+</g>
+<g transform="translate(62 170)">
+  <rect width="238" height="38" rx="10" fill="#ECECEF"/>
+  <text x="119" y="25" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing=".6" fill="#55555B">СПРАВОЧНИК СТАВОК</text>
+  <text x="0" y="138" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="-2.8" fill="#202124">Ставки для кино,</text>
+  <text x="0" y="226" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="-2.8" fill="#202124">сериалов и рекламы</text>
+  <text x="0" y="284" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#6B6B72">Актуальные ставки · цеховые письма · конструктор сметы</text>
+</g>
+<g transform="translate(894 64)">
+  <rect width="244" height="164" rx="24" fill="#FFFFFF" stroke="#E0E0E4"/>
+  <line x1="0" y1="54" x2="244" y2="54" stroke="#E0E0E4"/>
+  <line x1="0" y1="109" x2="244" y2="109" stroke="#E0E0E4"/>
+  <line x1="124" y1="0" x2="124" y2="164" stroke="#E0E0E4"/>
+  <rect x="136" y="67" width="92" height="30" rx="8" fill="#111111"/>
+  <circle cx="26" cy="27" r="6" fill="#111111"/>
+  <rect x="40" y="22" width="50" height="10" rx="5" fill="#D7D7DB"/>
+  <rect x="18" y="128" width="78" height="10" rx="5" fill="#E7E7EA"/>
+</g>
+<path d="M62 566 H1138" stroke="#202124" stroke-width="5" stroke-linecap="round"/>
 </svg>
