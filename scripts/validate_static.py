@@ -31,7 +31,7 @@ while i<len(css):
             if depth<0: fail('Extra closing brace in app.css')
     i+=1
 if comment or quote or depth: fail('Unclosed construct in app.css')
-og_name='og-image-v3.png'
+og_name='og-image-v4.png'
 og=(root/og_name).read_bytes()
 if og[:8]!=b'\x89PNG\r\n\x1a\n' or og[12:16]!=b'IHDR': fail(f'{og_name} is not valid PNG')
 w,h=struct.unpack('>II',og[16:24])
@@ -41,9 +41,9 @@ if (w,h)!=(1200,630): fail(f'OG image must use the standard 1200x630 canvas, got
 og_url=f'https://kinorates.ru/{og_name}'
 for required in (
     '<meta property="og:title" content="Ставки для кино, сериалов и рекламы">',
-    '<meta property="og:description" content="449 ставок с первоисточниками, фильтрами по формату и рабочей сметой.">',
+    '<meta property="og:description" content="Справочник ставок с первоисточниками, фильтрами по формату и рабочей сметой.">',
     f'<meta property="og:image" content="{og_url}">',
-    '<meta property="og:image:alt" content="KinoRates — 449 ставок для кино и рекламы">',
+    '<meta property="og:image:alt" content="KinoRates — ставки для кино, сериалов и рекламы">',
     f'<meta name="twitter:image" content="{og_url}">',
 ):
     if required not in index: fail(f'Missing refreshed social preview metadata: {required}')
