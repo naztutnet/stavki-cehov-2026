@@ -1,3 +1,11 @@
+function applyBrandLogoStyle(){
+  if(document.getElementById('kinorates-brand-logo-style'))return;
+  const style=document.createElement('style');
+  style.id='kinorates-brand-logo-style';
+  style.textContent=`.brand b{font-size:0!important;background:#fff url('/favicon.svg') center/cover no-repeat!important;color:transparent!important;border:1px solid #dedee2!important;box-shadow:0 1px 2px rgba(0,0,0,.04)!important}`;
+  document.head.appendChild(style);
+}
+
 function applyMobileUpdatesLayout(){
   if(!window.matchMedia('(max-width: 600px)').matches)return;
   const list=document.querySelector('.updates-inline .updates-list');
@@ -125,6 +133,7 @@ function syncKinoRatesVisibleCounters(){
 }
 
 function bootKinoRatesEnhancements(){
+  applyBrandLogoStyle();
   syncKinoRatesVisibleCounters();
   setupResponsiveInspector();
   /* app.js определяет старую прокрутку к инспектору для <=920px. После загрузки
