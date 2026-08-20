@@ -61,9 +61,9 @@ let selectedRate = null;
 let selectedProductionType = TYPE_FILTER?.normalizeFilterId(initialProductionType) || "all";
 let rateQuery = "";
 let selectedRateStatus = "";
+const BUDGET_STORAGE_KEY = "kinorates-budget-v4";
 const budgetItems = loadBudget();
 const recentRates = [];
-const BUDGET_STORAGE_KEY = "kinorates-budget-v4";
 function migrateLegacyBudget(saved) {
   if (!Array.isArray(saved)) return [];
   return saved.map((entry) => {
