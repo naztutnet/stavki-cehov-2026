@@ -96,6 +96,11 @@ const genericRateModal=modalContext.__modal('contribution','',{kind:'rate',produ
 assert(genericRateModal.includes('Предложить ставку')&&!genericRateModal.includes('name="profession" value="" maxlength="160" required readonly'),'Generic rate contribution incorrectly locks an empty profession');
 assert(contributionModal.includes('name="email" type="email"')&&!contributionModal.includes('name="email" type="email" autocomplete="email" placeholder="name@example.com" required'),'Contribution contact must remain optional');
 assert(app.includes('kind === "rate" && !rate && !evidence'),'Missing-rate submissions can be empty');
+assert(app.includes('class="rate-reading-guide"'),'How-to-read page does not explain the production filter workflow');
+assert(app.includes('Киношные значения в этот раздел не копируются и не пересчитываются.'),'How-to-read page does not protect against inferred advertising rates');
+assert(app.includes('href="?type=cinema-series#home"')&&app.includes('href="?type=commercial-media#home"'),'How-to-read page does not link to both production filters');
+assert(app.includes('data-contribution-kind="rate">Предложить ставку')&&app.includes('data-contribution-kind="profession">Предложить профессию'),'How-to-read page lost its contribution actions');
+assert(css.includes('.rate-reading-steps'),'How-to-read workflow styling is missing');
 assert(!app.includes('Данные актуальны'),'Unclear global data-status badge returned');
 assert(!app.includes('market-source-strip'),'Removed market link strip returned');
 assert(app.includes('<span>Цеха</span>'),'About metrics use the wrong workshop label');
