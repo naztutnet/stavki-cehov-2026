@@ -127,6 +127,18 @@ function budgetFormula(x) {
   const base = attached ? `${shortDate(x.start)}–${shortDate(x.end)} · ${dec2(x.periods)} периода · расчёт по календарным долям месяцев` : `${rub(x.rate)} × ${dec2(x.qty)} × ${dec2(x.periods)}`;
   return `${base}${+x.extra ? ` + доплата ${rub(x.extra)}` : ""} = ${rub(itemNet(x))}${+x.tax ? `; ÷ (1 − ${dec2(x.tax)}%) = ${rub(itemGross(x))}` : "; без налога"}`;
 }
+function budgetProductionTypes(item) {
+  if (item?.custom || !TYPE_FILTER?.classifyRate) return [];
+  const sourceRate = R.find((rate) => String(rate.id) === String(item?.id));
+  if (!sourceRate) return [];
+  const typeIds = TYPE_FILTER.classifyRate(sourceRate);
+  return TYPE_FILTER.FILTERS.filter(({ id }) => id !== "all" && typeIds.includes(id));
+}
+function budgetProductionLabel(item) { return budgetProductionTypes(item).map(({ label }) => label).join(" · "); }
+function budgetProductionMarkup(item) {
+  const types = budgetProductionTypes(item);
+  return types.length ? `<div class="budget-production-types" aria-label="Формат производства">${types.map(({ id, label }) => `<span class="budget-production-type" data-type="${id}">${esc(label)}</span>`).join("")}</div>` : "";
+}
 function periodsFromDates(start, end, unit, fallback) {
   if (!start || !end) return fallback;
   const first = new Date(`${start}T12:00:00`), last = new Date(`${end}T12:00:00`);
@@ -142,17 +154,17 @@ async function exportBudgetExcel() {
   await ensureExcelJS();
   const workbook = new ExcelJS.Workbook(), sheet = workbook.addWorksheet("Рабочая смета");
   workbook.creator = "KinoRates"; workbook.title = "KinoRates — Рабочая смета"; workbook.company = "KinoRates"; workbook.created = new Date();
-  sheet.mergeCells("A1:M1"); const title = sheet.getCell("A1"); title.value = "KinoRates · Рабочая смета"; title.font = { name: "Arial", size: 18, bold: true, color: { argb: "FFFFFFFF" } }; title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF6D4AFF" } }; title.alignment = { vertical: "middle" }; sheet.getRow(1).height = 36;
-  sheet.mergeCells("A2:M2"); const meta = sheet.getCell("A2"); meta.value = `Экспортировано ${new Date().toLocaleString("ru-RU")} · ${budgetItems.length} позиций`; meta.font = { name: "Arial", size: 9, color: { argb: "FF77777F" } }; meta.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.getRow(2).height = 23;
-  const headers = ["Статья", "Цех", "Единица", "Ставка", "Количество", "Периоды", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом", "Заметка"];
+  sheet.mergeCells("A1:N1"); const title = sheet.getCell("A1"); title.value = "KinoRates · Рабочая смета"; title.font = { name: "Arial", size: 18, bold: true, color: { argb: "FFFFFFFF" } }; title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF6D4AFF" } }; title.alignment = { vertical: "middle" }; sheet.getRow(1).height = 36;
+  sheet.mergeCells("A2:N2"); const meta = sheet.getCell("A2"); meta.value = `Экспортировано ${new Date().toLocaleString("ru-RU")} · ${budgetItems.length} позиций`; meta.font = { name: "Arial", size: 9, color: { argb: "FF77777F" } }; meta.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.getRow(2).height = 23;
+  const headers = ["Статья", "Цех", "Формат", "Единица", "Ставка", "Количество", "Периоды", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом", "Заметка"];
   sheet.addRow([]); sheet.addRow(headers);
-  budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit); sheet.addRow([safeSheetText(x.prof), safeSheetText(x.dept), safeSheetText(x.unit), +x.rate || 0, +x.qty || 0, (monthly ? attachmentFactor(x.start, x.end) : null) ?? (+x.periods || 0), monthly && x.start ? new Date(`${x.start}T12:00:00`) : "", monthly && x.end ? new Date(`${x.end}T12:00:00`) : "", +x.extra || 0, (+x.tax || 0) / 100, itemNet(x), itemGross(x), safeSheetText(x.comment)]); });
-  const first = 5, last = 4 + budgetItems.length, totalRow = sheet.addRow(["", "", "", "", "", "", "", "", "", "ИТОГО", { formula: `SUM(K${first}:K${last})`, result: budgetItems.reduce((s, x) => s + itemNet(x), 0) }, { formula: `SUM(L${first}:L${last})`, result: budgetItems.reduce((s, x) => s + itemGross(x), 0) }, ""]);
-  sheet.columns = [30, 20, 13, 15, 11, 11, 14, 14, 15, 11, 17, 17, 32].map((width) => ({ width }));
+  budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit); sheet.addRow([safeSheetText(x.prof), safeSheetText(x.dept), safeSheetText(budgetProductionLabel(x)), safeSheetText(x.unit), +x.rate || 0, +x.qty || 0, (monthly ? attachmentFactor(x.start, x.end) : null) ?? (+x.periods || 0), monthly && x.start ? new Date(`${x.start}T12:00:00`) : "", monthly && x.end ? new Date(`${x.end}T12:00:00`) : "", +x.extra || 0, (+x.tax || 0) / 100, itemNet(x), itemGross(x), safeSheetText(x.comment)]); });
+  const first = 5, last = 4 + budgetItems.length, totalRow = sheet.addRow(["", "", "", "", "", "", "", "", "", "", "ИТОГО", { formula: `SUM(L${first}:L${last})`, result: budgetItems.reduce((s, x) => s + itemNet(x), 0) }, { formula: `SUM(M${first}:M${last})`, result: budgetItems.reduce((s, x) => s + itemGross(x), 0) }, ""]);
+  sheet.columns = [30, 20, 24, 13, 15, 11, 11, 14, 14, 15, 11, 17, 17, 32].map((width) => ({ width }));
   const header = sheet.getRow(4); header.height = 28; header.eachCell((cell) => { cell.font = { name: "Arial", size: 9, bold: true, color: { argb: "FF4C4855" } }; cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEDEAFB" } }; cell.alignment = { vertical: "middle", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: "FFCBC5E6" } } }; });
   sheet.eachRow((row, n) => { if (n >= first) { row.height = 28; row.font = { name: "Arial", size: 10, bold: n === totalRow.number }; row.alignment = { vertical: "middle", wrapText: true }; row.eachCell((cell) => { cell.border = { bottom: { style: "thin", color: { argb: "FFE5E4E9" } } }; }); } });
-  ["D", "I", "K", "L"].forEach((col) => { sheet.getColumn(col).numFmt = '#,##0.00 "₽"'; }); ["E", "F"].forEach((col) => { sheet.getColumn(col).numFmt = "0.00"; }); ["G", "H"].forEach((col) => { sheet.getColumn(col).numFmt = "dd.mm.yyyy"; }); sheet.getColumn("J").numFmt = "0.00%";
-  totalRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.views = [{ state: "frozen", ySplit: 4 }]; sheet.autoFilter = { from: "A4", to: `M${last}` }; sheet.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+  ["E", "J", "L", "M"].forEach((col) => { sheet.getColumn(col).numFmt = '#,##0.00 "₽"'; }); ["F", "G"].forEach((col) => { sheet.getColumn(col).numFmt = "0.00"; }); ["H", "I"].forEach((col) => { sheet.getColumn(col).numFmt = "dd.mm.yyyy"; }); sheet.getColumn("K").numFmt = "0.00%";
+  totalRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F2F7" } }; sheet.views = [{ state: "frozen", ySplit: 4 }]; sheet.autoFilter = { from: "A4", to: `N${last}` }; sheet.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
   const buffer = await workbook.xlsx.writeBuffer();
   downloadBlob(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", exportName("xlsx"));
 }
@@ -164,7 +176,7 @@ async function exportBudgetPdf() {
     await ensurePdfMake();
     const money = (n) => `${new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(+n || 0)} ₽`;
     const body = [["Статья / цех", "Ставка", "Кол-во", "Период", "Прикрепление", "Открепление", "Доплата", "Налог", "Без налога", "С налогом"].map((text) => ({ text, bold: true, color: "#ffffff" }))];
-    budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit); body.push([{ text: `${x.prof}\n${x.dept} · ${x.unit}` }, money(x.rate), dec2(x.qty), dec2((monthly ? attachmentFactor(x.start, x.end) : null) ?? x.periods), monthly ? shortDate(x.start) || "—" : "—", monthly ? shortDate(x.end) || "—" : "—", money(x.extra), `${dec2(x.tax)}%`, money(itemNet(x)), money(itemGross(x))]); });
+    budgetItems.forEach((x) => { const monthly = usesAttachmentDates(x.unit), production = budgetProductionLabel(x); body.push([{ text: `${x.prof}\n${x.dept} · ${x.unit}${production ? `\nФормат: ${production}` : ""}` }, money(x.rate), dec2(x.qty), dec2((monthly ? attachmentFactor(x.start, x.end) : null) ?? x.periods), monthly ? shortDate(x.start) || "—" : "—", monthly ? shortDate(x.end) || "—" : "—", money(x.extra), `${dec2(x.tax)}%`, money(itemNet(x)), money(itemGross(x))]); });
     body.push([{ text: "ИТОГО", bold: true, colSpan: 8 }, {}, {}, {}, {}, {}, {}, {}, { text: money(budgetItems.reduce((s, x) => s + itemNet(x), 0)), bold: true }, { text: money(budgetItems.reduce((s, x) => s + itemGross(x), 0)), bold: true }]);
     const doc = { pageSize: "A4", pageOrientation: "landscape", pageMargins: [28, 32, 28, 32], info: { title: "KinoRates — Рабочая смета", author: "KinoRates", creator: "KinoRates" }, defaultStyle: { font: "Roboto", fontSize: 7.3, color: "#27262D" }, content: [{ text: "KINORATES", bold: true, fontSize: 8, color: "#6D4AFF", characterSpacing: 1.2, margin: [0, 0, 0, 4] }, { text: "Рабочая смета", bold: true, fontSize: 18, margin: [0, 0, 0, 4] }, { text: `${budgetItems.length} позиций · сформировано ${new Date().toLocaleString("ru-RU")}`, color: "#77777F", margin: [0, 0, 0, 13] }, { table: { headerRows: 1, widths: [116, 52, 31, 33, 52, 52, 50, 34, 59, 59], body }, layout: { fillColor: (i) => i === 0 ? "#6D4AFF" : i === body.length - 1 ? "#F3F2F7" : null, hLineColor: () => "#E5E4E9", vLineColor: () => "#E5E4E9", paddingLeft: () => 4, paddingRight: () => 4, paddingTop: () => 5, paddingBottom: () => 5 } }], footer: (current, count) => ({ columns: [{ text: "KinoRates · предварительный расчёт", alignment: "left" }, { text: `${current} / ${count}`, alignment: "right" }], margin: [28, 8, 28, 0], fontSize: 7, color: "#88858E" }) };
     const pdfBlob = await new Promise((resolve, reject) => {
@@ -220,7 +232,7 @@ function budgetItemMarkup(x, index) {
   const attachmentHint = attachmentEnabled ? "" : `<p class="budget-attachment-hint">Даты доступны только для ставки за месяц. Для смен, часов и других единиц расчёт идёт по количеству периодов.</p>`;
   return `<article class="budget-item">
     <div class="budget-item-main">
-      <div class="budget-position">${title}<small>${esc(x.dept)} · ${esc(x.unit)}</small></div>
+      <div class="budget-position">${title}<small>${esc(x.dept)} · ${esc(x.unit)}</small>${budgetProductionMarkup(x)}</div>
       <label>Ставка<input type="number" min="0" step="0.01" value="${dec2(x.rate)}" data-budget-field="rate" data-budget-index="${index}"></label>
       <label>Кол-во<input type="number" min="0" step="1" value="${dec2(x.qty)}" data-budget-field="qty" data-budget-index="${index}"></label>
       <label>Периоды<input type="number" min="0" step="0.01" value="${dec2(x.periods)}" data-budget-field="periods" data-budget-index="${index}"></label>
