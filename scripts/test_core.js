@@ -135,8 +135,9 @@ assert(app.includes('<span>Цеха</span>'),'About metrics use the wrong worksh
 assert(app.includes('function contacts()')&&app.includes('href="#contacts">Контакты</a>'),'Contacts route is not reachable from the persistent navigation');
 assert(app.includes('contacts: "Контакты"')&&app.includes('about, contacts'),'Contacts route is missing from the title or page registry');
 assert(app.includes('href="mailto:snegproduction@gmail.com"'),'Collaboration contact email is missing');
+assert((app.match(/class="contact-icon"/g)||[]).length===1,'Contact email needs one inline icon');
 assert(app.includes('route === "contacts" ? ""'),'Contacts page still shows the unrelated rate-contribution action');
-assert(css.includes('.contact-card')&&css.includes('.contact-email:focus-visible'),'Contact section is missing its responsive or keyboard-focus styling');
+assert(css.includes('.contact-card')&&css.includes('.contact-method:focus-visible'),'Contact section is missing its responsive or keyboard-focus styling');
 assert(market.includes("id:'mpk-regions-2025'")&&market.includes('ELEMENT_ID=57863'),'Regional market card or its source is missing');
 for(const section of ['Operatori','Zvukorezhisseri','RezhisseriMontazha','HudozhnikiPostanovschiki','Stsenaristi'])assert(market.includes(`/#${section}`),`Kinopoisk native section link is missing: ${section}`);
 for(const tone of ['current','previous','market','archive','unpublished'])assert(css.includes(`.status.${tone}`),`Rate status palette is missing: ${tone}`);
