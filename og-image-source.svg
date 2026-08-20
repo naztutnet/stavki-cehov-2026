@@ -2,14 +2,10 @@
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#FBFBFC"/>
-      <stop offset="1" stop-color="#F0EEF8"/>
-    </linearGradient>
-    <linearGradient id="numberCard" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6D4AFF"/>
-      <stop offset="1" stop-color="#5134C6"/>
+      <stop offset="1" stop-color="#F1EFF8"/>
     </linearGradient>
     <filter id="shadow" x="-25%" y="-25%" width="160%" height="170%">
-      <feDropShadow dx="0" dy="22" stdDeviation="28" flood-color="#302561" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#302561" flood-opacity="0.12"/>
     </filter>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap');
@@ -18,9 +14,9 @@
   </defs>
 
   <rect width="1200" height="630" fill="url(#background)"/>
-  <circle cx="1112" cy="50" r="220" fill="#E9E4FF" opacity="0.82"/>
-  <circle cx="1130" cy="650" r="250" fill="#F8EBD6" opacity="0.76"/>
-  <circle cx="-35" cy="635" r="210" fill="#EAE5FF" opacity="0.42"/>
+  <circle cx="1130" cy="-20" r="235" fill="#E9E4FF" opacity="0.78"/>
+  <circle cx="1160" cy="650" r="255" fill="#F7EAD4" opacity="0.72"/>
+  <circle cx="-40" cy="650" r="220" fill="#EAE5FF" opacity="0.40"/>
 
   <g transform="translate(62 46)">
     <rect width="44" height="44" rx="12" fill="#25252B"/>
@@ -28,27 +24,32 @@
     <text x="58" y="30" font-size="24" font-weight="600" fill="#25252B">KinoRates</text>
   </g>
 
-  <g transform="translate(62 146)">
-    <rect width="252" height="38" rx="10" fill="#EDE9FF"/>
-    <text x="126" y="25" text-anchor="middle" font-size="16" font-weight="600" letter-spacing="0.6" fill="#5942C6">СПРАВОЧНИК СТАВОК</text>
+  <g transform="translate(62 150)">
+    <rect width="252" height="40" rx="10" fill="#EDE9FF"/>
+    <text x="126" y="27" text-anchor="middle" font-size="16" font-weight="600" letter-spacing="0.6" fill="#5942C6">СПРАВОЧНИК СТАВОК</text>
 
-    <text x="0" y="128" font-size="78" font-weight="600" letter-spacing="-3" fill="#24242A">Ставки для</text>
-    <text x="0" y="210" font-size="78" font-weight="600" letter-spacing="-3" fill="#24242A">кино и рекламы</text>
+    <text x="0" y="144" font-size="84" font-weight="600" letter-spacing="-3.2" fill="#24242A">Ставки для кино,</text>
+    <text x="0" y="236" font-size="84" font-weight="600" letter-spacing="-3.2" fill="#24242A">сериалов и рекламы</text>
 
-    <g transform="translate(0 264)">
-      <rect width="184" height="50" rx="13" fill="#FFFFFF" stroke="#DCD8E7" stroke-width="2"/>
-      <text x="92" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="#504C59">КИНО + СЕРИАЛ</text>
-      <rect x="196" width="274" height="50" rx="13" fill="#FAF0DF"/>
-      <text x="333" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="#7A531C">РЕКЛАМА + КЛИП + ТВ</text>
+    <g transform="translate(0 292)">
+      <rect width="204" height="54" rx="14" fill="#FFFFFF" stroke="#DCD8E7" stroke-width="2"/>
+      <text x="102" y="35" text-anchor="middle" font-size="18" font-weight="600" fill="#504C59">КИНО + СЕРИАЛ</text>
+      <rect x="218" width="296" height="54" rx="14" fill="#FAF0DF"/>
+      <text x="366" y="35" text-anchor="middle" font-size="18" font-weight="600" fill="#7A531C">РЕКЛАМА + КЛИП + ТВ</text>
     </g>
-
   </g>
 
-  <g transform="translate(790 136)" filter="url(#shadow)">
-    <rect width="342" height="360" rx="34" fill="url(#numberCard)"/>
-    <circle cx="292" cy="54" r="58" fill="#FFFFFF" opacity="0.08"/>
-    <circle cx="44" cy="330" r="94" fill="#FFFFFF" opacity="0.06"/>
-    <text x="171" y="235" text-anchor="middle" font-size="164" font-weight="600" letter-spacing="-8" fill="#FFFFFF">449</text>
-    <text x="171" y="305" text-anchor="middle" font-size="32" font-weight="600" letter-spacing="5" fill="#FFFFFF">СТАВОК</text>
+  <g transform="translate(935 50)" filter="url(#shadow)">
+    <rect width="205" height="138" rx="22" fill="#FFFFFF" stroke="#DDD9E7"/>
+    <line x1="0" y1="46" x2="205" y2="46" stroke="#DDD9E7"/>
+    <line x1="0" y1="92" x2="205" y2="92" stroke="#DDD9E7"/>
+    <line x1="104" y1="0" x2="104" y2="138" stroke="#DDD9E7"/>
+    <rect x="112" y="54" width="85" height="30" rx="8" fill="#6D4AFF"/>
+    <circle cx="24" cy="23" r="6" fill="#6D4AFF"/>
+    <rect x="38" y="18" width="42" height="10" rx="5" fill="#D8D2EF"/>
+    <rect x="14" y="108" width="66" height="10" rx="5" fill="#E6E2EE"/>
   </g>
+
+  <path d="M62 566 H884" stroke="#6D4AFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M900 566 H1138" stroke="#DAD4EC" stroke-width="5" stroke-linecap="round"/>
 </svg>
