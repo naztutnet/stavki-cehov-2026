@@ -20,11 +20,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y librsvg2-bin
       - name: Render PNG
-        run: rsvg-convert -w 1200 -h 630 og-image-source.svg -o og-image-v5.png
+        run: rsvg-convert -w 1200 -h 630 og-image-source.svg -o og-image-v6.png
       - name: Commit generated image
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add og-image-v5.png
-          git diff --cached --quiet || git commit -m "Render updated KinoRates social preview"
+          git add og-image-v6.png
+          git diff --cached --quiet || git commit -m "Render KinoRates social preview v6"
           git push
