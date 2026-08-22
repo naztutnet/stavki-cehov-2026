@@ -12,8 +12,8 @@
 
     const rect = reference.getBoundingClientRect();
     const cs = getComputedStyle(reference);
-    control.style.width = `${Math.round(rect.width)}px`;
-    control.style.minWidth = `${Math.round(rect.width)}px`;
+    control.style.width = "auto";
+    control.style.minWidth = "0";
     control.style.height = `${Math.round(rect.height)}px`;
     control.style.minHeight = `${Math.round(rect.height)}px`;
     control.style.padding = cs.padding;
@@ -25,6 +25,8 @@
     const title = control.querySelector("[data-header-count]");
     const total = control.querySelector("[data-header-total]");
     if (title) {
+      const match = title.textContent.match(/Смета\s*·\s*(\d+)/i);
+      if (match) title.textContent = `Смета · ${match[1]} поз. ·`;
       title.style.fontSize = cs.fontSize;
       title.style.fontWeight = cs.fontWeight;
       title.style.lineHeight = cs.lineHeight;
@@ -37,7 +39,7 @@
   }
 
   const observer = new MutationObserver(() => requestAnimationFrame(syncBudgetHeaderSize));
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   window.addEventListener("resize", syncBudgetHeaderSize, { passive: true });
   window.addEventListener("hashchange", () => requestAnimationFrame(syncBudgetHeaderSize));
   setTimeout(syncBudgetHeaderSize, 0);
