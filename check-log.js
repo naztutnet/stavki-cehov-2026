@@ -2,7 +2,7 @@ window.KINORATES_CHECKS = [];
 window.addEventListener("DOMContentLoaded", () => {
   if (document.querySelector('script[data-budget-ux]')) return;
   const script = document.createElement("script");
-  script.src = "budget-ux.js?v=20260822-3";
+  script.src = "budget-ux.js?v=20260822-4";
   script.dataset.budgetUx = "";
   document.body.appendChild(script);
 });
