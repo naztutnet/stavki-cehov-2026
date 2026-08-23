@@ -1,12 +1,13 @@
 (() => {
   const addMaterialsLink = () => {
-    const footer = document.querySelector("#sidebar footer");
-    if (!footer || footer.querySelector("[data-seo-materials]")) return;
+    const nav = document.querySelector("#sidebar nav");
+    if (!nav || nav.querySelector("[data-seo-materials]")) return;
+
     const link = document.createElement("a");
     link.href = "/stavki-kinotsekhov/";
-    link.textContent = "Материалы";
     link.dataset.seoMaterials = "";
-    footer.insertBefore(link, footer.firstChild);
+    link.innerHTML = "<i>▤</i><span>Материалы</span>";
+    nav.appendChild(link);
   };
 
   const root = document.getElementById("app");
