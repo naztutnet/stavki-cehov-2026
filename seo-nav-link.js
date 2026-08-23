@@ -1,4 +1,10 @@
 (() => {
+  const params = new URL(location.href).searchParams;
+  const requestedQuery = params.get("q")?.trim() || "";
+  const requestedDept = params.get("dept")?.trim() || "";
+  let queryApplied = !requestedQuery;
+  let deptApplied = !requestedDept;
+
   const addMaterialsLink = () => {
     const nav = document.querySelector("#sidebar nav");
     if (nav && !nav.querySelector("[data-seo-materials]")) {
@@ -30,8 +36,35 @@
     sourceStrip.insertAdjacentElement("afterend", section);
   };
 
+  const applyDeepLink = () => {
+    if (!deptApplied) {
+      const button = [...document.querySelectorAll("[data-dept]")].find((item) => item.dataset.dept === requestedDept);
+      if (button) {
+        deptApplied = true;
+        if (!button.classList.contains("active")) {
+          button.click();
+          return;
+        }
+      }
+    }
+
+    if (!queryApplied) {
+      const input = document.getElementById("rateSearch");
+      if (input) {
+        queryApplied = true;
+        input.value = requestedQuery;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+  };
+
+  const sync = () => {
+    addMaterialsLink();
+    applyDeepLink();
+  };
+
   const root = document.getElementById("app");
   if (!root) return;
-  addMaterialsLink();
-  new MutationObserver(addMaterialsLink).observe(root, { childList: true, subtree: true });
+  sync();
+  new MutationObserver(sync).observe(root, { childList: true, subtree: true });
 })();
