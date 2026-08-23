@@ -25,6 +25,7 @@ jobs:
           node --check market-data.js
           node --check updates.js
           node --check check-log.js
+          node --check seo-nav-link.js
           node --check preview-v4/budget-template.js
           node --check preview-v4/app.js
           node --check production-type-filter.js
