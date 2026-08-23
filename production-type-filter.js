@@ -26,6 +26,7 @@
   const hasShortMeterSignal = (value) => /(коротк\w*\s+метр|короткометраж|(?:^|\s)к-м(?:\s|$))/i.test(value);
   const hasAdvertisingSignal = (value) => /реклам/i.test(value);
   const hasClipTvSignal = (value) => /(клип|музыкальн\w*\s+видео|(?:^|[^а-я])тв(?:[^а-я]|$)|телевид|интернет-шоу|шоу|подкаст|реалити)/i.test(value);
+  const isGafferRate = (rate) => /(^|\W)(gaffer|гаффер)(\W|$)/i.test(normalize(rate?.prof));
 
   function classifyRate(rate) {
     const content = normalize(rate?.content);
@@ -40,7 +41,8 @@
     const conditionIsSeries = hasSeriesSignal(condition);
     const conditionIsShortOnly = hasShortMeterSignal(condition) && !conditionIsFull && !conditionIsSeries;
 
-    const hasCinemaSeriesType = conditionIsFull
+    const hasCinemaSeriesType = isGafferRate(rate)
+      || conditionIsFull
       || conditionIsSeries
       || ((fullContent || seriesContent || sharedScreenContent) && !conditionIsShortOnly);
     if (hasCinemaSeriesType) types.push("cinema-series");
