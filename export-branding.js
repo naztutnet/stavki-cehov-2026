@@ -14,7 +14,11 @@
     </g>
   </svg>`;
 
+  const EXCEL_SRC = "https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";
+  const EXCEL_INTEGRITY = "sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz";
+
   let logoPngPromise = null;
+  let excelRuntimePromise = null;
   const brandedPdfDefinitions = new WeakSet();
 
   function logoPngDataUrl() {
@@ -38,51 +42,78 @@
     return logoPngPromise;
   }
 
+  function ensureExcelRuntime() {
+    if (window.ExcelJS?.Workbook) return Promise.resolve(window.ExcelJS);
+    if (excelRuntimePromise) return excelRuntimePromise;
+
+    excelRuntimePromise = new Promise((resolve, reject) => {
+      const existing = [...document.scripts].find((script) => script.src === EXCEL_SRC);
+      if (existing) {
+        existing.addEventListener("load", () => window.ExcelJS?.Workbook ? resolve(window.ExcelJS) : reject(new Error("ExcelJS unavailable")), { once: true });
+        existing.addEventListener("error", () => reject(new Error("Не удалось загрузить ExcelJS")), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = EXCEL_SRC;
+      script.crossOrigin = "anonymous";
+      script.integrity = EXCEL_INTEGRITY;
+      script.onload = () => window.ExcelJS?.Workbook ? resolve(window.ExcelJS) : reject(new Error("ExcelJS unavailable"));
+      script.onerror = () => reject(new Error("Не удалось загрузить ExcelJS"));
+      document.head.appendChild(script);
+    });
+
+    return excelRuntimePromise;
+  }
+
   async function brandWorkbook(workbook) {
     if (!workbook || workbook.__kinoratesBrandApplied) return;
     workbook.__kinoratesBrandApplied = true;
     const sheet = workbook.getWorksheet?.("Рабочая смета") || workbook.worksheets?.[0];
-    if (!sheet) return;
+    if (!sheet || typeof workbook.addImage !== "function" || typeof sheet.addImage !== "function") return;
 
     try {
       const png = await logoPngDataUrl();
       const imageId = workbook.addImage({ base64: png, extension: "png" });
       sheet.addImage(imageId, {
-        tl: { col: 0.16, row: 0.10 },
-        ext: { width: 28, height: 28 },
+        tl: { col: 0.08, row: 0.12 },
+        ext: { width: 32, height: 32 },
         editAs: "oneCell",
       });
+
       const title = sheet.getCell?.("A1");
-      if (title && typeof title.value === "string" && !/^\s{5}/.test(title.value)) title.value = `      ${title.value}`;
+      if (title && typeof title.value === "string" && !/^\s{6}/.test(title.value)) title.value = `       ${title.value}`;
       const firstRow = sheet.getRow?.(1);
-      if (firstRow) firstRow.height = Math.max(Number(firstRow.height) || 0, 27);
+      if (firstRow) firstRow.height = Math.max(Number(firstRow.height) || 0, 30);
     } catch (error) {
       console.warn("KinoRates: не удалось добавить логотип в Excel", error);
     }
   }
 
-  function patchExcelRuntime() {
-    const ExcelJS = window.ExcelJS;
-    if (!ExcelJS?.Workbook || ExcelJS.Workbook.__kinoratesBrandProxy) return;
+  function patchWorkbookInstance(workbook) {
+    if (!workbook || workbook.__kinoratesWriteWrapped || typeof workbook.xlsx?.writeBuffer !== "function") return workbook;
+    workbook.__kinoratesWriteWrapped = true;
+    const originalWriteBuffer = workbook.xlsx.writeBuffer.bind(workbook.xlsx);
+    workbook.xlsx.writeBuffer = async (...args) => {
+      await brandWorkbook(workbook);
+      return originalWriteBuffer(...args);
+    };
+    return workbook;
+  }
 
-    const OriginalWorkbook = ExcelJS.Workbook;
-    const WrappedWorkbook = new Proxy(OriginalWorkbook, {
-      construct(Target, args) {
-        const workbook = Reflect.construct(Target, args);
-        const writer = workbook?.xlsx?.writeBuffer;
-        if (typeof writer === "function" && !workbook.__kinoratesWriteWrapped) {
-          workbook.__kinoratesWriteWrapped = true;
-          const originalWriteBuffer = writer.bind(workbook.xlsx);
-          workbook.xlsx.writeBuffer = async (...writeArgs) => {
-            await brandWorkbook(workbook);
-            return originalWriteBuffer(...writeArgs);
-          };
-        }
-        return workbook;
-      },
-    });
-    WrappedWorkbook.__kinoratesBrandProxy = true;
-    ExcelJS.Workbook = WrappedWorkbook;
+  function patchExcelRuntime() {
+    const Workbook = window.ExcelJS?.Workbook;
+    if (!Workbook?.prototype || Workbook.prototype.__kinoratesBrandPatched) return;
+    Workbook.prototype.__kinoratesBrandPatched = true;
+
+    const originalAddWorksheet = Workbook.prototype.addWorksheet;
+    if (typeof originalAddWorksheet === "function") {
+      Workbook.prototype.addWorksheet = function patchedAddWorksheet(...args) {
+        const sheet = originalAddWorksheet.apply(this, args);
+        patchWorkbookInstance(this);
+        return sheet;
+      };
+    }
   }
 
   function brandPdfDefinition(docDefinition) {
@@ -135,18 +166,17 @@
   async function brandedExcelExport(...args) {
     if (typeof originalExcelExport !== "function") return;
     try {
-      if (typeof window.ensureExcelJS === "function") await window.ensureExcelJS();
+      await ensureExcelRuntime();
       patchExcelRuntime();
-    } catch (error) { console.warn("KinoRates: Excel branding prep failed", error); }
+    } catch (error) {
+      console.warn("KinoRates: Excel branding prep failed", error);
+    }
     return originalExcelExport.apply(this, args);
   }
 
   async function brandedPdfExport(...args) {
     if (typeof originalPdfExport !== "function") return;
-    try {
-      if (typeof window.ensurePdfMake === "function") await window.ensurePdfMake();
-      patchPdfRuntime();
-    } catch (error) { console.warn("KinoRates: PDF branding prep failed", error); }
+    patchPdfRuntime();
     return originalPdfExport.apply(this, args);
   }
 
@@ -155,15 +185,21 @@
 
   patchPdfRuntime();
 
-  function bindExportButtons() {
-    const excel = document.querySelector("[data-export-excel]");
+  document.addEventListener("click", (event) => {
+    const excelButton = event.target.closest?.("[data-export-excel]");
+    if (!excelButton || typeof originalExcelExport !== "function") return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    brandedExcelExport.call(excelButton).catch((error) => console.error("KinoRates: Excel export failed", error));
+  }, true);
+
+  function bindPdfButton() {
     const pdf = document.querySelector("[data-export-pdf]");
-    if (excel && typeof originalExcelExport === "function") excel.onclick = brandedExcelExport;
     if (pdf && typeof originalPdfExport === "function") pdf.onclick = brandedPdfExport;
   }
 
-  const observer = new MutationObserver(() => requestAnimationFrame(bindExportButtons));
+  const observer = new MutationObserver(() => requestAnimationFrame(bindPdfButton));
   observer.observe(document.body, { childList: true, subtree: true });
-  window.addEventListener("hashchange", () => requestAnimationFrame(bindExportButtons));
-  bindExportButtons();
+  window.addEventListener("hashchange", () => requestAnimationFrame(bindPdfButton));
+  bindPdfButton();
 })();
