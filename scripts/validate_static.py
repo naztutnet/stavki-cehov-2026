@@ -54,8 +54,8 @@ if not mw or not mh or (w,h)!=(int(mw.group(1)),int(mh.group(1))): fail('OG imag
 if (w,h)!=(1200,630): fail(f'OG image must use the standard 1200x630 canvas, got {w}x{h}')
 og_url=f'https://kinorates.ru/{og_name}'
 for required in (
-    '<meta property="og:title" content="KinoRates — ставки съёмочных групп и конструктор сметы">',
-    '<meta property="og:description" content="Актуальные ставки для кино, сериалов и рекламы, цеховые письма и конструктор сметы — всё в одном месте.">',
+    '<meta property="og:title" content="KinoRates — ставки и рабочая смета">',
+    '<meta property="og:description" content="Ставки для кино, сериалов и рекламы, первоисточники и рабочая смета — в одном месте.">',
     f'<meta property="og:image" content="{og_url}">',
     '<meta property="og:image:alt" content="KinoRates — ставки для кино, сериалов и рекламы">',
     f'<meta name="twitter:image" content="{og_url}">',

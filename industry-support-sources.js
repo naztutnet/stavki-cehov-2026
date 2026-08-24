@@ -46,7 +46,7 @@
     section.className = "industry-group";
     section.dataset.industryGroup = "";
     section.dataset.industrySupportSources = "";
-    section.innerHTML = `<header><div><span>ФИНАНСИРОВАНИЕ И ПОДДЕРЖКА</span><h2>Фонды и конкурсные программы</h2></div><p>Ресурсы с конкурсами, грантами и программами поддержки производства.</p></header><div class="industry-list">${supportSources.map(([code, name, description, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener" data-industry-entry data-search="${esc(`${code} ${name} ${description}`.toLocaleLowerCase("ru-RU"))}"><i>${esc(code)}</i><span><b>${esc(name)}</b><span>${esc(description)}</span></span><em>Открыть ↗</em></a>`).join("")}</div>`;
+    section.innerHTML = `<header><div><span>ПОДДЕРЖКА</span><h2>Гранты и конкурсы</h2></div><p>Фонды и программы для проектов.</p></header><div class="industry-list">${supportSources.map(([code, name, description, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener" data-industry-entry data-search="${esc(`${code} ${name} ${description}`.toLocaleLowerCase("ru-RU"))}"><i>${esc(code)}</i><span><b>${esc(name)}</b><span>${esc(description)}</span></span><em>Открыть ↗</em></a>`).join("")}</div>`;
     anchor.insertAdjacentElement("afterend", section);
     const counter = document.querySelector(".industry-intro ul li:nth-child(3) b");
     if (counter) counter.textContent = String(document.querySelectorAll(".industry-list [data-industry-entry]").length);
@@ -66,9 +66,9 @@
     const union = document.getElementById("industry-union");
     replaceRegistry(
       union,
-      "СОЮЗ КИНЕМАТОГРАФИСТОВ РОССИЙСКОЙ ФЕДЕРАЦИИ",
+      "СОЮЗ КИНЕМАТОГРАФИСТОВ",
       "Профессиональные гильдии",
-      "Каждая карточка теперь ведёт на официальный сайт гильдии или на её страницу в Союзе кинематографистов. Если отдельной страницы нет, ссылка ведёт на официальный реестр Союза.",
+      "Официальные страницы гильдий и общий реестр Союза.",
       unionGuilds
     );
 
@@ -76,28 +76,14 @@
     const bodies = registries.find((section) => section !== union && /6 профильных объединений|КОМИССИИ И АССОЦИАЦИИ/i.test(section.textContent));
     replaceRegistry(
       bodies,
-      "КОМИССИИ И АССОЦИАЦИИ · СОЮЗ КИНЕМАТОГРАФИСТОВ РОССИЙСКОЙ ФЕДЕРАЦИИ",
-      "Комиссии и профильные ассоциации",
-      "Прямые официальные страницы там, где они существуют; в остальных случаях — официальный реестр Союза кинематографистов.",
+      "СОЮЗ КИНЕМАТОГРАФИСТОВ",
+      "Комиссии и ассоциации",
+      "Официальные страницы и общий реестр Союза.",
       unionBodies
     );
 
     const crafts = document.getElementById("industry-crafts");
     if (crafts) crafts.dataset.industryLinksEnhanced = "1";
-  };
-
-  const expandAbbreviations = () => {
-    const page = document.querySelector(".industry-page");
-    if (!page || page.dataset.industryAbbreviationsExpanded === "1") return;
-    const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach((node) => {
-      node.nodeValue = node.nodeValue
-        .replaceAll("СК РФ", "Союз кинематографистов Российской Федерации")
-        .replaceAll("реестре Союза кинематографистов Российской Федерации", "реестре Союза кинематографистов Российской Федерации");
-    });
-    page.dataset.industryAbbreviationsExpanded = "1";
   };
 
   const configureOrganizationForm = (attempt = 0) => {
@@ -158,7 +144,6 @@
       queued = false;
       addSupportSources();
       enhanceRegistries();
-      expandAbbreviations();
       enhanceProposal();
     });
   };

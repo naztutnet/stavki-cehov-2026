@@ -139,7 +139,7 @@ assert(genericRateModal.includes('Предложить ставку')&&!genericR
 assert(contributionModal.includes('name="email" type="email"')&&!contributionModal.includes('name="email" type="email" autocomplete="email" placeholder="name@example.com" required'),'Contribution contact must remain optional');
 assert(app.includes('kind === "rate" && !rate && !evidence'),'Missing-rate submissions can be empty');
 assert(app.includes('class="rate-reading-guide"'),'How-to-read page does not explain the production filter workflow');
-assert(app.includes('Киношные значения в этот раздел не копируются и не пересчитываются.'),'How-to-read page does not protect against inferred advertising rates');
+assert(app.includes('Если выбрали рекламу, суммы из кино туда не попадут и не будут пересчитаны.'),'How-to-read page does not protect against inferred advertising rates');
 assert(app.includes('href="?type=cinema-series#home"')&&app.includes('href="?type=commercial-media#home"'),'How-to-read page does not link to both production filters');
 assert(app.includes('data-contribution-kind="rate">Предложить ставку')&&app.includes('data-contribution-kind="profession">Предложить профессию'),'How-to-read page lost its contribution actions');
 assert(app.includes('class="status resource-date ${sourceDateTone(s)}"')&&app.includes('class="resource-status-legend"'),'Workshop letters do not reuse the rate-status badges and legend');
@@ -169,7 +169,8 @@ assert(css.includes('.registry-page .source-strip>a,.registry-page .registry-sta
 assert(css.includes('.rate-detail-row{scroll-margin-top:66px}'),'Mobile expanded detail can be hidden beneath the sticky top bar');
 assert(css.includes('view-enter .42s cubic-bezier(.16,1,.3,1)'),'Page transitions do not use the intended eased motion');
 assert(css.includes('html{scroll-behavior:auto}'),'Native smooth scrolling conflicts with the custom eased route animation');
-assert(industryNav.includes('<h1>Сообщества и организации</h1>')&&industryNav.includes('<span>Сообщества и организации</span>'),'Industry title and persistent navigation label must stay aligned');
+assert(industryNav.includes('<h1>Сообщества и организации</h1>')&&industryNav.includes('<span>Сообщества</span>'),'Industry page needs its full title and a concise persistent navigation label');
+assert(!industryNav.includes('class="industry-intro"'),'Removed industry explanation-and-count block returned');
 assert(industryNav.includes('<h2>Профессиональные гильдии</h2>')&&industryNav.includes('registryMarkup(unionGuilds, "Профессиональная гильдия")'),'Professional guild wording must stay count-free and grammatically consistent');
 assert(industrySupport.includes('Профессиональная гильдия · Союз кинематографистов')&&!industrySupport.includes('13 профессиональных гильдий'),'Enhanced guild cards must use the agreed professional-guild label');
 assert(industryNav.includes('name: "Сообщество Script Supervisor"')&&industryNav.includes('https://kinoprofsoyuz.ru/continuity/'),'Script Supervisor community needs its own confirmed public entry');

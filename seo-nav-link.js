@@ -9,8 +9,8 @@
     {
       id: "professional",
       eyebrow: "ПРОФЕССИОНАЛЬНЫЕ ОБЪЕДИНЕНИЯ",
-      title: "Гильдии, профсоюзы и цеховые сообщества",
-      text: "Организации, которые объединяют специалистов, публикуют документы, рекомендации, стандарты и профессиональные новости.",
+      title: "Гильдии и профсоюзы",
+      text: "Объединения специалистов и их официальные страницы.",
       items: [
         ["МПК", "Межрегиональный профсоюз кинематографистов", "Защита трудовых прав киноработников, цеховые секции, документы и письма по ставкам.", "https://kinoprofsoyuz.ru/"],
         ["СК", "Союз кинематографистов Российской Федерации", "Официальный реестр профессиональных гильдий, комиссий, ассоциаций и региональных отделений.", "https://unikino.ru/список-гильдий/"],
@@ -30,8 +30,8 @@
     {
       id: "associations",
       eyebrow: "ИНДУСТРИАЛЬНЫЕ АССОЦИАЦИИ",
-      title: "Продюсеры, анимация, телевидение и кинопоказ",
-      text: "Объединения компаний и участников рынка, которые работают с производством, региональными съёмками, вещанием и прокатом.",
+      title: "Компании и участники рынка",
+      text: "Производство, анимация, телевидение и кинопоказ.",
       items: [
         ["АПКиТ", "Ассоциация продюсеров кино и телевидения", "53 компании в составе; проекты АПКиТ, премия и «Кино России» — развитие съёмок в регионах.", "https://rusproducers.com/"],
         ["ААК", "Ассоциация анимационного кино России", "Профессиональное объединение организаций индустрии анимации; более 90 участников, реестр и отраслевые материалы.", "https://aakr.ru/"],
@@ -42,8 +42,8 @@
     {
       id: "public",
       eyebrow: "ГОСУДАРСТВЕННЫЕ ИНСТИТУЦИИ",
-      title: "Поддержка, реестры и инфраструктура отрасли",
-      text: "Официальные ресурсы для господдержки, прокатных данных, международного продвижения и архивной работы.",
+      title: "Государственные ресурсы",
+      text: "Поддержка, прокатные данные, продвижение и архивы.",
       items: [
         ["МК", "Министерство культуры Российской Федерации", "Государственная политика и документы в сфере кинематографии, конкурсы и нормативная информация.", "https://culture.gov.ru/"],
         ["ФК", "Фонд кино", "Финансовая поддержка отечественного кинематографа, конкурсы, документы и отраслевая аналитика.", "https://fond-kino.ru/"],
@@ -55,8 +55,8 @@
     {
       id: "rights",
       eyebrow: "АВТОРСКИЕ И СМЕЖНЫЕ ПРАВА",
-      title: "Правообладатели и лицензирование",
-      text: "Ресурсы, которые полезны продюсеру при работе с музыкой, произведениями, вознаграждениями и правами на аудиовизуальный контент.",
+      title: "Права и лицензии",
+      text: "Музыка, произведения, вознаграждения и права на контент.",
       items: [
         ["РАО", "Российское Авторское Общество", "Коллективное управление авторскими правами, реестры произведений, документы и ставки авторского вознаграждения.", "https://rao.ru/"],
         ["РСП", "Российский Союз Правообладателей", "Защита прав авторов, исполнителей и правообладателей аудиовизуальных произведений.", "https://rp-union.ru/"],
@@ -66,8 +66,8 @@
     {
       id: "media",
       eyebrow: "ОТРАСЛЕВЫЕ МЕДИА И БАЗЫ",
-      title: "Новости, аналитика, касса и справочники",
-      text: "Не нормативные источники, а профессиональные медиа и базы — полезны для рыночного контекста и проверки отраслевых событий.",
+      title: "Медиа и базы",
+      text: "Новости, аналитика, касса и отраслевые справочники.",
       items: [
         ["ПС", "ПрофиСинема", "Портал для профессионалов кинобизнеса: аналитика, кассовые сборы, релизы, компании и услуги для кино.", "https://www.proficinema.com/"],
         ["БК", "Бюллетень кинопрокатчика", "Профессиональное издание о кинопрокате, бокс-офисе и аналитике российского рынка.", "https://www.kinometro.ru/"],
@@ -142,9 +142,9 @@
       const link = document.createElement("a");
       link.href = "#industry";
       link.dataset.industrySources = "";
-      link.innerHTML = "<i>◎</i><span>Сообщества и организации</span>";
-      const resources = nav.querySelector('a[href="#resources"]');
-      if (resources) resources.insertAdjacentElement("afterend", link);
+      link.innerHTML = "<i>◎</i><span>Сообщества</span>";
+      const market = nav.querySelector('a[href="#market"]');
+      if (market) market.insertAdjacentElement("afterend", link);
       else nav.appendChild(link);
     }
 
@@ -153,7 +153,9 @@
       link.href = "/stavki-kinotsekhov/";
       link.dataset.seoMaterials = "";
       link.innerHTML = "<i>▤</i><span>Материалы</span>";
-      nav.appendChild(link);
+      const updates = nav.querySelector('a[href="#updates"]');
+      if (updates) updates.insertAdjacentElement("beforebegin", link);
+      else nav.appendChild(link);
     }
   };
 
@@ -171,15 +173,14 @@
 
   const industryPageMarkup = () => `
     <div class="industry-page">
-      <section class="page-head"><div><span>ПРОФЕССИОНАЛЬНАЯ СРЕДА</span><h1>Сообщества и организации</h1><p>Здесь собраны гильдии, профсоюзы и профессиональные сообщества российского кино. По ссылкам можно найти их сайты, контакты, документы и ставки.</p></div></section>
-      <section class="industry-intro"><div><span>КАК УСТРОЕН КАТАЛОГ</span><h2>Где искать контакты и документы</h2><p>У некоторых объединений есть свой сайт. У других — только страница на сайте МПК или запись в реестре Союза кинематографистов. Мы показываем только те ссылки, которые удалось проверить.</p></div><ul><li><b>${unionGuilds.length}</b> гильдий в официальном реестре СК РФ</li><li><b>${unionBodies.length}</b> комиссий и ассоциаций СК РФ</li><li><b>${industryGroups.reduce((sum, group) => sum + group.items.length, 0)}</b> официальных сайтов и страниц</li><li>Проверено и обновлено: <b>24 августа 2026</b></li></ul></section>
-      <nav class="industry-jump" aria-label="Разделы отраслевых источников">${industryGroups.map((group) => `<a href="#industry-${group.id}">${escHtml(group.title)}</a>`).join("")}<a href="#industry-union">Все гильдии СК РФ</a><a href="#industry-crafts">Цеховые сообщества</a></nav>
-      <label class="industry-filter"><span>⌕</span><input type="search" placeholder="Найти гильдию, ассоциацию, цех или ресурс…" data-industry-filter></label>
+      <section class="page-head"><div><span>ПРОФЕССИОНАЛЬНАЯ СРЕДА</span><h1>Сообщества и организации</h1><p>Найдите гильдию, профсоюз или цеховое сообщество. Мы ведём только на проверенные публичные страницы.</p></div></section>
+      <nav class="industry-jump" aria-label="Разделы каталога">${industryGroups.map((group) => `<a href="#industry-${group.id}">${escHtml(group.title)}</a>`).join("")}<a href="#industry-union">Гильдии Союза</a><a href="#industry-crafts">Цеховые сообщества</a></nav>
+      <label class="industry-filter"><span>⌕</span><input type="search" placeholder="Найти организацию или цех…" data-industry-filter></label>
       ${industryGroups.map((group) => `<section class="industry-group" id="industry-${group.id}" data-industry-group><header><div><span>${escHtml(group.eyebrow)}</span><h2>${escHtml(group.title)}</h2></div><p>${escHtml(group.text)}</p></header><div class="industry-list">${industryListMarkup(group.items)}</div></section>`).join("")}
-      <section class="industry-registry" id="industry-union" data-industry-group><header><div><span>ОФИЦИАЛЬНЫЙ РЕЕСТР СК РФ</span><h2>Профессиональные гильдии</h2></div><p>Это список гильдий из реестра Союза кинематографистов России. Если у гильдии нет своего сайта, она всё равно остаётся в списке.</p></header><div class="industry-pill-grid">${registryMarkup(unionGuilds, "Профессиональная гильдия")}</div></section>
-      <section class="industry-registry" data-industry-group><header><div><span>КОМИССИИ И АССОЦИАЦИИ СК РФ</span><h2>Ещё 6 профильных объединений</h2></div><p>Анимация, неигровое кино, документалистика, военное кино и образовательные направления.</p></header><div class="industry-pill-grid">${registryMarkup(unionBodies, "СК РФ")}</div></section>
-      <section class="industry-registry" id="industry-crafts" data-industry-group><header><div><span>ЦЕХОВЫЕ СООБЩЕСТВА</span><h2>Где найти цеховые сообщества</h2></div><p>Карточка ведёт на сайт самого сообщества или на его страницу на сайте МПК. Там можно найти контакты, документы или ставки. Страница МПК не означает, что сообщество входит в структуру профсоюза.</p></header><div class="industry-pill-grid industry-community-grid">${craftCommunityMarkup(craftCommunities)}</div></section>
-      <aside class="industry-note"><div><b>Не нашли организацию?</b><p>Мы добавляем только те отраслевые страницы, которые удалось проверить. Если здесь нет нужного сообщества, пришлите его сайт или публичную страницу.</p></div><a href="mailto:snegproduction@gmail.com?subject=KinoRates%20—%20отраслевой%20источник">Предложить источник →</a></aside>
+      <section class="industry-registry" id="industry-union" data-industry-group><header><div><span>СОЮЗ КИНЕМАТОГРАФИСТОВ</span><h2>Профессиональные гильдии</h2></div><p>Официальные страницы гильдий и общий реестр Союза.</p></header><div class="industry-pill-grid">${registryMarkup(unionGuilds, "Профессиональная гильдия")}</div></section>
+      <section class="industry-registry" data-industry-group><header><div><span>СОЮЗ КИНЕМАТОГРАФИСТОВ</span><h2>Комиссии и ассоциации</h2></div><p>Анимация, документальное кино, образование и другие направления.</p></header><div class="industry-pill-grid">${registryMarkup(unionBodies, "Союз кинематографистов")}</div></section>
+      <section class="industry-registry" id="industry-crafts" data-industry-group><header><div><span>ЦЕХОВЫЕ СООБЩЕСТВА</span><h2>Цеховые сообщества</h2></div><p>Карточка ведёт на официальный сайт или публичную страницу на сайте МПК. Страница МПК не означает, что сообщество входит в структуру профсоюза.</p></header><div class="industry-pill-grid industry-community-grid">${craftCommunityMarkup(craftCommunities)}</div></section>
+      <aside class="industry-note"><div><b>Не нашли организацию?</b><p>Пришлите официальный сайт или публичную страницу — мы проверим и добавим.</p></div><a href="mailto:snegproduction@gmail.com?subject=KinoRates%20—%20отраслевой%20источник">Предложить организацию →</a></aside>
     </div>`;
 
   const bindIndustryFilter = (view) => {
@@ -213,7 +214,7 @@
     const breadcrumb = document.querySelector(".breadcrumb");
     if (breadcrumb) breadcrumb.innerHTML = 'KinoRates <span>/</span> Сообщества и организации';
     const actions = document.querySelector(".top-actions");
-    if (actions) actions.innerHTML = '<a class="quiet button-link" href="#resources">Цеховые письма</a>';
+    if (actions) actions.innerHTML = '<a class="quiet button-link" href="#resources">Документы</a>';
 
     document.querySelectorAll("#sidebar nav a").forEach((link) => link.classList.toggle("active", link.hasAttribute("data-industry-sources")));
     bindIndustryFilter(view);
