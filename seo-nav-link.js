@@ -142,7 +142,7 @@
       const link = document.createElement("a");
       link.href = "#industry";
       link.dataset.industrySources = "";
-      link.innerHTML = "<i>◎</i><span>Сообщества</span>";
+      link.innerHTML = "<i>◎</i><span>Сообщества и организации</span>";
       const market = nav.querySelector('a[href="#market"]');
       if (market) market.insertAdjacentElement("afterend", link);
       else nav.appendChild(link);

@@ -33,7 +33,8 @@
       .registry-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
       .registry-stats>div{display:block!important;min-width:0;padding:11px 10px!important;border-right:1px solid var(--line)!important;border-bottom:0!important}
       .registry-stats>div:last-child{border-right:0!important}
-      .registry-stats>div b{display:block;font-size:18px!important;line-height:1.05}
+      .source-strip b,.registry-stats>div b{font-size:18px!important;font-weight:540!important}
+      .registry-stats>div b{display:block;line-height:1.05}
       .registry-stats>div span{display:block;margin-top:4px!important;font-size:9px!important;line-height:1.2}
     }
     @media(max-width:520px){
@@ -44,9 +45,9 @@
       .source-strip>a:nth-of-type(2){border-right:0!important}
       .source-strip>a:last-of-type{grid-column:1/-1!important}
       .source-strip span,.source-strip small{font-size:10px!important;line-height:1.25}
-      .source-strip b{font-size:14px!important;line-height:1.25}
+      .source-strip b,.registry-stats>div b{font-size:17px!important}
+      .source-strip b{line-height:1.25}
       .registry-stats>div{grid-template-columns:none!important;gap:0!important;align-items:initial!important}
-      .registry-stats>div b{font-size:17px!important}
       .registry-stats>div span{font-size:8.5px!important}
       .budget-float{left:12px;right:12px;bottom:calc(8px + env(safe-area-inset-bottom,0px));grid-template-columns:auto minmax(0,1fr) auto;gap:8px;padding:9px 10px;border-radius:12px}
       .budget-float span{font-size:10px;white-space:nowrap}
