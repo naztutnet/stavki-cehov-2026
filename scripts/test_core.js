@@ -162,7 +162,10 @@ assert(market.includes("id:'mpk-regions-2025'")&&market.includes('ELEMENT_ID=578
 for(const section of ['Operatori','Zvukorezhisseri','RezhisseriMontazha','HudozhnikiPostanovschiki','Stsenaristi'])assert(market.includes(`/#${section}`),`Kinopoisk native section link is missing: ${section}`);
 for(const tone of ['current','previous','market','archive','unpublished'])assert(css.includes(`.status.${tone}`),`Rate status palette is missing: ${tone}`);
 assert(css.includes('.registry-page{overflow-anchor:none}'),'Mobile browser scroll anchoring can fight expanded-row navigation');
-assert(css.includes('.registry-page .source-strip>a{padding:11px 16px}.registry-page .registry-stats>div{padding:9px 16px}'),'Desktop source-strip statistics no longer share the MPK left inset');
+assert(app.includes('class="source-materials-link" href="/stavki-kinotsekhov/"')&&app.includes('<b>Материалы</b>'),'Materials are not available as one compact source-strip entry');
+assert(!industryNav.includes('data.homeMaterials')&&!industryNav.includes('addHomeMaterials'),'Large home materials showcase returned');
+assert(!html.includes('home-materials.css'),'Removed home materials showcase stylesheet is still loaded');
+assert(css.includes('.registry-page .source-strip>a,.registry-page .registry-stats>div{display:grid;grid-template-rows:14px 24px 16px')&&css.includes('padding:11px 16px'),'Source-strip statistics and source cards do not share one rendered row grid');
 assert(css.includes('.rate-detail-row{scroll-margin-top:66px}'),'Mobile expanded detail can be hidden beneath the sticky top bar');
 assert(css.includes('view-enter .42s cubic-bezier(.16,1,.3,1)'),'Page transitions do not use the intended eased motion');
 assert(css.includes('html{scroll-behavior:auto}'),'Native smooth scrolling conflicts with the custom eased route animation');

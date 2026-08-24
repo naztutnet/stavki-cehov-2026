@@ -174,3 +174,14 @@ select{appearance:none;-webkit-appearance:none;padding-right:40px!important;back
 .legend-contribution-note .rate-reading-actions{flex:none;margin:0;padding:0}
 @media(max-width:780px){.colorist-calculator-note{display:grid;gap:16px;padding:18px}.colorist-calculator-note .button-link{width:100%;justify-content:center}}
 @media(max-width:520px){.resource-list .resource-date,.resource-status-legend .status{font-size:10px}.resource-status-legend{gap:6px;padding:12px}.colorist-calculator-note h3{font-size:17px}}
+
+/* One compact materials entry and one shared vertical rhythm for the source strip. */
+.registry-page .source-strip{grid-template-columns:minmax(270px,1.25fr) repeat(4,minmax(132px,1fr))}
+.registry-page .source-strip>a,.registry-page .registry-stats>div{display:grid;grid-template-rows:14px 24px 16px;align-content:center;min-width:0;padding:11px 16px}
+.registry-page .source-strip>a>span,.registry-page .registry-stats>div>span{align-self:start;margin:0;font-size:10px;font-weight:400;line-height:14px}
+.registry-page .source-strip>a>b,.registry-page .registry-stats>div>b{display:flex;height:24px;align-items:center;min-width:0;line-height:1}
+.registry-page .source-strip>a>small,.registry-page .registry-stats>div>small{align-self:end;min-width:0;font-size:10px;line-height:16px;white-space:nowrap}
+.registry-page .registry-stats>div>b{font-size:20px;font-variant-numeric:tabular-nums}.registry-page .registry-stats>div>small{color:var(--muted)}
+@media(max-width:1150px){.registry-page .source-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.registry-page .source-strip .registry-stats{grid-column:1/-1;border-right:0;border-bottom:1px solid var(--line)}.registry-page .source-strip>a{grid-column:auto / auto!important;border-right:1px solid var(--line);border-top:0!important}.registry-page .source-strip>a:nth-of-type(even){border-right:0}.registry-page .source-strip>a:nth-of-type(n+3){border-top:1px solid var(--line)!important}}
+@media(max-width:520px){.registry-page .source-strip>a.source-materials-link{grid-column:2!important}}
+@media(max-width:360px){.registry-page .source-strip{grid-template-columns:1fr}.registry-page .source-strip .registry-stats{grid-column:auto}.registry-page .source-strip>a{border-right:0}.registry-page .source-strip>a:nth-of-type(n+2){border-top:1px solid var(--line)!important}}

@@ -157,28 +157,6 @@
     }
   };
 
-  const addHomeMaterials = () => {
-    const sourceStrip = document.querySelector(".registry-page .source-strip");
-    if (!sourceStrip || document.querySelector("[data-home-materials]")) return;
-
-    const section = document.createElement("section");
-    section.className = "home-materials";
-    section.dataset.homeMaterials = "";
-    section.innerHTML = `
-      <header>
-        <div><span>Материалы KinoRates</span><h2>Ставки, цеха и смета</h2></div>
-        <a href="/stavki-kinotsekhov/">Все материалы →</a>
-      </header>
-      <div class="home-materials-grid">
-        <a href="/stavki-kinotsekhov/"><small>Справочник</small><b>Все ставки киноцехов</b><span>Подборки по цехам и быстрый вход в текущую базу.</span><em>Открыть →</em></a>
-        <a href="/smeta-filma/"><small>Бюджет</small><b>Смета фильма</b><span>Как собрать предварительный расчёт проекта.</span><em>Открыть →</em></a>
-        <a href="/operatorskiy-tsekh/"><small>Цех</small><b>Операторский</b><span>Ставки и условия операторской группы.</span><em>Открыть →</em></a>
-        <a href="/rezhisserskiy-tsekh/"><small>Цех</small><b>Режиссёрский</b><span>Ставки режиссёрской группы и условия.</span><em>Открыть →</em></a>
-        <a href="/hudozhestvennyy-tsekh/"><small>Цех</small><b>Художественный</b><span>Ориентиры художественно-постановочного блока.</span><em>Открыть →</em></a>
-      </div>`;
-    sourceStrip.insertAdjacentElement("afterend", section);
-  };
-
   const industryListMarkup = (items) => items.map(([code, name, description, url]) => `<a href="${escHtml(url)}" target="_blank" rel="noopener" data-industry-entry data-search="${escHtml(`${code} ${name} ${description}`.toLocaleLowerCase("ru-RU"))}"><i>${escHtml(code)}</i><span><b>${escHtml(name)}</b><span>${escHtml(description)}</span></span><em>Открыть ↗</em></a>`).join("");
 
   const registryMarkup = (items, sourceLabel) => items.map((name) => `<span data-industry-entry data-search="${escHtml(name.toLocaleLowerCase("ru-RU"))}"><b>${escHtml(name)}</b><small>${escHtml(sourceLabel)}</small></span>`).join("");
@@ -271,7 +249,6 @@
     requestAnimationFrame(() => {
       syncQueued = false;
       addNavigationLinks();
-      addHomeMaterials();
       renderIndustryPage();
       applyDeepLink();
     });
