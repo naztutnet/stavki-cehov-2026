@@ -91,8 +91,10 @@ for required in (
     'Страница МПК не означает, что сообщество входит в структуру профсоюза.',
 ):
     if required not in industry_nav: fail(f'Missing audited industry registry contract: {required}')
-if 'Независимая гильдия колористов' in industry_nav or 'stavki-v-regionah/' in industry_nav:
-    fail('Unverified or generic craft-community entry returned')
+if 'name: "Независимая гильдия колористов"' not in industry_nav or 'https://icguild.org/calculator' not in industry_nav:
+    fail('Confirmed ICG calculator entry is missing')
+if 'stavki-v-regionah/' in industry_nav:
+    fail('Generic craft-community entry returned')
 if 'const craftCommunities' in industry_support:
     fail('Craft-community registry is duplicated across runtime scripts')
 

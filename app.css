@@ -164,3 +164,13 @@ select{appearance:none;-webkit-appearance:none;padding-right:40px!important;back
 /* Dialogs are true viewport modals with a native dimmed backdrop. */
 .modal{inset:50% auto auto 50%;margin:0;max-height:calc(100vh - 32px);overflow:auto}
 .privacy-dialog:focus,.dialog-x:focus,.modal-close:focus{outline:none}
+
+/* Source dates use the same freshness language as rate statuses. */
+.resource-list .resource-date{display:inline-flex;width:max-content;margin-top:7px;padding:5px 7px;border-radius:5px;font-size:11px;font-weight:560;line-height:1;letter-spacing:.01em}
+.resource-status-legend{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.resource-status-legend>span{display:flex;align-items:center}.resource-status-legend .status{font-size:11px;font-weight:560}
+.colorist-calculator-note{display:flex;align-items:center;justify-content:space-between;gap:28px;margin:0 0 14px;padding:20px 22px;border:1px solid #eadfbd;border-radius:9px;background:#fffaf0}
+.colorist-calculator-note>div{max-width:740px}.colorist-calculator-note .status{margin-bottom:10px}.colorist-calculator-note h3{margin:0 0 7px;font-size:18px;font-weight:620;letter-spacing:-.025em}.colorist-calculator-note p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}.colorist-calculator-note .button-link{flex:none;white-space:nowrap}
+.legend-contribution-note .rate-reading-actions{flex:none;margin:0;padding:0}
+@media(max-width:780px){.colorist-calculator-note{display:grid;gap:16px;padding:18px}.colorist-calculator-note .button-link{width:100%;justify-content:center}}
+@media(max-width:520px){.resource-list .resource-date,.resource-status-legend .status{font-size:10px}.resource-status-legend{gap:6px;padding:12px}.colorist-calculator-note h3{font-size:17px}}
