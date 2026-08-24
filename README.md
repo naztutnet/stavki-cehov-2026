@@ -13,6 +13,7 @@ KinoRates — отраслевой справочник рекомендован
 - `sources-data.js` — реестр отображаемых первоисточников и цеховых писем.
 - `stavki-kinotsekhov/`, `smeta-filma/`, `operatorskiy-tsekh/`, `rezhisserskiy-tsekh/`, `hudozhestvennyy-tsekh/` — SEO-страницы.
 - `seo-pages.css` — общие стили SEO-страниц.
+- `docs/industry-community-audit.md` — реестр проверенных точек входа и статусов логотипов для цеховых сообществ.
 - `updates.js` — журнал обновлений сервиса.
 - `check-log.js` — журнал автоматических проверок источников.
 - `data/monitored-sources.json` — список первоисточников, которые проверяются автоматически.

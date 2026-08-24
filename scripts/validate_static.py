@@ -8,6 +8,9 @@ app=(root/'app.js').read_text(encoding='utf-8')
 css=(root/'app.css').read_text(encoding='utf-8')
 navigation_css=(root/'navigation.css').read_text(encoding='utf-8')
 seo_css=(root/'seo-pages.css').read_text(encoding='utf-8')
+industry_css=(root/'industry-sources.css').read_text(encoding='utf-8')
+industry_nav=(root/'seo-nav-link.js').read_text(encoding='utf-8')
+industry_support=(root/'industry-support-sources.js').read_text(encoding='utf-8')
 
 def fail(msg): raise SystemExit(msg)
 
@@ -39,6 +42,7 @@ def validate_css_braces(content, name):
 
 validate_css_braces(css,'app.css')
 validate_css_braces(seo_css,'seo-pages.css')
+validate_css_braces(industry_css,'industry-sources.css')
 
 og_name='og-image-v9.png'
 og=(root/og_name).read_bytes()
@@ -69,14 +73,28 @@ assets={
     'market-data.js':r'<script src="market-data\.js\?v=([^"]+)"></script>',
     'app.js':r'<script src="app\.js\?v=([^"]+)"></script>',
     'seo-nav-link.js':r'<script src="seo-nav-link\.js\?v=([^"]+)"></script>',
+    'industry-support-sources.js':r'<script src="industry-support-sources\.js\?v=([^"]+)"></script>',
 }
 positions={}
 for name,pattern in assets.items():
     m=re.search(pattern,index)
     if not m: fail(f'Missing versioned asset {name}')
     positions[name]=m.start()
-if not positions['production-type-filter.js']<positions['site-updates-data.js']<positions['updates.js']<positions['check-log.js']<positions['rates-data.js']<positions['sources-data.js']<positions['market-data.js']<positions['app.js']<positions['seo-nav-link.js']:
+if not positions['production-type-filter.js']<positions['site-updates-data.js']<positions['updates.js']<positions['check-log.js']<positions['rates-data.js']<positions['sources-data.js']<positions['market-data.js']<positions['app.js']<positions['seo-nav-link.js']<positions['industry-support-sources.js']:
     fail('Script load order is invalid')
+
+for required in (
+    '<h1>Сообщества и организации</h1>',
+    'Сообщество Script Supervisor',
+    'https://kinoprofsoyuz.ru/continuity/',
+    'data-logo-status=',
+    'Страница МПК не означает, что сообщество входит в структуру профсоюза.',
+):
+    if required not in industry_nav: fail(f'Missing audited industry registry contract: {required}')
+if 'Независимая гильдия колористов' in industry_nav or 'stavki-v-regionah/' in industry_nav:
+    fail('Unverified or generic craft-community entry returned')
+if 'const craftCommunities' in industry_support:
+    fail('Craft-community registry is duplicated across runtime scripts')
 
 if '<style>' in index: fail('Inline CSS unexpectedly returned to index.html')
 for token in ('FilmRate','FILMRATE_CHECKS','filmrate.ru'):
