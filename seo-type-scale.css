@@ -1,0 +1,29 @@
+.seo-section-head p{font-size:13px;line-height:1.55}
+.seo-related{padding:20px}
+.seo-related-grid{gap:10px}
+.seo-related-grid a{min-height:116px;padding:18px 17px}
+.seo-related-grid b{font-size:14px;font-weight:560;line-height:1.35}
+.seo-related-grid span{margin-top:8px;font-size:11px;line-height:1.5}
+
+.seo-view .article-grid.standalone article{min-height:168px;padding:22px}
+.seo-view .article-grid.standalone article>span{font-size:10px;letter-spacing:.06em}
+.seo-view .article-grid.standalone h3{margin:18px 0 8px;font-size:16px;line-height:1.3;font-weight:560}
+.seo-view .article-grid.standalone p{font-size:12px;line-height:1.55}
+.seo-view .article-grid.standalone a{margin-top:16px;font-size:11px;line-height:1.4}
+
+.seo-resource-list b{font-size:13px;font-weight:560;line-height:1.35}
+.seo-resource-list span span{margin-top:5px;font-size:10.5px;line-height:1.5}
+.seo-resource-list em{font-size:10px}
+.seo-meta-row{font-size:10px;line-height:1.45}
+.seo-popular a{font-size:10px}
+
+@media(max-width:680px){
+  .seo-related{padding:16px}
+  .seo-related-grid a{min-height:0;padding:16px}
+  .seo-related-grid b{font-size:14px}
+  .seo-related-grid span{font-size:11px}
+  .seo-view .article-grid.standalone article{min-height:0;padding:18px}
+  .seo-view .article-grid.standalone h3{font-size:15px}
+  .seo-view .article-grid.standalone p{font-size:11.5px}
+  .seo-section-head p{font-size:12px}
+}
