@@ -11,14 +11,65 @@
     @keyframes krNewBudgetItem{0%{box-shadow:0 0 0 0 rgba(109,74,255,0);border-color:var(--line)}35%{box-shadow:0 0 0 4px rgba(109,74,255,.10);border-color:#c9bfff}100%{box-shadow:none;border-color:var(--line)}}
     .registry-controls.kr-picker-focus{animation:krPickerFocus .9s cubic-bezier(.16,1,.3,1)}
     @keyframes krPickerFocus{0%{box-shadow:0 0 0 0 rgba(109,74,255,0)}35%{box-shadow:0 0 0 4px rgba(109,74,255,.10)}100%{box-shadow:none}}
+    .kr-mobile-rate-meta{display:none}
     @media(min-width:781px){.kr-back-to-top{display:none!important}}
     @media(max-width:780px){.kr-back-to-top{display:grid}}
+    @media(max-width:620px){
+      .registry-layout td:nth-child(2) b{display:block}
+      .kr-mobile-rate-meta{display:-webkit-box;margin-top:4px;color:#8b8b93;font-size:11px;font-weight:400;line-height:1.28;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+    }
     @media(prefers-reduced-motion:reduce){.kr-back-to-top{transition:none}.budget-item.kr-new-custom,.registry-controls.kr-picker-focus{animation:none}}
   `;
   document.head.appendChild(style);
 
   const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const smoothBehavior = () => prefersReducedMotion() ? 'auto' : 'smooth';
+  const normalizeMeta = (value) => String(value ?? '').toLocaleLowerCase('ru-RU').replaceAll('ё', 'е').replace(/\s+/g, ' ').trim();
+
+  function mobileRateMeta(rate) {
+    if (!rate) return '';
+    const content = String(rate.content || '').trim();
+    const condition = String(rate.cond || '').trim();
+    if (!content) return condition;
+    if (!condition) return content;
+    const normalizedContent = normalizeMeta(content);
+    const normalizedCondition = normalizeMeta(condition);
+    if (normalizedCondition.includes(normalizedContent) || normalizedContent.includes(normalizedCondition)) return condition.length >= content.length ? condition : content;
+    return `${content} · ${condition}`;
+  }
+
+  function decorateRateRows() {
+    const rates = window.KINORATES_DATA || [];
+    if (!rates.length) return;
+    const rateById = new Map(rates.map((rate) => [String(rate.id), rate]));
+    document.querySelectorAll('.registry-layout tr[data-rate-id]').forEach((row) => {
+      const professionCell = row.querySelector('td:nth-child(2)');
+      if (!professionCell) return;
+      const rate = rateById.get(String(row.dataset.rateId));
+      const text = mobileRateMeta(rate);
+      let meta = professionCell.querySelector('.kr-mobile-rate-meta');
+      if (!text) {
+        meta?.remove();
+        return;
+      }
+      if (!meta) {
+        meta = document.createElement('span');
+        meta.className = 'kr-mobile-rate-meta';
+        professionCell.appendChild(meta);
+      }
+      if (meta.textContent !== text) meta.textContent = text;
+    });
+  }
+
+  let decorateQueued = false;
+  function queueRateDecoration() {
+    if (decorateQueued) return;
+    decorateQueued = true;
+    requestAnimationFrame(() => {
+      decorateQueued = false;
+      decorateRateRows();
+    });
+  }
 
   function ensureBackToTop() {
     let button = document.querySelector('.kr-back-to-top');
@@ -114,14 +165,22 @@
     }
   });
 
+  const appRoot = document.querySelector('#app');
+  if (appRoot) new MutationObserver(queueRateDecoration).observe(appRoot, { childList: true, subtree: true });
+
   window.addEventListener('hashchange', () => {
     requestAnimationFrame(updateBackToTop);
     restoreRatePickerAfterRoute();
+    queueRateDecoration();
   });
   window.addEventListener('scroll', updateBackToTop, { passive: true });
-  window.addEventListener('resize', updateBackToTop, { passive: true });
+  window.addEventListener('resize', () => {
+    updateBackToTop();
+    queueRateDecoration();
+  }, { passive: true });
 
   ensureBackToTop();
   updateBackToTop();
   restoreRatePickerAfterRoute();
+  queueRateDecoration();
 })();
