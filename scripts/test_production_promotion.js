@@ -18,13 +18,13 @@ const previewApp = fs.readFileSync(require.resolve("../preview-production-types/
 const previewV3Html = fs.readFileSync(require.resolve("../preview-v3/index.html"), "utf8");
 const previewV4Html = fs.readFileSync(require.resolve("../preview-v4/index.html"), "utf8");
 
-assert(rates.length === 449, `Expected 449 canonical rates, got ${rates.length}`);
+assert(rates.length === 450, `Expected 450 canonical rates, got ${rates.length}`);
 assert(JSON.stringify(FILTERS) === JSON.stringify([
   { id: "all", label: "Все" },
   { id: "cinema-series", label: "Кино и сериал" },
   { id: "commercial-media", label: "Реклама / клип / ТВ" },
 ]), "Unexpected production filter contract");
-assert(JSON.stringify(countByType(rates)) === JSON.stringify({ all: 449, "cinema-series": 205, "commercial-media": 156 }), "Unexpected production filter counts");
+assert(JSON.stringify(countByType(rates)) === JSON.stringify({ all: 450, "cinema-series": 205, "commercial-media": 157 }), "Unexpected production filter counts");
 assert(classifyRate(rates.find(({ id }) => String(id) === "147")).length === 2, "Shared production rate lost one of its filters");
 assert(normalizeFilterId("advertising") === "commercial-media", "Legacy advertising URL is not supported");
 const productionDesignerInCinema = contributionState(rates, "Художник-постановщик", "cinema-series");
@@ -35,8 +35,8 @@ assert(productionDesignerInAds.kind === "missing-rate" && productionDesignerInAd
 assert(absentProfession.kind === "missing-profession" && absentProfession.allRows.length === 0, "Profession absent from the canonical dataset is not detected");
 assert(contributionState(rates, "", "commercial-media").kind === "none", "Empty searches should not trigger a contribution prompt");
 
-assert(Array.isArray(updates) && updates.length === 15, "Production update feed must contain the curated 15 entries");
-assert(updates[0].title === "Добавлен раздел «Сообщества и организации»", "Latest production update is incorrect");
+assert(Array.isArray(updates) && updates.length === 16, "Production update feed must contain the curated 16 entries");
+assert(updates[0].title === "Постановщик кадра: ставка для рекламы", "Latest production update is incorrect");
 assert(!updates.some(({ title }) => title === "Проект получил имя KinoRates"), "Removed update returned to production data");
 
 assert(app.includes("KINORATES_TYPE_FILTER"), "Production app does not consume the shared production filter");
@@ -56,4 +56,4 @@ assert(previewApp.includes("KINORATES_SITE_UPDATES"), "Preview lost the shared u
 assert(previewV3Html.includes('../site-updates-data.js?v=20260820-20') && previewV4Html.includes('../site-updates-data.js?v=20260820-20'), "Legacy previews lost their update data dependency");
 assert(dataContext.window.KINORATES_UPDATES === updates, "Legacy update alias does not reference the canonical feed");
 
-console.log("Production promotion checks OK: 449 rates, 3 filters, 15 updates");
+console.log("Production promotion checks OK: 450 rates, 3 filters, 16 updates");
