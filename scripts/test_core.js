@@ -174,7 +174,7 @@ assert(css.includes('.rate-detail-row{scroll-margin-top:66px}'),'Mobile expanded
 assert(css.includes('view-enter .42s cubic-bezier(.16,1,.3,1)'),'Page transitions do not use the intended eased motion');
 assert(css.includes('html{scroll-behavior:auto}'),'Native smooth scrolling conflicts with the custom eased route animation');
 assert(industryNav.includes('<h1>Сообщества и организации</h1>')&&industryNav.includes('<span>Сообщества и организации</span>'),'Industry page and persistent navigation must use the same full section name');
-assert(app.includes('<span>Ревизия</span><b>24.08.2026</b>'),'About-page revision must match the 24 August catalog update');
+assert(app.includes('<span>Ревизия</span><b>02.10.2026</b>'),'About-page revision must match the 2 October catalog update');
 assert(!industryNav.includes('class="industry-intro"'),'Removed industry explanation-and-count block returned');
 assert(industryNav.includes('<h2>Профессиональные гильдии</h2>')&&industryNav.includes('registryMarkup(unionGuilds, "Профессиональная гильдия")'),'Professional guild wording must stay count-free and grammatically consistent');
 assert(industrySupport.includes('Профессиональная гильдия · Союз кинематографистов')&&!industrySupport.includes('13 профессиональных гильдий'),'Enhanced guild cards must use the agreed professional-guild label');
