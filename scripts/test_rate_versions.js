@@ -13,7 +13,7 @@ for (const id of [288,289,290,291,292,293]) {
   const alternative = versions.resolve(rate,'light-2026-05-chat');
   assert.equal(primary.amount, rate.amount, 'Primary price must preserve current catalog');
   assert.ok(alternative.amount < primary.amount);
-  assert.equal(alternative.version.status,'Требует подтверждения');
+  assert.equal(alternative.version.status,'Письмо 2026');
   assert.equal(versions.resolve(rate,'missing-version').versionId,primary.versionId);
   const item = {id,rate:alternative.amount,rateSnapshot:versions.snapshot(alternative)};
   assert.ok(versions.matches(item,alternative));
@@ -53,8 +53,24 @@ vm.runInContext(app.match(/^function safeSheetText.*$/m)[0]+app.slice(app.indexO
 exportContext.run().then(()=>{
   assert.equal(rows.get(5).values[4],22000);
   assert.equal(rows.get(5).values[11],132100);
-  assert.ok(rows.get(5).values[13].includes('Требует подтверждения'));
+  assert.ok(rows.get(5).values[13].includes('Письмо 2026'));
   assert.ok(rows.get(5).values[13].includes(budget.rateSnapshot.doc));
   assert.equal(downloadName,'budget.xlsx');
   console.log('Excel exporter preserves selected price, totals, version status and source');
 }).catch(error=>{console.error(error);process.exitCode=1;});
+
+const oldSnapshot={...budget.rateSnapshot,status:'Требует подтверждения',extra:'Разрыв 5 000 ₽/ч. Статус письма и его соотношение с публикацией МПК не подтверждены.'};
+const oldSerialized=JSON.stringify(oldSnapshot);
+assert.equal(versions.displaySnapshot(oldSnapshot).status,'Письмо 2026');
+assert.equal(versions.displaySnapshot(oldSnapshot).extra,'Разрыв 5 000 ₽/ч.');
+assert.equal(JSON.stringify(oldSnapshot),oldSerialized,'Editorial display changes must preserve stored snapshot');
+assert.ok(!versions.note({...budget,rateSnapshot:oldSnapshot}).includes('Требует подтверждения'));
+const cardContext={RATE_VERSIONS:versions,currentRateVersion:rate=>versions.resolve(rate),esc:value=>String(value??''),rub:value=>String(value),shortDate:value=>value,budgetHasRate:()=>false};
+vm.createContext(cardContext);
+vm.runInContext(app.slice(app.indexOf('function rateVersionsMarkup'),app.indexOf('function budgetItemMarkup'))+';this.markup=rateVersionsMarkup;',cardContext);
+const cards=cardContext.markup(rates.find(rate=>rate.id===288));
+const cardClasses=[...cards.matchAll(/class="(rate-version-option [^"]+)"/g)].map(match=>match[1].split(/\s+/));
+assert.equal(cardClasses.length,2);
+assert.ok(cardClasses.every(classes=>!classes.includes('primary')),'Rate cards must never inherit global primary button styles');
+assert.ok(!cards.includes('Требует подтверждения'));
+console.log('Version card styles and editorial labels OK');
