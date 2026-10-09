@@ -19,6 +19,7 @@ jobs:
 
       - name: Проверить синтаксис
         run: |
+          node --check rate-versions.js
           node --check app.js
           node --check rates-data.js
           node --check sources-data.js
@@ -46,6 +47,7 @@ jobs:
           node scripts/test_core.js
           node scripts/test_production_promotion.js
           node scripts/test_budget_persistence.js
+          node scripts/test_rate_versions.js
           node preview-production-types/test-type-filter.js
 
       - name: Проверить HTML, CSS, OG и cache-version

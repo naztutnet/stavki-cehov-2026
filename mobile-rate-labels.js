@@ -145,7 +145,7 @@
   }
 
   function decorateRows() {
-    const rates = window.KINORATES_DATA || [];
+    const rates = (window.KINORATES_DATA || []).map(rate => typeof window.currentRateVersion === "function" ? window.currentRateVersion(rate) : rate);
     if (!rates.length) return;
     const byId = new Map(rates.map((rate) => [String(rate.id), rate]));
     const rows = [...document.querySelectorAll('.registry-layout tr[data-rate-id]')];

@@ -154,7 +154,7 @@
     window.addRate = function enhancedAddRate(id) {
       const rate = R.find((item) => String(item.id) === String(id));
       if (!rate) return;
-      const exists = budgetItems.some((item) => String(item.id) === String(rate.id));
+      const exists = budgetHasRate(currentRateVersion(rate));
       if (exists) {
         showBudgetToast(rate, true);
         updateBudgetControls();
