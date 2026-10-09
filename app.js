@@ -260,7 +260,7 @@ function budgetItemMarkup(x, index) {
   const attachmentEnabled = usesAttachmentDates(x.unit), attachmentDisabled = attachmentEnabled ? "" : "disabled";
   const attachmentFields = `<label class="budget-attachment${attachmentEnabled ? "" : " is-disabled"}">Дата прикрепления<input class="date-input" type="date" ${attachmentDisabled} value="${esc(x.start)}" data-budget-field="start" data-budget-index="${index}" title="${attachmentEnabled ? "Дата начала прикрепления" : "Доступно только для ставки за месяц"}"></label><label class="budget-attachment${attachmentEnabled ? "" : " is-disabled"}">Дата открепления<input class="date-input" type="date" ${attachmentDisabled} value="${esc(x.end)}" data-budget-field="end" data-budget-index="${index}" title="${attachmentEnabled ? "Дата окончания прикрепления" : "Доступно только для ставки за месяц"}"></label>`;
   const attachmentHint = attachmentEnabled ? "" : `<p class="budget-attachment-hint">Даты доступны только для ставки за месяц. Для смен, часов и других единиц расчёт идёт по количеству периодов.</p>`;
-  return `<article class="budget-item">
+  return `<article class="budget-item" data-motion-key="${esc(JSON.stringify([String(x.id), x.rateSnapshot?.versionId || ""]))}">
     <div class="budget-item-main">
       <div class="budget-position">${title}<small>${esc(x.dept)} · ${esc(x.unit)}</small>${budgetProductionMarkup(x)}</div>
       <label>Ставка<input type="number" min="0" step="0.01" value="${dec2(x.rate)}" data-budget-field="rate" data-budget-index="${index}"></label>

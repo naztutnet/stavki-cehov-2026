@@ -19,6 +19,7 @@ jobs:
 
       - name: Проверить синтаксис
         run: |
+          node --check motion.js
           node --check rate-versions.js
           node --check app.js
           node --check rates-data.js
