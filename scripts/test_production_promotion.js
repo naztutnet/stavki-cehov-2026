@@ -35,8 +35,8 @@ assert(productionDesignerInAds.kind === "missing-rate" && productionDesignerInAd
 assert(absentProfession.kind === "missing-profession" && absentProfession.allRows.length === 0, "Profession absent from the canonical dataset is not detected");
 assert(contributionState(rates, "", "commercial-media").kind === "none", "Empty searches should not trigger a contribution prompt");
 
-assert(Array.isArray(updates) && updates.length === 16, "Production update feed must contain the curated 16 entries");
-assert(updates[0].title === "Постановщик кадра: ставка для рекламы", "Latest production update is incorrect");
+assert(Array.isArray(updates) && updates.length === 18, "Production update feed must contain the curated 18 entries");
+assert(updates[0].title === "Свет и грип: две версии ставок", "Latest production update is incorrect");
 assert(!updates.some(({ title }) => title === "Проект получил имя KinoRates"), "Removed update returned to production data");
 
 assert(app.includes("KINORATES_TYPE_FILTER"), "Production app does not consume the shared production filter");
